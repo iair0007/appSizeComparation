@@ -1205,6 +1205,200 @@
         transform: none
       }
     }
+
+    /* ── CRUD Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.78);
+      z-index: 200; display: none;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(5px);
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--panel);
+      border: 1px solid var(--line2);
+      border-radius: 20px;
+      width: min(660px, 100%);
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.75);
+    }
+    .modal-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem 1rem;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    .modal-header h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.45rem; font-weight: 500;
+    }
+    .modal-close {
+      background: none; border: none; color: var(--txt3);
+      font-size: 1.1rem; cursor: pointer; padding: .4rem .5rem;
+      border-radius: 6px; transition: color .2s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--txt); }
+    .modal-body { overflow-y: auto; flex: 1; padding: 1.5rem 2rem; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: .75rem;
+      padding: 1rem 2rem 1.5rem;
+      border-top: 1px solid var(--line); flex-shrink: 0;
+    }
+    .form-section {
+      margin-bottom: 1.6rem; padding-bottom: 1.6rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .form-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .form-section-title {
+      font-size: .7rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--gold);
+      font-weight: 500; margin-bottom: .9rem;
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .field-group {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: .75rem; margin-bottom: .75rem;
+    }
+    .field-group.fg-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .field-label {
+      font-size: .7rem; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--txt2);
+      font-weight: 500; margin-bottom: .3rem;
+    }
+    .modal-body input[type="text"],
+    .modal-body input[type="number"],
+    .modal-body textarea,
+    .modal-body select {
+      background: var(--panel2);
+      border: 1px solid var(--line2);
+      color: var(--txt);
+      border-radius: 8px; padding: .6rem .8rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: .93rem; width: 100%;
+      transition: border-color .2s;
+    }
+    .modal-body input[type="color"] {
+      background: var(--panel2);
+      border: 1px solid var(--line2);
+      border-radius: 8px; padding: .2rem .3rem;
+      width: 100%; height: 42px; cursor: pointer;
+    }
+    .modal-body input:focus,
+    .modal-body textarea:focus { outline: none; border-color: var(--gold); }
+    .modal-body textarea { resize: vertical; min-height: 76px; }
+    .computed-row {
+      font-size: .83rem; color: var(--txt2); margin-top: .35rem;
+    }
+    .computed-row strong { color: var(--txt); }
+    .computed-preview {
+      background: rgba(224,161,58,0.07);
+      border: 1px solid rgba(224,161,58,0.2);
+      border-radius: 10px; padding: .85rem 1.1rem;
+      margin: 1.1rem 0; font-size: .88rem;
+      display: flex; gap: 2rem; flex-wrap: wrap; color: var(--txt2);
+    }
+    .computed-preview strong { color: var(--gold); }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px;
+      padding: .65rem 1.4rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500; font-size: .93rem; transition: opacity .2s;
+    }
+    .btn-primary:hover { opacity: .85; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--line2);
+      color: var(--txt2); border-radius: 8px;
+      padding: .65rem 1.4rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: .93rem; transition: all .2s;
+    }
+    .btn-ghost:hover { color: var(--txt); border-color: var(--txt3); }
+    .btn-danger {
+      background: var(--neg); color: #fff;
+      border: none; border-radius: 8px;
+      padding: .65rem 1.4rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500; font-size: .93rem; transition: opacity .2s;
+    }
+    .btn-danger:hover { opacity: .85; }
+    .btn-autogen {
+      background: rgba(224,161,58,0.1);
+      border: 1px solid rgba(224,161,58,0.28);
+      color: var(--gold); border-radius: 6px;
+      padding: .28rem .75rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: .76rem; font-weight: 500; transition: all .2s;
+    }
+    .btn-autogen:hover { background: rgba(224,161,58,0.2); }
+    .btn-additem {
+      background: none; border: 1px dashed var(--line2);
+      color: var(--txt3); border-radius: 6px;
+      padding: .38rem .8rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: .8rem; margin-top: .35rem; transition: all .2s;
+    }
+    .btn-additem:hover { border-color: var(--txt3); color: var(--txt2); }
+    .pro-con-row {
+      display: flex; align-items: center;
+      gap: .45rem; margin-bottom: .4rem;
+    }
+    .pro-con-row input { flex: 1; }
+    .pro-con-row .rm-btn {
+      background: none; border: none; color: var(--txt3);
+      cursor: pointer; padding: .3rem .45rem; font-size: .85rem;
+      border-radius: 4px; flex-shrink: 0; transition: color .2s; line-height: 1;
+    }
+    .pro-con-row .rm-btn:hover { color: var(--neg); }
+    .confirm-box {
+      background: var(--panel); border: 1px solid var(--line2);
+      border-radius: 16px; padding: 2rem;
+      width: min(400px, 100%);
+      box-shadow: 0 16px 60px rgba(0,0,0,0.75);
+    }
+    .confirm-box h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.25rem; margin-bottom: .55rem;
+    }
+    .confirm-box p {
+      color: var(--txt2); font-size: .9rem;
+      margin-bottom: 1.4rem; line-height: 1.55;
+    }
+    .confirm-actions { display: flex; gap: .75rem; justify-content: flex-end; }
+    /* hero card actions */
+    .hcard-actions {
+      display: flex; gap: .4rem;
+      margin-top: .65rem; padding-top: .55rem;
+      border-top: 1px solid var(--line);
+      opacity: 0; transition: opacity .2s;
+    }
+    .hcard:hover .hcard-actions { opacity: 1; }
+    .apt-action-btn {
+      flex: 1; background: var(--panel2);
+      border: 1px solid var(--line2); color: var(--txt2);
+      border-radius: 6px; padding: .32rem .5rem;
+      cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-size: .72rem; transition: all .2s;
+    }
+    .apt-action-btn:hover { color: var(--txt); }
+    .apt-action-del:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
+    /* add apartment card */
+    .hcard-add {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; border-style: dashed;
+      min-height: 150px; gap: .4rem; transition: all .3s;
+    }
+    .hcard-add::before { display: none; }
+    .hcard-add:hover { border-color: var(--gold); background: rgba(224,161,58,0.05); transform: translateY(-3px); }
+    .add-icon { font-size: 1.8rem; color: var(--txt3); transition: color .2s; line-height: 1; }
+    .hcard-add:hover .add-icon { color: var(--gold); }
+    .add-label { font-size: .75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt3); transition: color .2s; }
+    .hcard-add:hover .add-label { color: var(--gold); }
   </style>
 </head>
 
@@ -1337,6 +1531,169 @@
     </footer>
   </div>
 
+  <!-- Apartment modal -->
+  <div id="aptModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add apartment</h2>
+        <button class="modal-close" onclick="closeAptModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="aptForm" onsubmit="return false">
+          <!-- Identity -->
+          <div class="form-section">
+            <div class="form-section-title">Identity</div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Display name</div>
+              <input type="text" id="f-label" placeholder="e.g. 7 · Park Avenue">
+            </div>
+            <div class="field-group">
+              <div>
+                <div class="field-label">Color</div>
+                <input type="color" id="f-color" value="#e8623a">
+              </div>
+              <div>
+                <div class="field-label">Price (M ILS, optional)</div>
+                <input type="number" id="f-price" placeholder="4.50" step="0.01" min="0">
+              </div>
+            </div>
+            <div class="field-group">
+              <div>
+                <div class="field-label">Total rooms</div>
+                <input type="number" id="f-rooms" placeholder="5" min="1" max="20" step="1">
+              </div>
+              <div>
+                <div class="field-label">Bedrooms</div>
+                <input type="number" id="f-beds" placeholder="4" min="1" max="10" step="1">
+              </div>
+            </div>
+            <div>
+              <div class="field-label">Balcony (m²)</div>
+              <input type="number" id="f-balcony" placeholder="15.0" step="0.1" min="0">
+            </div>
+          </div>
+          <!-- Living areas -->
+          <div class="form-section">
+            <div class="form-section-title">Living areas (m²)</div>
+            <div class="field-group fg-3">
+              <div>
+                <div class="field-label">Living / Dining</div>
+                <input type="number" id="f-living" placeholder="35.0" step="0.1" min="0">
+              </div>
+              <div>
+                <div class="field-label">Kitchen</div>
+                <input type="number" id="f-kitchen" placeholder="10.0" step="0.1" min="0">
+              </div>
+              <div>
+                <div class="field-label">Hallway</div>
+                <input type="number" id="f-hallway" placeholder="0" step="0.1" min="0">
+              </div>
+            </div>
+          </div>
+          <!-- Bedrooms -->
+          <div class="form-section">
+            <div class="form-section-title">Bedroom sizes (m²)</div>
+            <div class="field-group">
+              <div>
+                <div class="field-label">Master</div>
+                <input type="number" id="f-bed1" placeholder="12.0" step="0.1" min="0">
+              </div>
+              <div>
+                <div class="field-label">Bedroom 2</div>
+                <input type="number" id="f-bed2" placeholder="10.0" step="0.1" min="0">
+              </div>
+            </div>
+            <div class="field-group">
+              <div>
+                <div class="field-label">Bedroom 3 (optional)</div>
+                <input type="number" id="f-bed3" placeholder="—" step="0.1" min="0">
+              </div>
+              <div>
+                <div class="field-label">Bedroom 4 (optional)</div>
+                <input type="number" id="f-bed4" placeholder="—" step="0.1" min="0">
+              </div>
+            </div>
+            <div class="computed-row">Bedrooms total: <strong id="f-bed-total">—</strong> m²</div>
+          </div>
+          <!-- Service -->
+          <div class="form-section">
+            <div class="form-section-title">Service areas (m²)</div>
+            <div class="field-group">
+              <div>
+                <div class="field-label">Main bathroom</div>
+                <input type="number" id="f-mainbath" placeholder="4.5" step="0.1" min="0">
+              </div>
+              <div>
+                <div class="field-label">Master bathroom</div>
+                <input type="number" id="f-masterbath" placeholder="3.5" step="0.1" min="0">
+              </div>
+            </div>
+            <div class="field-group">
+              <div>
+                <div class="field-label">Master closet</div>
+                <input type="number" id="f-closet" placeholder="2.5" step="0.1" min="0">
+              </div>
+              <div>
+                <div class="field-label">3rd bathroom (optional)</div>
+                <input type="number" id="f-thirdbath" placeholder="—" step="0.1" min="0">
+              </div>
+            </div>
+            <div class="computed-row">Service total: <strong id="f-svc-total">—</strong> m²</div>
+          </div>
+          <!-- Live summary -->
+          <div class="computed-preview">
+            <div>Interior total: <strong id="f-int-preview">—</strong> m²</div>
+            <div>Interior + balcony: <strong id="f-tot-preview">—</strong> m²</div>
+          </div>
+          <!-- Verdict -->
+          <div class="form-section">
+            <div class="form-section-title">
+              Verdict
+              <button type="button" class="btn-autogen" onclick="applyAutoGenVerdict()">✦ Auto-generate</button>
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Title</div>
+              <input type="text" id="f-vtitle" placeholder="e.g. The entertainer">
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Description</div>
+              <textarea id="f-vdesc" rows="3" placeholder="A brief narrative about this apartment..."></textarea>
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Pros</div>
+              <div id="f-pros-list"></div>
+              <button type="button" class="btn-additem" onclick="addProRow()">+ Add pro</button>
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Cons</div>
+              <div id="f-cons-list"></div>
+              <button type="button" class="btn-additem" onclick="addConRow()">+ Add con</button>
+            </div>
+            <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--txt2);cursor:pointer;user-select:none">
+              <input type="checkbox" id="f-hasshower"> Third bathroom has shower
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeAptModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveAptForm()">Save apartment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div id="confirmModal" class="modal-overlay">
+    <div class="confirm-box">
+      <h3 id="confirmTitle"></h3>
+      <p id="confirmMsg"></p>
+      <div class="confirm-actions">
+        <button class="btn-ghost" onclick="closeConfirmModal()">Cancel</button>
+        <button class="btn-danger" id="confirmOkBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <div id="lightbox" class="lightbox">
     <button class="lightbox-close" onclick="closeLightbox()">✕</button>
     <div class="lightbox-controls">
@@ -1366,7 +1723,7 @@
 
 
 
-    const DATA = {
+    const DEFAULT_DATA = {
       hertzog: {
         key: 'hertzog', label: '0 · hertzog', num: 0, price: null, color: '#c9c2b0', current: true,
         rooms: 4, beds: 3, interior: 70.5, balcony: 13.8,
@@ -1417,7 +1774,35 @@
         service: { mainBath: 5.1, masterBath: 6.1, closet: 2.6, thirdBath: 1.6 }
       }
     };
-    const ORDER = ['hertzog', 'Liors_apartment', 'Katzir_10', 'Anesiim_42', 'Golda_floor_9', 'Golda_floor_12', 'katzir_22'];
+    const DEFAULT_ORDER = ['hertzog', 'Liors_apartment', 'Katzir_10', 'Anesiim_42', 'Golda_floor_9', 'Golda_floor_12', 'katzir_22'];
+
+    let DATA, VERDICTS, ORDER;
+    let active = {};
+    const STORAGE_KEY = 'apt_data_v1';
+
+    function saveStore() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
+    }
+    function loadStore() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try { const s = JSON.parse(raw); DATA = s.DATA; VERDICTS = s.VERDICTS; ORDER = s.ORDER; }
+        catch(e) { DATA = JSON.parse(JSON.stringify(DEFAULT_DATA)); VERDICTS = JSON.parse(JSON.stringify(DEFAULT_VERDICTS)); ORDER = [...DEFAULT_ORDER]; saveStore(); }
+      } else {
+        DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        VERDICTS = JSON.parse(JSON.stringify(DEFAULT_VERDICTS));
+        ORDER = [...DEFAULT_ORDER];
+        saveStore();
+      }
+      active = {};
+      ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+    }
+    function computeCalcFields(apt) {
+      apt.cat.bedrooms = apt.bedList.reduce((s, v) => s + (v ?? 0), 0);
+      apt.cat.service = apt.service.mainBath + apt.service.masterBath + apt.service.closet + (apt.service.thirdBath ?? 0);
+      apt.interior = r1(apt.cat.living + apt.cat.kitchen + apt.cat.bedrooms + apt.cat.service + apt.cat.hallway);
+    }
+
     const r1 = (n) => Math.round(n * 10) / 10;
 
 
@@ -1561,7 +1946,6 @@
 
     function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})` }
 
-    let active = {}; ORDER.forEach(k => active[k] = true);
     let metricsOn = { interior: true, balcony: false, livingDining: false, kitchen: false, bedAvg: false };
     let showVs = true;
 
@@ -1576,15 +1960,17 @@
     function activeList() { return ORDER.filter(k => active[k]) }
 
     function buildHero() {
-      const h = DATA.hertzog;
+      const h = Object.values(DATA).find(a => a.current) || DATA[ORDER[0]];
       let html = '';
       ORDER.forEach(k => {
-        const a = DATA[k]; const isCurr = a.current;
-        const delta = !isCurr ? (a.interior - h.interior) : 0;
+        const a = DATA[k]; if (!a) return;
+        const isCurr = a.current;
+        const delta = (!isCurr && h) ? (a.interior - h.interior) : 0;
         const sign = delta > 0 ? 'pos' : (delta < 0 ? 'neg' : 'eq');
-        const dtxt = isCurr ? '' : `<div class="delta">vs hertzog interior: <b class="${sign}">${delta > 0 ? '+' : ''}${r1(delta)} m²</b></div>`;
+        const dtxt = (isCurr || !h) ? '' : `<div class="delta">vs baseline interior: <b class="${sign}">${delta > 0 ? '+' : ''}${r1(delta)} m²</b></div>`;
         const priceLine = a.price ? `<div class="price"><span>₪${a.price.toFixed(2)}M</span><span class="ppm">₪${Math.round(a.price * 1000 / a.interior).toLocaleString()}/m²</span></div>` : '';
         const gallery = buildGalleryStrip(k);
+        const deleteBtn = !isCurr ? `<button class="apt-action-btn apt-action-del" onclick="event.stopPropagation();confirmDeleteApt('${k}')">Delete</button>` : '';
         html += `<div class="hcard ${active[k] ? '' : 'off'}" style="--c:${a.color}" data-key="${k}">
       <div class="nm">${a.label} ${isCurr ? '<span class="currbadge">Current</span>' : ''}</div>
       <div class="big">${a.interior}<small> m² interior</small></div>
@@ -1593,10 +1979,20 @@
       <div class="tot"><span>+ balcony ${a.balcony}</span><b>${r1(a.interior + a.balcony)} m² total</b></div>
       ${dtxt}
       ${gallery}
+      <div class="hcard-actions">
+        <button class="apt-action-btn" onclick="event.stopPropagation();openAptModal('${k}')">Edit</button>
+        ${deleteBtn}
+      </div>
     </div>`;
       });
+      html += `<div class="hcard hcard-add" onclick="openAptModal()">
+      <div class="add-icon">+</div>
+      <div class="add-label">Add apartment</div>
+    </div>`;
       document.getElementById('heroCards').innerHTML = html;
-      document.querySelectorAll('.hcard').forEach(c => c.addEventListener('click', e => { if (!e.target.closest('.gallery-thumb')) toggleApt(c.dataset.key) }));
+      document.querySelectorAll('.hcard:not(.hcard-add)').forEach(c => c.addEventListener('click', e => {
+        if (!e.target.closest('.gallery-thumb') && !e.target.closest('.hcard-actions')) toggleApt(c.dataset.key);
+      }));
     }
 
     function buildAptChips() {
@@ -1710,7 +2106,7 @@
 
     function buildStats() {
       const list = activeList().map(k => DATA[k]);
-      const h = DATA.hertzog; const incH = active.hertzog;
+      const h = Object.values(DATA).find(a => a.current) || DATA[ORDER[0]]; const incH = h && active[h.key];
       function avgBed(a) { const b = a.bedList.filter(x => x != null); return b.reduce((s, x) => s + x, 0) / b.length }
       function deltaTxt(val, baseline, unit = ' m²') {
         if (!incH) return '';
@@ -1836,6 +2232,7 @@
       ORDER.forEach(k => { winTally[k] = 0; winCategories[k] = [] });
       const cols = activeList();
       const colCount = cols.length;
+      const bk = cols.find(k => DATA[k] && DATA[k].current) || null;
       const minCol = cols.length >= 5 ? '130px' : '150px';
       const gridCols = `minmax(160px,1.6fr) ${cols.map(() => `minmax(${minCol},1fr)`).join(' ')}`;
       const minTblWidth = cols.length >= 5 ? (160 + parseInt(minCol) * cols.length) + 'px' : 'auto';
@@ -1856,18 +2253,18 @@
             cols.forEach(k => {
               const isCurr = DATA[k].current;
               let dh = '';
-              if (showVs && cols.includes('hertzog')) {
+              if (showVs && bk && cols.includes(bk)) {
                 if (isCurr) dh = '<span class="vsh eq">baseline</span>';
                 else {
-                  const h = row.hertzog?.[0];
-                  if (h != null) {
-                    const d = r1(row[k][0] - h);
+                  const hv = row[bk]?.[0];
+                  if (hv != null && row[k]) {
+                    const d = r1(row[k][0] - hv);
                     const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
                     dh = `<span class="vsh ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
                   }
                 }
               }
-              html += `<div class="rt-cell"><span class="val" style="color:var(--txt2)">${row[k][0].toFixed(1)}<span style="font-size:.62em;color:var(--txt3)"> m²</span></span>${dh}</div>`;
+              html += `<div class="rt-cell"><span class="val" style="color:var(--txt2)">${row[k] ? row[k][0].toFixed(1) : '—'}<span style="font-size:.62em;color:var(--txt3)"> m²</span></span>${dh}</div>`;
             });
             html += '</div>';
             return;
@@ -1884,12 +2281,12 @@
             const isWin = who.length && who.includes(k) && who.length < colCount;
             if (isWin) { winTally[k]++; winCategories[k].push(row.name); }
             let dh = '';
-            if (showVs && cols.includes('hertzog') && row.name !== 'Living room') {
+            if (showVs && bk && cols.includes(bk) && row.name !== 'Living room') {
               if (isCurr) dh = '<span class="vsh eq">baseline</span>';
               else {
-                const h = row.hertzog?.[0];
-                if (h != null) {
-                  const d = r1(cell[0] - h);
+                const hv = row[bk]?.[0];
+                if (hv != null) {
+                  const d = r1(cell[0] - hv);
                   const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
                   dh = `<span class="vsh ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
                 }
@@ -1908,20 +2305,26 @@
         });
       });
 
-      TOTALS.forEach(row => {
-        const vals = {}; cols.forEach(k => vals[k] = row[k]);
+      const dynamicTotals = [
+        { name: 'Interior total', first: true, getter: a => a.interior },
+        { name: 'Interior + balcony', first: false, getter: a => r1(a.interior + a.balcony) }
+      ];
+      dynamicTotals.forEach(row => {
+        const vals = {}; cols.forEach(k => { if (DATA[k]) vals[k] = row.getter(DATA[k]); });
         let best = -Infinity, who = [];
         cols.forEach(k => { if (vals[k] > best) { best = vals[k]; who = [k] } else if (vals[k] === best) who.push(k) });
+        const baseVal = bk ? vals[bk] : null;
         html += `<div class="rt-total ${row.first ? 'first' : ''}" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span></div>`;
         cols.forEach(k => {
+          if (!DATA[k]) return;
           const isCurr = DATA[k].current;
           const win = who.includes(k) && who.length < colCount;
           const v = vals[k];
           let dh = '';
-          if (showVs && cols.includes('hertzog')) {
+          if (showVs && bk && cols.includes(bk)) {
             if (isCurr) dh = '<span class="vsh eq">baseline</span>';
-            else {
-              const d = r1(v - row.hertzog);
+            else if (baseVal != null) {
+              const d = r1(v - baseVal);
               const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
               dh = `<span class="vsh ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
             }
@@ -1955,7 +2358,7 @@
       document.getElementById('tally').innerHTML = html;
     }
 
-    const VERDICTS = {
+    const DEFAULT_VERDICTS = {
       hertzog: {
         title: 'Your current home', cls: 'h', desc: 'The baseline. Smallest of the seven but punches above its weight on outdoor space. Compact, efficient, 3 bedrooms.', hasShower: false,
         pros: ['Big balcony for its size (13.8 m²)', 'Solid living room (25.3 m²)'],
@@ -2026,7 +2429,7 @@
     vsToggle.addEventListener('change', () => { showVs = vsToggle.checked; buildTable(); });
 
     function syncVsToggleState() {
-      const has = active.hertzog;
+      const baseK = ORDER.find(k => DATA[k] && DATA[k].current); const has = baseK && active[baseK];
       if (!has) { vsToggle.checked = false; showVs = false; vsWrap.classList.add('disabled'); vsToggle.disabled = true; }
       else { vsWrap.classList.remove('disabled'); vsToggle.disabled = false; }
     }
@@ -2037,7 +2440,228 @@
       buildStats(); buildTable(); buildVerdicts();
     }
 
-    buildHero(); buildAptChips(); redrawAll();
+    // ── CRUD ──────────────────────────────────────────────────────────────────
+    let _editKey = null;
+
+    function nv(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
+
+    function updateComputedPreview() {
+      const living = nv('f-living') ?? 0, kitchen = nv('f-kitchen') ?? 0, hallway = nv('f-hallway') ?? 0;
+      const beds = [nv('f-bed1'), nv('f-bed2'), nv('f-bed3'), nv('f-bed4')];
+      const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
+      const svc = (nv('f-mainbath') ?? 0) + (nv('f-masterbath') ?? 0) + (nv('f-closet') ?? 0) + (nv('f-thirdbath') ?? 0);
+      const interior = living + kitchen + hallway + bedTotal + svc;
+      const balcony = nv('f-balcony') ?? 0;
+      document.getElementById('f-bed-total').textContent = r1(bedTotal);
+      document.getElementById('f-svc-total').textContent = r1(svc);
+      document.getElementById('f-int-preview').textContent = r1(interior);
+      document.getElementById('f-tot-preview').textContent = r1(interior + balcony);
+    }
+
+    function renderProsList(arr) {
+      document.getElementById('f-pros-list').innerHTML = arr.map((t, i) => proConRow('pro', t, i)).join('');
+    }
+    function renderConsList(arr) {
+      document.getElementById('f-cons-list').innerHTML = arr.map((t, i) => proConRow('con', t, i)).join('');
+    }
+    function proConRow(type, text, idx) {
+      const safe = String(text).replace(/"/g, '&quot;');
+      return `<div class="pro-con-row"><input type="text" value="${safe}" placeholder="${type === 'pro' ? 'Pro...' : 'Con...'}" data-${type}-idx="${idx}"><button type="button" class="rm-btn" onclick="this.closest('.pro-con-row').remove()">✕</button></div>`;
+    }
+    function addProRow() { const el = document.getElementById('f-pros-list'); el.insertAdjacentHTML('beforeend', proConRow('pro', '', el.children.length)); }
+    function addConRow() { const el = document.getElementById('f-cons-list'); el.insertAdjacentHTML('beforeend', proConRow('con', '', el.children.length)); }
+    function getProsList() { return [...document.querySelectorAll('#f-pros-list input')].map(i => i.value).filter(Boolean); }
+    function getConsList() { return [...document.querySelectorAll('#f-cons-list input')].map(i => i.value).filter(Boolean); }
+
+    function openAptModal(key = null) {
+      _editKey = key;
+      document.getElementById('modalTitle').textContent = key ? 'Edit apartment' : 'Add apartment';
+      if (key) {
+        const a = DATA[key], v = VERDICTS[key] || {};
+        document.getElementById('f-label').value = a.label || '';
+        document.getElementById('f-color').value = a.color || '#e8623a';
+        document.getElementById('f-price').value = a.price != null ? a.price : '';
+        document.getElementById('f-rooms').value = a.rooms || '';
+        document.getElementById('f-beds').value = a.beds || '';
+        document.getElementById('f-balcony').value = a.balcony != null ? a.balcony : '';
+        document.getElementById('f-living').value = a.cat.living || '';
+        document.getElementById('f-kitchen').value = a.cat.kitchen || '';
+        document.getElementById('f-hallway').value = a.cat.hallway || '';
+        document.getElementById('f-bed1').value = a.bedList[0] != null ? a.bedList[0] : '';
+        document.getElementById('f-bed2').value = a.bedList[1] != null ? a.bedList[1] : '';
+        document.getElementById('f-bed3').value = a.bedList[2] != null ? a.bedList[2] : '';
+        document.getElementById('f-bed4').value = a.bedList[3] != null ? a.bedList[3] : '';
+        document.getElementById('f-mainbath').value = a.service.mainBath || '';
+        document.getElementById('f-masterbath').value = a.service.masterBath || '';
+        document.getElementById('f-closet').value = a.service.closet || '';
+        document.getElementById('f-thirdbath').value = a.service.thirdBath != null ? a.service.thirdBath : '';
+        document.getElementById('f-vtitle').value = v.title || '';
+        document.getElementById('f-vdesc').value = v.desc || '';
+        document.getElementById('f-hasshower').checked = !!v.hasShower;
+        renderProsList(v.pros || []);
+        renderConsList(v.cons || []);
+      } else {
+        document.getElementById('aptForm').reset();
+        document.getElementById('f-color').value = '#e8623a';
+        renderProsList([]); renderConsList([]);
+      }
+      updateComputedPreview();
+      document.getElementById('aptModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAptModal() {
+      document.getElementById('aptModal').classList.remove('open');
+      document.body.style.overflow = '';
+      _editKey = null;
+    }
+
+    function saveAptForm() {
+      const label = document.getElementById('f-label').value.trim();
+      if (!label) { alert('Please enter a display name.'); return; }
+      const key = _editKey || label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+      if (!_editKey && DATA[key]) { alert('An apartment with this key already exists. Please use a different name.'); return; }
+      const beds = [nv('f-bed1'), nv('f-bed2'), nv('f-bed3'), nv('f-bed4')];
+      const apt = {
+        key, label,
+        num: _editKey ? DATA[_editKey].num : ORDER.length,
+        price: nv('f-price'),
+        color: document.getElementById('f-color').value,
+        current: _editKey ? DATA[_editKey].current : false,
+        rooms: parseInt(document.getElementById('f-rooms').value) || 0,
+        beds: parseInt(document.getElementById('f-beds').value) || 0,
+        balcony: nv('f-balcony') ?? 0,
+        cat: { living: nv('f-living') ?? 0, kitchen: nv('f-kitchen') ?? 0, bedrooms: 0, service: 0, hallway: nv('f-hallway') ?? 0 },
+        bedList: beds,
+        service: { mainBath: nv('f-mainbath') ?? 0, masterBath: nv('f-masterbath') ?? 0, closet: nv('f-closet') ?? 0, thirdBath: nv('f-thirdbath') },
+        interior: 0
+      };
+      const verdict = {
+        title: document.getElementById('f-vtitle').value.trim() || label,
+        cls: key.slice(0, 4),
+        desc: document.getElementById('f-vdesc').value.trim(),
+        hasShower: document.getElementById('f-hasshower').checked,
+        pros: getProsList(),
+        cons: getConsList()
+      };
+      if (_editKey) updateApt(_editKey, apt, verdict);
+      else createApt(key, apt, verdict);
+      closeAptModal();
+    }
+
+    function createApt(key, apt, verdict) {
+      computeCalcFields(apt);
+      DATA[key] = apt; VERDICTS[key] = verdict;
+      ORDER.push(key); active[key] = true;
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
+    }
+
+    function updateApt(key, apt, verdict) {
+      if (apt.current && !DATA[key].current) {
+        const old = Object.keys(DATA).find(k => DATA[k].current);
+        if (old) DATA[old].current = false;
+      }
+      computeCalcFields(apt);
+      DATA[key] = { ...DATA[key], ...apt };
+      VERDICTS[key] = verdict;
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
+    }
+
+    function deleteApt(key) {
+      if (DATA[key] && DATA[key].current) return;
+      delete DATA[key]; delete VERDICTS[key];
+      const idx = ORDER.indexOf(key); if (idx > -1) ORDER.splice(idx, 1);
+      delete active[key];
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
+    }
+
+    function confirmDeleteApt(key) {
+      const a = DATA[key]; if (!a) return;
+      document.getElementById('confirmTitle').textContent = `Delete "${a.label}"?`;
+      document.getElementById('confirmMsg').textContent = 'This will permanently remove this apartment. This cannot be undone.';
+      document.getElementById('confirmOkBtn').onclick = () => { deleteApt(key); closeConfirmModal(); };
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('open'); }
+
+    function autoGenerateVerdict(apt) {
+      const all = Object.values(DATA);
+      const base = all.find(a => a.current) || all[0];
+      const maxOf = fn => Math.max(...all.map(fn));
+      const minOf = fn => Math.min(...all.map(fn));
+      let title = 'The contender';
+      if (apt.cat.living >= maxOf(a => a.cat.living)) title = 'The entertainer';
+      else if (apt.cat.bedrooms >= maxOf(a => a.cat.bedrooms)) title = 'The bedroom champion';
+      else if (apt.cat.kitchen >= maxOf(a => a.cat.kitchen)) title = "The chef's choice";
+      else if (apt.balcony >= maxOf(a => a.balcony)) title = 'The outdoor lover';
+      else if (apt.interior >= maxOf(a => a.interior)) title = 'The space maximizer';
+      const delta = apt.interior - (base ? base.interior : 0);
+      const sign = delta >= 0 ? '+' : '';
+      const lvComp = apt.cat.living > (base ? base.cat.living : 0) ? 'a generous living area' : 'a compact living area';
+      const priceNote = apt.price ? ` Priced at ₪${apt.price.toFixed(2)}M (₪${Math.round(apt.price * 1000 / apt.interior).toLocaleString()}/m²).` : '';
+      const showerNote = apt.service.thirdBath ? ' Includes a third bathroom.' : '';
+      const desc = `${apt.label} offers ${sign}${r1(delta)} m² vs. baseline with ${lvComp} (${r1(apt.cat.living)} m²) and ${apt.beds} bedrooms.${showerNote}${priceNote}`;
+      const pros = [];
+      [
+        { label: `Largest interior (${r1(apt.interior)} m²)`, val: apt.interior, fn: a => a.interior },
+        { label: `Biggest living room (${r1(apt.cat.living)} m²)`, val: apt.cat.living, fn: a => a.cat.living },
+        { label: `Best kitchen (${r1(apt.cat.kitchen)} m²)`, val: apt.cat.kitchen, fn: a => a.cat.kitchen },
+        { label: `Most bedroom space (${r1(apt.cat.bedrooms)} m²)`, val: apt.cat.bedrooms, fn: a => a.cat.bedrooms },
+        { label: `Biggest balcony (${r1(apt.balcony)} m²)`, val: apt.balcony, fn: a => a.balcony },
+        { label: `Largest master bedroom (${r1(apt.bedList[0])} m²)`, val: apt.bedList[0], fn: a => a.bedList[0] ?? 0 },
+        { label: `Largest main bathroom (${r1(apt.service.mainBath)} m²)`, val: apt.service.mainBath, fn: a => a.service.mainBath },
+        { label: `Largest master bathroom (${r1(apt.service.masterBath)} m²)`, val: apt.service.masterBath, fn: a => a.service.masterBath },
+      ].forEach(c => { if (c.val != null && c.val >= maxOf(c.fn)) pros.push(c.label); });
+      if (apt.service.thirdBath) pros.push(`Third bathroom (${r1(apt.service.thirdBath)} m²)`);
+      if (!pros.length) pros.push(delta > 0 ? `${sign}${r1(delta)} m² more interior than baseline` : 'Well-rounded layout');
+      const cons = [];
+      [
+        { label: `Smallest interior (${r1(apt.interior)} m²)`, fn: a => a.interior },
+        { label: `Smallest balcony (${r1(apt.balcony)} m²)`, fn: a => a.balcony },
+        { label: `Smallest kitchen (${r1(apt.cat.kitchen)} m²)`, fn: a => a.cat.kitchen },
+        { label: `Smallest living room (${r1(apt.cat.living)} m²)`, fn: a => a.cat.living },
+      ].forEach(c => { if (c.fn(apt) <= minOf(c.fn)) cons.push(c.label); });
+      if (!apt.service.thirdBath) cons.push('No third bathroom');
+      if (!cons.length) cons.push('No standout weakness vs. the field');
+      return { title, desc, pros, cons, hasShower: !!apt.service.thirdBath };
+    }
+
+    function applyAutoGenVerdict() {
+      const beds = [nv('f-bed1'), nv('f-bed2'), nv('f-bed3'), nv('f-bed4')];
+      const svc = { mainBath: nv('f-mainbath') ?? 0, masterBath: nv('f-masterbath') ?? 0, closet: nv('f-closet') ?? 0, thirdBath: nv('f-thirdbath') };
+      const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
+      const svcTotal = svc.mainBath + svc.masterBath + svc.closet + (svc.thirdBath ?? 0);
+      const living = nv('f-living') ?? 0, kitchen = nv('f-kitchen') ?? 0, hallway = nv('f-hallway') ?? 0;
+      const interior = r1(living + kitchen + hallway + bedTotal + svcTotal);
+      const tempApt = {
+        key: _editKey || '_new_', label: document.getElementById('f-label').value || 'New apartment',
+        price: nv('f-price'), beds: parseInt(document.getElementById('f-beds').value) || 0,
+        balcony: nv('f-balcony') ?? 0, interior,
+        cat: { living, kitchen, bedrooms: bedTotal, service: svcTotal, hallway },
+        bedList: beds, service: svc
+      };
+      const v = autoGenerateVerdict(tempApt);
+      document.getElementById('f-vtitle').value = v.title;
+      document.getElementById('f-vdesc').value = v.desc;
+      document.getElementById('f-hasshower').checked = v.hasShower;
+      renderProsList(v.pros); renderConsList(v.cons);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (document.getElementById('aptModal').classList.contains('open')) closeAptModal();
+        else if (document.getElementById('confirmModal').classList.contains('open')) closeConfirmModal();
+      }
+    });
+
+    // wire live preview
+    ['f-living','f-kitchen','f-hallway','f-bed1','f-bed2','f-bed3','f-bed4','f-mainbath','f-masterbath','f-closet','f-thirdbath','f-balcony'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', updateComputedPreview);
+    });
+
+    loadStore(); buildHero(); buildAptChips(); redrawAll();
   </script>
 </body>
 
