@@ -1429,13 +1429,11 @@
       border-radius: 4px; padding: 1px 6px; font-family: 'Outfit', sans-serif;
     }
     /* extra bed item */
-    .extra-bed-item { position: relative; }
-    .extra-bed-item .field-label { display: flex; justify-content: space-between; align-items: center; }
     .extra-bed-item .rm-btn {
       background: var(--panel2); border: 1px solid var(--line2);
       color: var(--txt3); border-radius: 6px; padding: .22rem .6rem;
       cursor: pointer; font-family: 'Outfit', sans-serif;
-      font-size: .72rem; transition: all .2s;
+      font-size: .72rem; transition: all .2s; white-space: nowrap; flex-shrink: 0;
     }
     .extra-bed-item .rm-btn:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
     /* image upload */
@@ -1652,6 +1650,10 @@
               <div class="field-label">Display name</div>
               <input type="text" id="f-label" placeholder="e.g. 7 · Park Avenue">
             </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Listing URL <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <input type="url" id="f-link" placeholder="https://...">
+            </div>
             <div class="field-group">
               <div>
                 <div class="field-label">Color</div>
@@ -1662,13 +1664,9 @@
                 <input type="number" id="f-price" placeholder="4.50" step="0.01" min="0">
               </div>
             </div>
-            <div>
+            <div style="margin-bottom:.75rem">
               <div class="field-label">Total rooms <span style="color:var(--txt3);font-size:.68rem">(auto-filled)</span></div>
-              <input type="number" id="f-rooms" placeholder="auto" min="1" max="30" step="1" style="opacity:.7">
-            </div>
-            <div>
-              <div class="field-label">Listing URL <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
-              <input type="url" id="f-link" placeholder="https://...">
+              <input type="number" id="f-rooms" placeholder="auto" min="1" max="30" step="1" style="opacity:.5" readonly>
             </div>
             <div>
               <div class="field-label">Balcony</div>
@@ -2829,16 +2827,14 @@
       const container = document.getElementById('f-extra-beds');
       container.insertAdjacentHTML('beforeend', `
         <div class="dim-field extra-bed-item" id="f-xbed-item-${idx}">
-          <div class="field-label">
-            Bedroom ${bedNum}
-            <button type="button" class="rm-btn" onclick="removeExtraBed(${idx})">✕ Remove</button>
-          </div>
+          <div class="field-label">Bedroom ${bedNum}</div>
           <div class="dim-row">
             <input type="number" id="f-xbed-${idx}-w" placeholder="W" min="0" step="1" class="dim-w">
             <span class="dim-sep">×</span>
             <input type="number" id="f-xbed-${idx}-h" placeholder="H" min="0" step="1" class="dim-h">
             <span class="dim-unit">cm</span>
             <span class="dim-result" id="f-xbed-${idx}-m2">—</span>
+            <button type="button" class="rm-btn" onclick="removeExtraBed(${idx})">✕ Remove</button>
           </div>
         </div>`);
       if (dimStr) setDimInputs('xbed-' + idx, dimStr);
@@ -2984,7 +2980,7 @@
       // Auto-fill room count: 1 living + fixed beds (2) + extra beds
       const totalBedCount = 2 + extraBedAreas.length;
       const roomsEl = document.getElementById('f-rooms');
-      if (roomsEl && !roomsEl.dataset.manual) roomsEl.value = 1 + totalBedCount;
+      if (roomsEl) roomsEl.value = 1 + totalBedCount;
       document.getElementById('f-bed-total').textContent = r1(bedTotal) + ' m²';
       document.getElementById('f-svc-total').textContent = r1(svc) + ' m²';
       document.getElementById('f-int-preview').textContent = r1(interior);
@@ -3025,7 +3021,6 @@
       document.getElementById('f-images-list').innerHTML = '';
       document.getElementById('aptForm').reset();
       document.getElementById('f-color').value = '#e8623a';
-      document.getElementById('f-rooms').dataset.manual = '';
       renderProsList([]); renderConsList([]);
       document.getElementById('modalTitle').textContent = key ? 'Edit apartment' : 'Add apartment';
       if (key) {
@@ -3035,7 +3030,6 @@
         document.getElementById('f-price').value = a.price != null ? a.price : '';
         document.getElementById('f-link').value = a.link || '';
         document.getElementById('f-rooms').value = a.rooms || '';
-        document.getElementById('f-rooms').dataset.manual = 'yes';
         // Fixed beds
         setDimInputs('bed1', aptDimStr(key, 'master'));
         setDimInputs('bed2', aptDimStr(key, 'bed2'));
@@ -3093,7 +3087,7 @@
         color: document.getElementById('f-color').value,
         current: _editKey ? DATA[_editKey].current : false,
         link: document.getElementById('f-link').value.trim() || null,
-        rooms: parseInt(document.getElementById('f-rooms').value) || (1 + totalBedCount),
+        rooms: 1 + totalBedCount,
         beds: totalBedCount,
         balcony: dimAreaFromInputs('balcony') ?? 0,
         cat: { living: ga('living'), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: ga('hallway') },
@@ -3253,9 +3247,17 @@
       });
     });
     // Mark total rooms as manually edited if user types in it
-    const roomsEl = document.getElementById('f-rooms');
-    if (roomsEl) roomsEl.addEventListener('input', () => { roomsEl.dataset.manual = 'yes'; });
 
+    // Pick up credentials from URL hash (#k=TOKEN&g=GISTID) on first visit, then strip
+    (function() {
+      const h = location.hash;
+      const km = h.match(/[#&]k=([^&]+)/);
+      const gm = h.match(/[#&]g=([^&]+)/);
+      if (km && gm) {
+        setGistCfg({ token: decodeURIComponent(km[1]), gistId: decodeURIComponent(gm[1]) });
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    })();
     loadStore(); buildHero(); buildAptChips(); redrawAll();
   </script>
 </body>
