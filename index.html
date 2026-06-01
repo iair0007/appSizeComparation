@@ -1417,6 +1417,45 @@
     .dim-result.has-val { background: rgba(224,161,58,0.15); border-color: rgba(224,161,58,0.32); }
     .dim-field { margin-bottom: .8rem; }
     .dim-hint { font-size: .64rem; letter-spacing: 0.06em; color: var(--txt3); text-transform: none; font-weight: 400; }
+    /* safe room badge */
+    .mamad-badge {
+      font-size: .68rem; font-weight: 600; letter-spacing: 0.04em;
+      background: rgba(232,98,58,0.18); color: var(--accent);
+      border: 1px solid rgba(232,98,58,0.35);
+      border-radius: 4px; padding: 1px 6px; font-family: 'Outfit', sans-serif;
+    }
+    /* extra bed item */
+    .extra-bed-item { position: relative; }
+    .extra-bed-item .field-label { display: flex; justify-content: space-between; align-items: center; }
+    .extra-bed-item .rm-btn { font-size: .72rem; padding: .2rem .5rem; }
+    /* image upload */
+    .img-upload-btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: none; border: 1px dashed var(--line2); color: var(--txt2);
+      border-radius: 8px; padding: .5rem 1rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif; font-size: .85rem;
+      transition: all .2s; margin-top: .4rem;
+    }
+    .img-upload-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .img-preview-item {
+      display: flex; gap: .75rem; align-items: flex-start;
+      padding: .75rem; background: var(--panel2);
+      border: 1px solid var(--line); border-radius: 10px;
+      margin-bottom: .5rem;
+    }
+    .img-preview-item img {
+      width: 80px; height: 60px; object-fit: cover;
+      border-radius: 6px; cursor: pointer; flex-shrink: 0;
+      border: 1px solid var(--line2);
+    }
+    .img-prev-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .4rem; }
+    .img-label-input { font-size: .85rem !important; padding: .4rem .6rem !important; }
+    .img-prev-controls { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .img-fp-label {
+      display: flex; align-items: center; gap: .35rem;
+      font-size: .82rem; color: var(--txt2); cursor: pointer; user-select: none;
+    }
+    .img-fp-label input[type="checkbox"] { accent-color: var(--gold); width: 14px; height: 14px; }
   </style>
 </head>
 
@@ -1575,15 +1614,9 @@
                 <input type="number" id="f-price" placeholder="4.50" step="0.01" min="0">
               </div>
             </div>
-            <div class="field-group">
-              <div>
-                <div class="field-label">Total rooms</div>
-                <input type="number" id="f-rooms" placeholder="5" min="1" max="20" step="1">
-              </div>
-              <div>
-                <div class="field-label">Bedrooms</div>
-                <input type="number" id="f-beds" placeholder="4" min="1" max="10" step="1">
-              </div>
+            <div>
+              <div class="field-label">Total rooms <span style="color:var(--txt3);font-size:.68rem">(auto-filled)</span></div>
+              <input type="number" id="f-rooms" placeholder="auto" min="1" max="30" step="1" style="opacity:.7">
             </div>
             <div>
               <div class="field-label">Balcony</div>
@@ -1633,6 +1666,7 @@
           <!-- Bedrooms -->
           <div class="form-section">
             <div class="form-section-title">Bedrooms <span class="dim-hint">width × height in cm</span></div>
+            <!-- Master bedroom (fixed) -->
             <div class="dim-field">
               <div class="field-label">Master bedroom</div>
               <div class="dim-row">
@@ -1643,8 +1677,12 @@
                 <span class="dim-result" id="f-bed1-m2">—</span>
               </div>
             </div>
+            <!-- Safe room / ממ"ד (fixed, always bed 2) -->
             <div class="dim-field">
-              <div class="field-label">Bedroom 2</div>
+              <div class="field-label" style="display:flex;align-items:center;gap:.5rem">
+                Safe room
+                <span class="mamad-badge">ממ"ד</span>
+              </div>
               <div class="dim-row">
                 <input type="number" id="f-bed2-w" placeholder="W" min="0" step="1" class="dim-w">
                 <span class="dim-sep">×</span>
@@ -1653,27 +1691,10 @@
                 <span class="dim-result" id="f-bed2-m2">—</span>
               </div>
             </div>
-            <div class="dim-field">
-              <div class="field-label">Bedroom 3 <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
-              <div class="dim-row">
-                <input type="number" id="f-bed3-w" placeholder="W" min="0" step="1" class="dim-w">
-                <span class="dim-sep">×</span>
-                <input type="number" id="f-bed3-h" placeholder="H" min="0" step="1" class="dim-h">
-                <span class="dim-unit">cm</span>
-                <span class="dim-result" id="f-bed3-m2">—</span>
-              </div>
-            </div>
-            <div class="dim-field">
-              <div class="field-label">Bedroom 4 <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
-              <div class="dim-row">
-                <input type="number" id="f-bed4-w" placeholder="W" min="0" step="1" class="dim-w">
-                <span class="dim-sep">×</span>
-                <input type="number" id="f-bed4-h" placeholder="H" min="0" step="1" class="dim-h">
-                <span class="dim-unit">cm</span>
-                <span class="dim-result" id="f-bed4-m2">—</span>
-              </div>
-            </div>
-            <div class="computed-row" style="margin-top:.6rem">Bedrooms total: <strong id="f-bed-total">—</strong> m²</div>
+            <!-- Dynamic extra bedrooms -->
+            <div id="f-extra-beds"></div>
+            <button type="button" class="btn-additem" onclick="addExtraBed()" style="margin-top:.4rem">+ Add bedroom</button>
+            <div class="computed-row" style="margin-top:.7rem">Bedrooms total: <strong id="f-bed-total">—</strong> m²</div>
           </div>
           <!-- Service -->
           <div class="form-section">
@@ -1719,6 +1740,16 @@
               </div>
             </div>
             <div class="computed-row" style="margin-top:.6rem">Service total: <strong id="f-svc-total">—</strong> m²</div>
+          </div>
+          <!-- Photos & Floor plan -->
+          <div class="form-section">
+            <div class="form-section-title">Photos &amp; Floor plan</div>
+            <div id="f-images-list"></div>
+            <label class="img-upload-btn">
+              <input type="file" id="f-img-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(this)">
+              + Add photos / floor plan
+            </label>
+            <div style="font-size:.73rem;color:var(--txt3);margin-top:.5rem">Images are resized and stored locally in your browser. Check "Floor plan" to mark a blueprint image.</div>
           </div>
           <!-- Live summary -->
           <div class="computed-preview">
@@ -1893,8 +1924,9 @@
     const zoomLevels = [1, 1.5, 2, 2.5, 3];
 
     function openGallery(aptKey, startIdx = 0) {
-      if (!IMAGES[aptKey]) return;
-      lightboxState = { aptKey, images: IMAGES[aptKey], currentIdx: startIdx, zoomLevel: 1 };
+      const imgs = getAptImages(aptKey);
+      if (!imgs.length) return;
+      lightboxState = { aptKey, images: imgs, currentIdx: startIdx, zoomLevel: 1 };
       showLightboxImage();
       document.getElementById('lightbox').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -2008,9 +2040,17 @@
       };
     }
 
+    function getAptImages(aptKey) {
+      const stored = (DATA[aptKey] && DATA[aptKey].images) ? DATA[aptKey].images : [];
+      const builtin = IMAGES[aptKey] || [];
+      // Stored images override/supplement built-in ones (stored first if any)
+      return stored.length > 0 ? stored : builtin;
+    }
+
     function buildGalleryStrip(aptKey) {
-      if (!IMAGES[aptKey]) return '';
-      return '<div class="gallery-strip">' + IMAGES[aptKey].map((img, i) =>
+      const imgs = getAptImages(aptKey);
+      if (!imgs.length) return '';
+      return '<div class="gallery-strip">' + imgs.map((img, i) =>
         `<div class="gallery-thumb" onclick="openGallery('${aptKey}',${i})" title="${img.label}">
       <img src="${img.data}" alt="${img.label}">
     </div>`).join('') + '</div>';
@@ -2548,11 +2588,111 @@
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
     let _editKey = null;
+    let _extraBeds = [];   // indices of active extra bed slots
+    let _extraBedSeq = 0;  // ever-increasing counter for unique IDs
+    let _formImages = [];  // { name, label, isFloorPlan, data }
+
+    // ── Dynamic extra bedrooms ────────────────────────────────────────────────
+    function addExtraBed(dimStr = null) {
+      const idx = _extraBedSeq++;
+      _extraBeds.push(idx);
+      const bedNum = _extraBeds.length + 2; // display number (3, 4, 5…)
+      const container = document.getElementById('f-extra-beds');
+      container.insertAdjacentHTML('beforeend', `
+        <div class="dim-field extra-bed-item" id="f-xbed-item-${idx}">
+          <div class="field-label">
+            Bedroom ${bedNum}
+            <button type="button" class="rm-btn" onclick="removeExtraBed(${idx})">✕ Remove</button>
+          </div>
+          <div class="dim-row">
+            <input type="number" id="f-xbed-${idx}-w" placeholder="W" min="0" step="1" class="dim-w">
+            <span class="dim-sep">×</span>
+            <input type="number" id="f-xbed-${idx}-h" placeholder="H" min="0" step="1" class="dim-h">
+            <span class="dim-unit">cm</span>
+            <span class="dim-result" id="f-xbed-${idx}-m2">—</span>
+          </div>
+        </div>`);
+      if (dimStr) setDimInputs('xbed-' + idx, dimStr);
+      ['f-xbed-'+idx+'-w','f-xbed-'+idx+'-h'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateComputedPreview);
+      });
+      updateComputedPreview();
+    }
+
+    function removeExtraBed(idx) {
+      const el = document.getElementById('f-xbed-item-' + idx);
+      if (el) el.remove();
+      _extraBeds = _extraBeds.filter(i => i !== idx);
+      // Renumber remaining labels
+      _extraBeds.forEach((i, pos) => {
+        const lbl = document.querySelector(`#f-xbed-item-${i} .field-label`);
+        if (lbl) lbl.childNodes[0].textContent = 'Bedroom ' + (pos + 3);
+      });
+      updateComputedPreview();
+    }
+
+    // ── Image upload & preview ────────────────────────────────────────────────
+    function handleImageUpload(input) {
+      Array.from(input.files).forEach(file => {
+        resizeImage(file, 1400, (data) => {
+          _formImages.push({ name: file.name, label: file.name.replace(/\.[^.]+$/, ''), isFloorPlan: false, data });
+          renderImagePreviews();
+        });
+      });
+      input.value = '';
+    }
+
+    function resizeImage(file, maxDim, callback) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          callback(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderImagePreviews() {
+      document.getElementById('f-images-list').innerHTML = _formImages.map((img, i) => `
+        <div class="img-preview-item">
+          <img src="${img.data}" alt="${img.label}" onclick="openGalleryFromFormImages(${i})">
+          <div class="img-prev-right">
+            <input type="text" class="img-label-input" value="${img.label.replace(/"/g,'&quot;')}"
+                   placeholder="Image label" oninput="_formImages[${i}].label=this.value">
+            <div class="img-prev-controls">
+              <label class="img-fp-label">
+                <input type="checkbox" ${img.isFloorPlan ? 'checked' : ''} onchange="_formImages[${i}].isFloorPlan=this.checked">
+                Floor plan
+              </label>
+              <button type="button" class="rm-btn" onclick="removeFormImage(${i})">✕ Remove</button>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    function removeFormImage(i) { _formImages.splice(i, 1); renderImagePreviews(); }
+
+    function openGalleryFromFormImages(startIdx) {
+      if (!_formImages.length) return;
+      lightboxState = { aptKey: null, images: _formImages, currentIdx: startIdx, zoomLevel: 1 };
+      showLightboxImage();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setupImageZoom();
+    }
 
     function nv(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
 
     // Dim helpers: read W×H inputs, compute m², update display
-    const DIM_ROOMS = ['living','kitchen','hallway','bed1','bed2','bed3','bed4','mainbath','masterbath','closet','thirdbath','balcony'];
+    const DIM_ROOMS = ['living','kitchen','hallway','bed1','bed2','mainbath','masterbath','closet','thirdbath','balcony'];
     function dimAreaFromInputs(key) {
       const w = nv('f-' + key + '-w'), h = nv('f-' + key + '-h');
       return (w != null && h != null) ? r1(w * h / 10000) : null;
@@ -2579,19 +2719,43 @@
       else { el.textContent = '—'; el.classList.remove('has-val'); }
     }
 
+    function dimAreaFromXBed(idx) {
+      const w = nv('f-xbed-' + idx + '-w'), h = nv('f-xbed-' + idx + '-h');
+      return (w != null && h != null) ? r1(w * h / 10000) : null;
+    }
+    function dimStrFromXBed(idx) {
+      const w = nv('f-xbed-' + idx + '-w'), h = nv('f-xbed-' + idx + '-h');
+      return (w != null && h != null) ? (Math.round(w) + '×' + Math.round(h)) : null;
+    }
+
     function updateComputedPreview() {
       DIM_ROOMS.forEach(k => updateDimResult(k));
+      // Update extra beds
+      _extraBeds.forEach(idx => {
+        const el = document.getElementById('f-xbed-item-' + idx);
+        if (!el) return;
+        const area = dimAreaFromXBed(idx);
+        const res = document.getElementById('f-xbed-' + idx + '-m2');
+        if (res) { res.textContent = area != null ? area + ' m²' : '—'; res.classList.toggle('has-val', area != null); }
+      });
       const living  = dimAreaFromInputs('living')    ?? 0;
       const kitchen = dimAreaFromInputs('kitchen')   ?? 0;
       const hallway = dimAreaFromInputs('hallway')   ?? 0;
-      const beds = ['bed1','bed2','bed3','bed4'].map(k => dimAreaFromInputs(k));
-      const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
+      const fixedBeds = ['bed1','bed2'].map(k => dimAreaFromInputs(k) ?? 0);
+      const extraBedAreas = _extraBeds
+        .filter(idx => document.getElementById('f-xbed-item-' + idx))
+        .map(idx => dimAreaFromXBed(idx) ?? 0);
+      const bedTotal = [...fixedBeds, ...extraBedAreas].reduce((s, v) => s + v, 0);
       const svc = (dimAreaFromInputs('mainbath')   ?? 0)
                 + (dimAreaFromInputs('masterbath') ?? 0)
                 + (dimAreaFromInputs('closet')     ?? 0)
                 + (dimAreaFromInputs('thirdbath')  ?? 0);
       const interior = r1(living + kitchen + hallway + bedTotal + svc);
       const balcony = dimAreaFromInputs('balcony') ?? 0;
+      // Auto-fill room count: 1 living + fixed beds (2) + extra beds
+      const totalBedCount = 2 + extraBedAreas.length;
+      const roomsEl = document.getElementById('f-rooms');
+      if (roomsEl && !roomsEl.dataset.manual) roomsEl.value = 1 + totalBedCount;
       document.getElementById('f-bed-total').textContent = r1(bedTotal) + ' m²';
       document.getElementById('f-svc-total').textContent = r1(svc) + ' m²';
       document.getElementById('f-int-preview').textContent = r1(interior);
@@ -2627,30 +2791,46 @@
 
     function openAptModal(key = null) {
       _editKey = key;
-      document.getElementById('modalTitle').textContent = key ? 'Edit apartment' : 'Add apartment';
+      _extraBeds = []; _extraBedSeq = 0; _formImages = [];
+      document.getElementById('f-extra-beds').innerHTML = '';
+      document.getElementById('f-images-list').innerHTML = '';
       document.getElementById('aptForm').reset();
       document.getElementById('f-color').value = '#e8623a';
+      document.getElementById('f-rooms').dataset.manual = '';
       renderProsList([]); renderConsList([]);
+      document.getElementById('modalTitle').textContent = key ? 'Edit apartment' : 'Add apartment';
       if (key) {
         const a = DATA[key], v = VERDICTS[key] || {};
         document.getElementById('f-label').value = a.label || '';
         document.getElementById('f-color').value = a.color || '#e8623a';
         document.getElementById('f-price').value = a.price != null ? a.price : '';
         document.getElementById('f-rooms').value = a.rooms || '';
-        document.getElementById('f-beds').value = a.beds || '';
-        // Populate dims from stored dims or TABLE
-        const dimSources = {
-          living: aptDimStr(key, 'living'), kitchen: aptDimStr(key, 'kitchen'), hallway: aptDimStr(key, 'hallway'),
-          bed1: aptDimStr(key, 'master'), bed2: aptDimStr(key, 'bed2'), bed3: aptDimStr(key, 'bed3'), bed4: aptDimStr(key, 'bed4'),
-          mainbath: aptDimStr(key, 'mainbath'), masterbath: aptDimStr(key, 'masterbath'), closet: aptDimStr(key, 'closet'),
-          thirdbath: aptDimStr(key, 'thirdbath'), balcony: aptDimStr(key, 'balcony')
-        };
-        Object.entries(dimSources).forEach(([k, dimStr]) => setDimInputs(k, dimStr));
+        document.getElementById('f-rooms').dataset.manual = 'yes';
+        // Fixed beds
+        setDimInputs('bed1', aptDimStr(key, 'master'));
+        setDimInputs('bed2', aptDimStr(key, 'bed2'));
+        // Extra beds from bedList[2+]
+        const extraDimKeys = ['bed3','bed4','bed5','bed6','bed7','bed8'];
+        const extraCount = Math.max(0, (a.bedList || []).length - 2);
+        for (let i = 0; i < extraCount; i++) addExtraBed(aptDimStr(key, extraDimKeys[i]));
+        // Other dims
+        setDimInputs('living',    aptDimStr(key, 'living'));
+        setDimInputs('kitchen',   aptDimStr(key, 'kitchen'));
+        setDimInputs('hallway',   aptDimStr(key, 'hallway'));
+        setDimInputs('mainbath',  aptDimStr(key, 'mainbath'));
+        setDimInputs('masterbath',aptDimStr(key, 'masterbath'));
+        setDimInputs('closet',    aptDimStr(key, 'closet'));
+        setDimInputs('thirdbath', aptDimStr(key, 'thirdbath'));
+        setDimInputs('balcony',   aptDimStr(key, 'balcony'));
+        // Verdict
         document.getElementById('f-vtitle').value = v.title || '';
         document.getElementById('f-vdesc').value = v.desc || '';
         document.getElementById('f-hasshower').checked = !!v.hasShower;
         renderProsList(v.pros || []);
         renderConsList(v.cons || []);
+        // User-uploaded images (not the hardcoded IMAGES const)
+        _formImages = JSON.parse(JSON.stringify(a.images || []));
+        renderImagePreviews();
       }
       updateComputedPreview();
       document.getElementById('aptModal').classList.add('open');
@@ -2670,15 +2850,20 @@
       if (!_editKey && DATA[key]) { alert('An apartment with this key already exists. Please use a different name.'); return; }
       const ga = k => dimAreaFromInputs(k) ?? 0;
       const gd = k => dimStrFromInputs(k);
-      const beds = ['bed1','bed2','bed3','bed4'].map(k => dimAreaFromInputs(k));
+      const liveExtra = _extraBeds.filter(idx => document.getElementById('f-xbed-item-' + idx));
+      const extraAreas = liveExtra.map(idx => dimAreaFromXBed(idx));
+      const beds = [dimAreaFromInputs('bed1'), dimAreaFromInputs('bed2'), ...extraAreas];
+      const totalBedCount = 2 + liveExtra.length;
+      const extraDims = {};
+      liveExtra.forEach((idx, pos) => { const d = dimStrFromXBed(idx); if (d) extraDims['bed' + (pos + 3)] = d; });
       const apt = {
         key, label,
         num: _editKey ? DATA[_editKey].num : ORDER.length,
         price: nv('f-price'),
         color: document.getElementById('f-color').value,
         current: _editKey ? DATA[_editKey].current : false,
-        rooms: parseInt(document.getElementById('f-rooms').value) || 0,
-        beds: parseInt(document.getElementById('f-beds').value) || 0,
+        rooms: parseInt(document.getElementById('f-rooms').value) || (1 + totalBedCount),
+        beds: totalBedCount,
         balcony: dimAreaFromInputs('balcony') ?? 0,
         cat: { living: ga('living'), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: ga('hallway') },
         bedList: beds,
@@ -2686,10 +2871,12 @@
         interior: 0,
         dims: {
           living: gd('living'), kitchen: gd('kitchen'), hallway: gd('hallway'),
-          master: gd('bed1'), bed2: gd('bed2'), bed3: gd('bed3'), bed4: gd('bed4'),
+          master: gd('bed1'), bed2: gd('bed2'),
           mainbath: gd('mainbath'), masterbath: gd('masterbath'), closet: gd('closet'),
-          thirdbath: gd('thirdbath'), balcony: gd('balcony')
-        }
+          thirdbath: gd('thirdbath'), balcony: gd('balcony'),
+          ...extraDims
+        },
+        images: _formImages
       };
       const verdict = {
         title: document.getElementById('f-vtitle').value.trim() || label,
@@ -2784,7 +2971,8 @@
 
     function applyAutoGenVerdict() {
       const ga = k => dimAreaFromInputs(k) ?? 0;
-      const beds = ['bed1','bed2','bed3','bed4'].map(k => dimAreaFromInputs(k));
+      const liveExtraForGen = _extraBeds.filter(idx => document.getElementById('f-xbed-item-' + idx));
+      const beds = [dimAreaFromInputs('bed1'), dimAreaFromInputs('bed2'), ...liveExtraForGen.map(idx => dimAreaFromXBed(idx))];
       const svc = { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath') };
       const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
       const svcTotal = svc.mainBath + svc.masterBath + svc.closet + (svc.thirdBath ?? 0);
@@ -2818,6 +3006,9 @@
         if (el) el.addEventListener('input', updateComputedPreview);
       });
     });
+    // Mark total rooms as manually edited if user types in it
+    const roomsEl = document.getElementById('f-rooms');
+    if (roomsEl) roomsEl.addEventListener('input', () => { roomsEl.dataset.manual = 'yes'; });
 
     loadStore(); buildHero(); buildAptChips(); redrawAll();
   </script>
