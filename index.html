@@ -1271,6 +1271,7 @@
     }
     .modal-body input[type="text"],
     .modal-body input[type="number"],
+    .modal-body input[type="url"],
     .modal-body textarea,
     .modal-body select {
       background: var(--panel2);
@@ -1430,7 +1431,13 @@
     /* extra bed item */
     .extra-bed-item { position: relative; }
     .extra-bed-item .field-label { display: flex; justify-content: space-between; align-items: center; }
-    .extra-bed-item .rm-btn { font-size: .72rem; padding: .2rem .5rem; }
+    .extra-bed-item .rm-btn {
+      background: var(--panel2); border: 1px solid var(--line2);
+      color: var(--txt3); border-radius: 6px; padding: .22rem .6rem;
+      cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-size: .72rem; transition: all .2s;
+    }
+    .extra-bed-item .rm-btn:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
     /* image upload */
     .img-upload-btn {
       display: inline-flex; align-items: center; gap: .5rem;
@@ -1459,6 +1466,40 @@
       font-size: .82rem; color: var(--txt2); cursor: pointer; user-select: none;
     }
     .img-fp-label input[type="checkbox"] { accent-color: var(--gold); width: 14px; height: 14px; }
+
+    /* Gist sync */
+    .sync-bar {
+      display: flex; align-items: center; gap: .65rem;
+      margin-top: 1.1rem; flex-wrap: wrap;
+    }
+    .sync-btn {
+      background: none; border: 1px solid var(--line2); color: var(--txt2);
+      border-radius: 8px; padding: .38rem .85rem;
+      font-family: 'Outfit', sans-serif; font-size: .82rem;
+      cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .sync-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .sync-btn.connected { border-color: rgba(155,207,79,.35); color: var(--pos); }
+    .sync-status {
+      font-size: .78rem; color: var(--txt3); display: flex; align-items: center; gap: .35rem;
+    }
+    .sync-status.ok { color: var(--pos); }
+    .sync-status.err { color: var(--neg); }
+    .sync-status.busy { color: var(--gold); }
+    #gistModal .modal-box { max-width: 480px; }
+    #gistModal .gist-field { margin-bottom: .9rem; }
+    #gistModal .gist-field label { display: block; font-size: .8rem; color: var(--txt2); margin-bottom: .35rem; }
+    #gistModal .gist-field input {
+      width: 100%; background: var(--panel2); border: 1px solid var(--line2);
+      color: var(--txt); border-radius: 8px; padding: .6rem .8rem;
+      font-family: 'Outfit', sans-serif; font-size: .88rem;
+    }
+    #gistModal .gist-field input:focus { outline: none; border-color: var(--gold); }
+    #gistModal .gist-note { font-size: .78rem; color: var(--txt3); margin-top: .35rem; line-height: 1.5; }
+    #gistModal .gist-note a { color: var(--gold); }
+    #gistModal .gist-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.1rem; }
+    #gistModal .gist-disconnect { margin-right: auto; background: none; border: 1px solid rgba(217,122,90,.35); color: var(--neg); border-radius: 8px; padding: .45rem .9rem; font-family:'Outfit',sans-serif; font-size:.85rem; cursor:pointer; }
+    #gistModal .gist-disconnect:hover { border-color: var(--neg); }
   </style>
 </head>
 
@@ -1470,6 +1511,10 @@
       <h1 class="fade" style="animation-delay:.05s">Seven homes, <em>one decision.</em></h1>
       <p class="lede fade" style="animation-delay:.1s">A room-by-room comparison anchored against your current home.
         Hertzog stays pinned as the baseline — every other apartment is a candidate to weigh against it.</p>
+      <div class="sync-bar">
+        <button class="sync-btn" id="syncSettingsBtn" onclick="openGistModal()">⚙ Sync settings</button>
+        <span class="sync-status" id="syncStatus"></span>
+      </div>
       <div class="hero" id="heroCards"></div>
     </div>
   </header>
@@ -1801,6 +1846,40 @@
   </div>
 
   <!-- Delete confirm modal -->
+  <!-- Gist Sync Modal -->
+  <div id="gistModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:480px">
+      <div class="modal-header">
+        <span class="modal-title">GitHub Gist sync</span>
+        <button class="modal-close" onclick="closeGistModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:1.2rem 1.5rem 1.5rem">
+        <p style="font-size:.85rem;color:var(--txt2);margin-bottom:1.1rem;line-height:1.6">
+          Your apartment data will be saved to a private GitHub Gist so you can access it from any device.
+          Data syncs automatically every time you make a change.
+        </p>
+        <div class="gist-field">
+          <label>GitHub Personal Access Token <span style="color:var(--neg)">*</span></label>
+          <input type="password" id="g-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+          <div class="gist-note">
+            Create one at <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> →
+            select <b>Classic</b> → tick the <b>gist</b> scope only. The token is stored only in your browser.
+          </div>
+        </div>
+        <div class="gist-field">
+          <label>Gist ID <span style="color:var(--txt3);font-weight:400">(leave empty to create a new one)</span></label>
+          <input type="text" id="g-gistid" placeholder="e.g. 4a3b2c1d0e..." autocomplete="off">
+          <div class="gist-note">You can find this in the Gist URL: gist.github.com/user/<b>GIST_ID</b></div>
+        </div>
+        <div class="gist-actions">
+          <button class="gist-disconnect" id="gistDisconnectBtn" onclick="disconnectGist()" style="display:none">Disconnect</button>
+          <button class="btn-ghost" onclick="closeGistModal()">Cancel</button>
+          <button class="btn-primary" onclick="saveGistSettings()">Connect &amp; sync</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="confirmModal" class="modal-overlay">
     <div class="confirm-box">
       <h3 id="confirmTitle"></h3>
@@ -1912,9 +1991,72 @@
     let active = {};
     const STORAGE_KEY = 'apt_data_v2';
 
-    function saveStore() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
+    const GIST_KEY = 'apt_gist_cfg'; // { token, gistId }
+    const GIST_FILE = 'apt-comparison-data.json';
+
+    function getGistCfg() {
+      try { return JSON.parse(localStorage.getItem(GIST_KEY)) || null; } catch { return null; }
     }
+    function setGistCfg(cfg) { localStorage.setItem(GIST_KEY, JSON.stringify(cfg)); }
+    function clearGistCfg() { localStorage.removeItem(GIST_KEY); }
+
+    function setSyncStatus(msg, cls = '') {
+      const el = document.getElementById('syncStatus');
+      if (!el) return;
+      el.textContent = msg; el.className = 'sync-status' + (cls ? ' ' + cls : '');
+      const btn = document.getElementById('syncSettingsBtn');
+      if (btn) btn.className = 'sync-btn' + (cls === 'ok' ? ' connected' : '');
+    }
+
+    async function gistFetch(token, gistId, payload = null) {
+      const url = `https://api.github.com/gists/${gistId}`;
+      const opts = {
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github+json' }
+      };
+      if (payload) { opts.method = 'PATCH'; opts.body = JSON.stringify(payload); }
+      else opts.method = 'GET';
+      const res = await fetch(url, opts);
+      if (!res.ok) throw new Error(`GitHub ${res.status}: ${res.statusText}`);
+      return res.json();
+    }
+
+    async function gistCreate(token, content) {
+      const res = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github+json' },
+        body: JSON.stringify({ description: 'Apartment comparison data', public: false, files: { [GIST_FILE]: { content } } })
+      });
+      if (!res.ok) throw new Error(`GitHub ${res.status}: ${res.statusText}`);
+      return res.json();
+    }
+
+    async function pushToGist() {
+      const cfg = getGistCfg(); if (!cfg) return;
+      const content = JSON.stringify({ DATA, VERDICTS, ORDER });
+      try {
+        setSyncStatus('Syncing…', 'busy');
+        await gistFetch(cfg.token, cfg.gistId, { files: { [GIST_FILE]: { content } } });
+        setSyncStatus('✓ Synced', 'ok');
+      } catch (e) {
+        setSyncStatus('Sync error — check settings', 'err');
+        console.error('Gist push error', e);
+      }
+    }
+
+    async function pullFromGist(token, gistId) {
+      const data = await gistFetch(token, gistId);
+      const file = data.files[GIST_FILE];
+      if (!file) throw new Error('File not found in Gist');
+      return JSON.parse(file.content);
+    }
+
+    function saveStore() {
+      const payload = { DATA, VERDICTS, ORDER };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      const cfg = getGistCfg();
+      if (cfg) pushToGist();
+    }
+
     function loadStore() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -1928,6 +2070,68 @@
       }
       active = {};
       ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+      // If Gist configured, pull latest in background and refresh UI
+      const cfg = getGistCfg();
+      if (cfg) {
+        setSyncStatus('Syncing…', 'busy');
+        pullFromGist(cfg.token, cfg.gistId).then(s => {
+          DATA = s.DATA; VERDICTS = s.VERDICTS; ORDER = s.ORDER;
+          active = {}; ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
+          buildHero(); buildAptChips(); redrawAll();
+          setSyncStatus('✓ Synced', 'ok');
+        }).catch(e => {
+          setSyncStatus('Sync error — check settings', 'err');
+          console.error('Gist pull error', e);
+        });
+      }
+    }
+
+    function openGistModal() {
+      const cfg = getGistCfg();
+      document.getElementById('g-token').value = cfg ? cfg.token : '';
+      document.getElementById('g-gistid').value = cfg ? cfg.gistId : '';
+      document.getElementById('gistDisconnectBtn').style.display = cfg ? '' : 'none';
+      document.getElementById('gistModal').classList.add('open');
+    }
+    function closeGistModal() { document.getElementById('gistModal').classList.remove('open'); }
+
+    async function saveGistSettings() {
+      const token = document.getElementById('g-token').value.trim();
+      const gistId = document.getElementById('g-gistid').value.trim();
+      if (!token) { alert('Please enter your GitHub token.'); return; }
+      setSyncStatus('Connecting…', 'busy');
+      try {
+        let finalGistId = gistId;
+        if (!finalGistId) {
+          // Create a new Gist seeded with current data
+          const content = JSON.stringify({ DATA, VERDICTS, ORDER });
+          const created = await gistCreate(token, content);
+          finalGistId = created.id;
+          document.getElementById('g-gistid').value = finalGistId;
+        } else {
+          // Validate + pull latest from existing Gist
+          const remote = await pullFromGist(token, finalGistId);
+          DATA = remote.DATA; VERDICTS = remote.VERDICTS; ORDER = remote.ORDER;
+          active = {}; ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
+          buildHero(); buildAptChips(); redrawAll();
+        }
+        setGistCfg({ token, gistId: finalGistId });
+        document.getElementById('gistDisconnectBtn').style.display = '';
+        setSyncStatus('✓ Connected · Gist ID: ' + finalGistId.slice(0, 8) + '…', 'ok');
+        closeGistModal();
+      } catch (e) {
+        setSyncStatus('Connection failed — check token/ID', 'err');
+        alert('Connection failed: ' + e.message);
+      }
+    }
+
+    function disconnectGist() {
+      clearGistCfg();
+      setSyncStatus('');
+      document.getElementById('syncSettingsBtn').className = 'sync-btn';
+      closeGistModal();
     }
     function computeCalcFields(apt) {
       apt.cat.bedrooms = apt.bedList.reduce((s, v) => s + (v ?? 0), 0);
@@ -3037,6 +3241,7 @@
       if (e.key === 'Escape') {
         if (document.getElementById('aptModal').classList.contains('open')) closeAptModal();
         else if (document.getElementById('confirmModal').classList.contains('open')) closeConfirmModal();
+        else if (document.getElementById('gistModal').classList.contains('open')) closeGistModal();
       }
     });
 
