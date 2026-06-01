@@ -1399,6 +1399,24 @@
     .hcard-add:hover .add-icon { color: var(--gold); }
     .add-label { font-size: .75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt3); transition: color .2s; }
     .hcard-add:hover .add-label { color: var(--gold); }
+    /* dim inputs */
+    .dim-row {
+      display: flex; align-items: center; gap: .45rem; flex-wrap: nowrap;
+    }
+    .dim-row input.dim-w, .dim-row input.dim-h {
+      width: 88px !important; flex: none !important; padding: .55rem .65rem;
+    }
+    .dim-sep { color: var(--txt3); font-size: 1.1rem; font-weight: 300; }
+    .dim-unit { font-size: .76rem; color: var(--txt3); white-space: nowrap; flex-shrink: 0; }
+    .dim-result {
+      background: rgba(224,161,58,0.09); border: 1px solid rgba(224,161,58,0.18);
+      border-radius: 6px; padding: .32rem .65rem;
+      font-size: .84rem; font-weight: 500; color: var(--gold);
+      min-width: 52px; text-align: center; white-space: nowrap; flex-shrink: 0;
+    }
+    .dim-result.has-val { background: rgba(224,161,58,0.15); border-color: rgba(224,161,58,0.32); }
+    .dim-field { margin-bottom: .8rem; }
+    .dim-hint { font-size: .64rem; letter-spacing: 0.06em; color: var(--txt3); text-transform: none; font-weight: 400; }
   </style>
 </head>
 
@@ -1568,77 +1586,139 @@
               </div>
             </div>
             <div>
-              <div class="field-label">Balcony (m²)</div>
-              <input type="number" id="f-balcony" placeholder="15.0" step="0.1" min="0">
+              <div class="field-label">Balcony</div>
+              <div class="dim-row">
+                <input type="number" id="f-balcony-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-balcony-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-balcony-m2">—</span>
+              </div>
             </div>
           </div>
           <!-- Living areas -->
           <div class="form-section">
-            <div class="form-section-title">Living areas (m²)</div>
-            <div class="field-group fg-3">
-              <div>
-                <div class="field-label">Living / Dining</div>
-                <input type="number" id="f-living" placeholder="35.0" step="0.1" min="0">
+            <div class="form-section-title">Living areas <span class="dim-hint">width × height in cm</span></div>
+            <div class="dim-field">
+              <div class="field-label">Living / Dining</div>
+              <div class="dim-row">
+                <input type="number" id="f-living-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-living-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-living-m2">—</span>
               </div>
-              <div>
-                <div class="field-label">Kitchen</div>
-                <input type="number" id="f-kitchen" placeholder="10.0" step="0.1" min="0">
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Kitchen</div>
+              <div class="dim-row">
+                <input type="number" id="f-kitchen-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-kitchen-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-kitchen-m2">—</span>
               </div>
-              <div>
-                <div class="field-label">Hallway</div>
-                <input type="number" id="f-hallway" placeholder="0" step="0.1" min="0">
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Hallway <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-hallway-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-hallway-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-hallway-m2">—</span>
               </div>
             </div>
           </div>
           <!-- Bedrooms -->
           <div class="form-section">
-            <div class="form-section-title">Bedroom sizes (m²)</div>
-            <div class="field-group">
-              <div>
-                <div class="field-label">Master</div>
-                <input type="number" id="f-bed1" placeholder="12.0" step="0.1" min="0">
-              </div>
-              <div>
-                <div class="field-label">Bedroom 2</div>
-                <input type="number" id="f-bed2" placeholder="10.0" step="0.1" min="0">
-              </div>
-            </div>
-            <div class="field-group">
-              <div>
-                <div class="field-label">Bedroom 3 (optional)</div>
-                <input type="number" id="f-bed3" placeholder="—" step="0.1" min="0">
-              </div>
-              <div>
-                <div class="field-label">Bedroom 4 (optional)</div>
-                <input type="number" id="f-bed4" placeholder="—" step="0.1" min="0">
+            <div class="form-section-title">Bedrooms <span class="dim-hint">width × height in cm</span></div>
+            <div class="dim-field">
+              <div class="field-label">Master bedroom</div>
+              <div class="dim-row">
+                <input type="number" id="f-bed1-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-bed1-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-bed1-m2">—</span>
               </div>
             </div>
-            <div class="computed-row">Bedrooms total: <strong id="f-bed-total">—</strong> m²</div>
+            <div class="dim-field">
+              <div class="field-label">Bedroom 2</div>
+              <div class="dim-row">
+                <input type="number" id="f-bed2-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-bed2-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-bed2-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Bedroom 3 <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-bed3-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-bed3-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-bed3-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Bedroom 4 <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-bed4-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-bed4-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-bed4-m2">—</span>
+              </div>
+            </div>
+            <div class="computed-row" style="margin-top:.6rem">Bedrooms total: <strong id="f-bed-total">—</strong> m²</div>
           </div>
           <!-- Service -->
           <div class="form-section">
-            <div class="form-section-title">Service areas (m²)</div>
-            <div class="field-group">
-              <div>
-                <div class="field-label">Main bathroom</div>
-                <input type="number" id="f-mainbath" placeholder="4.5" step="0.1" min="0">
-              </div>
-              <div>
-                <div class="field-label">Master bathroom</div>
-                <input type="number" id="f-masterbath" placeholder="3.5" step="0.1" min="0">
-              </div>
-            </div>
-            <div class="field-group">
-              <div>
-                <div class="field-label">Master closet</div>
-                <input type="number" id="f-closet" placeholder="2.5" step="0.1" min="0">
-              </div>
-              <div>
-                <div class="field-label">3rd bathroom (optional)</div>
-                <input type="number" id="f-thirdbath" placeholder="—" step="0.1" min="0">
+            <div class="form-section-title">Service areas <span class="dim-hint">width × height in cm</span></div>
+            <div class="dim-field">
+              <div class="field-label">Main bathroom</div>
+              <div class="dim-row">
+                <input type="number" id="f-mainbath-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-mainbath-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-mainbath-m2">—</span>
               </div>
             </div>
-            <div class="computed-row">Service total: <strong id="f-svc-total">—</strong> m²</div>
+            <div class="dim-field">
+              <div class="field-label">Master bathroom</div>
+              <div class="dim-row">
+                <input type="number" id="f-masterbath-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-masterbath-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-masterbath-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Master closet</div>
+              <div class="dim-row">
+                <input type="number" id="f-closet-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-closet-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-closet-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">3rd bathroom <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-thirdbath-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-thirdbath-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-thirdbath-m2">—</span>
+              </div>
+            </div>
+            <div class="computed-row" style="margin-top:.6rem">Service total: <strong id="f-svc-total">—</strong> m²</div>
           </div>
           <!-- Live summary -->
           <div class="computed-preview">
@@ -2215,10 +2295,34 @@
       { name: 'Interior + balcony', hertzog: 84.3, Liors_apartment: 130.7, Katzir_10: 117.7, Golda_floor_9: 121.6, Golda_floor_12: 120.6, Anesiim_42: 119.8, katzir_22: 130.1 }
     ];
 
+    const ROW_TO_DIM_TABLE = {
+      'Living room': 'living', 'Kitchen': 'kitchen', 'Hallway': 'hallway',
+      'Master bedroom': 'master', 'Bedroom 2': 'bed2', 'Bedroom 3': 'bed3', 'Bedroom 4': 'bed4',
+      'Main bathroom': 'mainbath', 'Master bathroom': 'masterbath', 'Master closet': 'closet',
+      'Third bathroom': 'thirdbath', 'Balcony': 'balcony'
+    };
+
+    function resolveCell(row, k) {
+      if (row[k] !== undefined) return row[k];
+      if (DATA[k] && DATA[k].dims) {
+        const dk = ROW_TO_DIM_TABLE[row.name];
+        if (dk) {
+          const dimStr = DATA[k].dims[dk];
+          if (dimStr) {
+            const parts = dimStr.split('×').map(Number);
+            const area = (parts.length === 2 && parts[0] && parts[1]) ? r1(parts[0] * parts[1] / 10000) : null;
+            if (area != null) return [area, dimStr];
+          }
+        }
+      }
+      return undefined;
+    }
+
     function winnerOf(row, cols) {
       let best = -Infinity, who = [];
       cols.forEach(k => {
-        const v = row[k]?.[0]; if (v == null) return;
+        const cell = resolveCell(row, k);
+        const v = cell?.[0]; if (v == null) return;
         if (v > best) { best = v; who = [k] } else if (v === best) { who.push(k) }
       });
       return { who };
@@ -2252,19 +2356,21 @@
             html += `<div class="rt-subtotal" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span></div>`;
             cols.forEach(k => {
               const isCurr = DATA[k].current;
+              // Fall back to computed cat.living for new apartments
+              const rawVal = row[k]?.[0] ?? DATA[k]?.cat?.living;
               let dh = '';
               if (showVs && bk && cols.includes(bk)) {
                 if (isCurr) dh = '<span class="vsh eq">baseline</span>';
                 else {
-                  const hv = row[bk]?.[0];
-                  if (hv != null && row[k]) {
-                    const d = r1(row[k][0] - hv);
+                  const hv = row[bk]?.[0] ?? DATA[bk]?.cat?.living;
+                  if (hv != null && rawVal != null) {
+                    const d = r1(rawVal - hv);
                     const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
                     dh = `<span class="vsh ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
                   }
                 }
               }
-              html += `<div class="rt-cell"><span class="val" style="color:var(--txt2)">${row[k] ? row[k][0].toFixed(1) : '—'}<span style="font-size:.62em;color:var(--txt3)"> m²</span></span>${dh}</div>`;
+              html += `<div class="rt-cell"><span class="val" style="color:var(--txt2)">${rawVal != null ? rawVal.toFixed(1) : '—'}<span style="font-size:.62em;color:var(--txt3)"> m²</span></span>${dh}</div>`;
             });
             html += '</div>';
             return;
@@ -2272,7 +2378,7 @@
           const { who } = winnerOf(row, cols);
           html += `<div class="rt-row" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span>${row.mamad ? '<span class="rmamad">ממ"ד · safe room</span>' : ''}</div>`;
           cols.forEach(k => {
-            const cell = row[k];
+            const cell = resolveCell(row, k);
             const isCurr = DATA[k].current;
             if (!cell || cell[0] == null) {
               html += `<div class="rt-cell ${isCurr ? 'curr' : ''}"><span class="rt-na">${cell?.[1] || '—'}</span></div>`;
@@ -2445,15 +2551,49 @@
 
     function nv(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
 
+    // Dim helpers: read W×H inputs, compute m², update display
+    const DIM_ROOMS = ['living','kitchen','hallway','bed1','bed2','bed3','bed4','mainbath','masterbath','closet','thirdbath','balcony'];
+    function dimAreaFromInputs(key) {
+      const w = nv('f-' + key + '-w'), h = nv('f-' + key + '-h');
+      return (w != null && h != null) ? r1(w * h / 10000) : null;
+    }
+    function dimStrFromInputs(key) {
+      const w = nv('f-' + key + '-w'), h = nv('f-' + key + '-h');
+      return (w != null && h != null) ? (Math.round(w) + '×' + Math.round(h)) : null;
+    }
+    function setDimInputs(key, dimStr) {
+      if (!dimStr) return;
+      const parts = dimStr.split('×');
+      if (parts.length === 2) {
+        const el_w = document.getElementById('f-' + key + '-w');
+        const el_h = document.getElementById('f-' + key + '-h');
+        if (el_w) el_w.value = parseFloat(parts[0]) || '';
+        if (el_h) el_h.value = parseFloat(parts[1]) || '';
+      }
+    }
+    function updateDimResult(key) {
+      const area = dimAreaFromInputs(key);
+      const el = document.getElementById('f-' + key + '-m2');
+      if (!el) return;
+      if (area != null) { el.textContent = area + ' m²'; el.classList.add('has-val'); }
+      else { el.textContent = '—'; el.classList.remove('has-val'); }
+    }
+
     function updateComputedPreview() {
-      const living = nv('f-living') ?? 0, kitchen = nv('f-kitchen') ?? 0, hallway = nv('f-hallway') ?? 0;
-      const beds = [nv('f-bed1'), nv('f-bed2'), nv('f-bed3'), nv('f-bed4')];
+      DIM_ROOMS.forEach(k => updateDimResult(k));
+      const living  = dimAreaFromInputs('living')    ?? 0;
+      const kitchen = dimAreaFromInputs('kitchen')   ?? 0;
+      const hallway = dimAreaFromInputs('hallway')   ?? 0;
+      const beds = ['bed1','bed2','bed3','bed4'].map(k => dimAreaFromInputs(k));
       const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
-      const svc = (nv('f-mainbath') ?? 0) + (nv('f-masterbath') ?? 0) + (nv('f-closet') ?? 0) + (nv('f-thirdbath') ?? 0);
-      const interior = living + kitchen + hallway + bedTotal + svc;
-      const balcony = nv('f-balcony') ?? 0;
-      document.getElementById('f-bed-total').textContent = r1(bedTotal);
-      document.getElementById('f-svc-total').textContent = r1(svc);
+      const svc = (dimAreaFromInputs('mainbath')   ?? 0)
+                + (dimAreaFromInputs('masterbath') ?? 0)
+                + (dimAreaFromInputs('closet')     ?? 0)
+                + (dimAreaFromInputs('thirdbath')  ?? 0);
+      const interior = r1(living + kitchen + hallway + bedTotal + svc);
+      const balcony = dimAreaFromInputs('balcony') ?? 0;
+      document.getElementById('f-bed-total').textContent = r1(bedTotal) + ' m²';
+      document.getElementById('f-svc-total').textContent = r1(svc) + ' m²';
       document.getElementById('f-int-preview').textContent = r1(interior);
       document.getElementById('f-tot-preview').textContent = r1(interior + balcony);
     }
@@ -2473,9 +2613,24 @@
     function getProsList() { return [...document.querySelectorAll('#f-pros-list input')].map(i => i.value).filter(Boolean); }
     function getConsList() { return [...document.querySelectorAll('#f-cons-list input')].map(i => i.value).filter(Boolean); }
 
+    // Get dim string for an apt from stored dims or TABLE
+    function aptDimStr(aptKey, dimKey) {
+      if (DATA[aptKey] && DATA[aptKey].dims && DATA[aptKey].dims[dimKey]) return DATA[aptKey].dims[dimKey];
+      for (const g of TABLE) {
+        for (const row of g.rows) {
+          if (row.subtotal) continue;
+          if (ROW_TO_DIM_TABLE[row.name] === dimKey && row[aptKey] && row[aptKey][1]) return row[aptKey][1];
+        }
+      }
+      return null;
+    }
+
     function openAptModal(key = null) {
       _editKey = key;
       document.getElementById('modalTitle').textContent = key ? 'Edit apartment' : 'Add apartment';
+      document.getElementById('aptForm').reset();
+      document.getElementById('f-color').value = '#e8623a';
+      renderProsList([]); renderConsList([]);
       if (key) {
         const a = DATA[key], v = VERDICTS[key] || {};
         document.getElementById('f-label').value = a.label || '';
@@ -2483,27 +2638,19 @@
         document.getElementById('f-price').value = a.price != null ? a.price : '';
         document.getElementById('f-rooms').value = a.rooms || '';
         document.getElementById('f-beds').value = a.beds || '';
-        document.getElementById('f-balcony').value = a.balcony != null ? a.balcony : '';
-        document.getElementById('f-living').value = a.cat.living || '';
-        document.getElementById('f-kitchen').value = a.cat.kitchen || '';
-        document.getElementById('f-hallway').value = a.cat.hallway || '';
-        document.getElementById('f-bed1').value = a.bedList[0] != null ? a.bedList[0] : '';
-        document.getElementById('f-bed2').value = a.bedList[1] != null ? a.bedList[1] : '';
-        document.getElementById('f-bed3').value = a.bedList[2] != null ? a.bedList[2] : '';
-        document.getElementById('f-bed4').value = a.bedList[3] != null ? a.bedList[3] : '';
-        document.getElementById('f-mainbath').value = a.service.mainBath || '';
-        document.getElementById('f-masterbath').value = a.service.masterBath || '';
-        document.getElementById('f-closet').value = a.service.closet || '';
-        document.getElementById('f-thirdbath').value = a.service.thirdBath != null ? a.service.thirdBath : '';
+        // Populate dims from stored dims or TABLE
+        const dimSources = {
+          living: aptDimStr(key, 'living'), kitchen: aptDimStr(key, 'kitchen'), hallway: aptDimStr(key, 'hallway'),
+          bed1: aptDimStr(key, 'master'), bed2: aptDimStr(key, 'bed2'), bed3: aptDimStr(key, 'bed3'), bed4: aptDimStr(key, 'bed4'),
+          mainbath: aptDimStr(key, 'mainbath'), masterbath: aptDimStr(key, 'masterbath'), closet: aptDimStr(key, 'closet'),
+          thirdbath: aptDimStr(key, 'thirdbath'), balcony: aptDimStr(key, 'balcony')
+        };
+        Object.entries(dimSources).forEach(([k, dimStr]) => setDimInputs(k, dimStr));
         document.getElementById('f-vtitle').value = v.title || '';
         document.getElementById('f-vdesc').value = v.desc || '';
         document.getElementById('f-hasshower').checked = !!v.hasShower;
         renderProsList(v.pros || []);
         renderConsList(v.cons || []);
-      } else {
-        document.getElementById('aptForm').reset();
-        document.getElementById('f-color').value = '#e8623a';
-        renderProsList([]); renderConsList([]);
       }
       updateComputedPreview();
       document.getElementById('aptModal').classList.add('open');
@@ -2521,7 +2668,9 @@
       if (!label) { alert('Please enter a display name.'); return; }
       const key = _editKey || label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
       if (!_editKey && DATA[key]) { alert('An apartment with this key already exists. Please use a different name.'); return; }
-      const beds = [nv('f-bed1'), nv('f-bed2'), nv('f-bed3'), nv('f-bed4')];
+      const ga = k => dimAreaFromInputs(k) ?? 0;
+      const gd = k => dimStrFromInputs(k);
+      const beds = ['bed1','bed2','bed3','bed4'].map(k => dimAreaFromInputs(k));
       const apt = {
         key, label,
         num: _editKey ? DATA[_editKey].num : ORDER.length,
@@ -2530,11 +2679,17 @@
         current: _editKey ? DATA[_editKey].current : false,
         rooms: parseInt(document.getElementById('f-rooms').value) || 0,
         beds: parseInt(document.getElementById('f-beds').value) || 0,
-        balcony: nv('f-balcony') ?? 0,
-        cat: { living: nv('f-living') ?? 0, kitchen: nv('f-kitchen') ?? 0, bedrooms: 0, service: 0, hallway: nv('f-hallway') ?? 0 },
+        balcony: dimAreaFromInputs('balcony') ?? 0,
+        cat: { living: ga('living'), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: ga('hallway') },
         bedList: beds,
-        service: { mainBath: nv('f-mainbath') ?? 0, masterBath: nv('f-masterbath') ?? 0, closet: nv('f-closet') ?? 0, thirdBath: nv('f-thirdbath') },
-        interior: 0
+        service: { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath') },
+        interior: 0,
+        dims: {
+          living: gd('living'), kitchen: gd('kitchen'), hallway: gd('hallway'),
+          master: gd('bed1'), bed2: gd('bed2'), bed3: gd('bed3'), bed4: gd('bed4'),
+          mainbath: gd('mainbath'), masterbath: gd('masterbath'), closet: gd('closet'),
+          thirdbath: gd('thirdbath'), balcony: gd('balcony')
+        }
       };
       const verdict = {
         title: document.getElementById('f-vtitle').value.trim() || label,
@@ -2628,16 +2783,17 @@
     }
 
     function applyAutoGenVerdict() {
-      const beds = [nv('f-bed1'), nv('f-bed2'), nv('f-bed3'), nv('f-bed4')];
-      const svc = { mainBath: nv('f-mainbath') ?? 0, masterBath: nv('f-masterbath') ?? 0, closet: nv('f-closet') ?? 0, thirdBath: nv('f-thirdbath') };
+      const ga = k => dimAreaFromInputs(k) ?? 0;
+      const beds = ['bed1','bed2','bed3','bed4'].map(k => dimAreaFromInputs(k));
+      const svc = { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath') };
       const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
       const svcTotal = svc.mainBath + svc.masterBath + svc.closet + (svc.thirdBath ?? 0);
-      const living = nv('f-living') ?? 0, kitchen = nv('f-kitchen') ?? 0, hallway = nv('f-hallway') ?? 0;
+      const living = ga('living'), kitchen = ga('kitchen'), hallway = ga('hallway');
       const interior = r1(living + kitchen + hallway + bedTotal + svcTotal);
       const tempApt = {
         key: _editKey || '_new_', label: document.getElementById('f-label').value || 'New apartment',
         price: nv('f-price'), beds: parseInt(document.getElementById('f-beds').value) || 0,
-        balcony: nv('f-balcony') ?? 0, interior,
+        balcony: ga('balcony'), interior,
         cat: { living, kitchen, bedrooms: bedTotal, service: svcTotal, hallway },
         bedList: beds, service: svc
       };
@@ -2655,10 +2811,12 @@
       }
     });
 
-    // wire live preview
-    ['f-living','f-kitchen','f-hallway','f-bed1','f-bed2','f-bed3','f-bed4','f-mainbath','f-masterbath','f-closet','f-thirdbath','f-balcony'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('input', updateComputedPreview);
+    // wire live preview for all W/H dim inputs
+    DIM_ROOMS.forEach(key => {
+      ['f-' + key + '-w', 'f-' + key + '-h'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateComputedPreview);
+      });
     });
 
     loadStore(); buildHero(); buildAptChips(); redrawAll();
