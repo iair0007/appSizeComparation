@@ -1386,6 +1386,9 @@
     }
     .apt-action-btn:hover { color: var(--txt); }
     .apt-action-del:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
+    .apt-action-base:hover { color: var(--gold); border-color: rgba(224,161,58,.4); }
+    .hcard-link-icon { font-size: .85rem; text-decoration: none; opacity: .7; vertical-align: middle; }
+    .hcard-link-icon:hover { opacity: 1; }
     /* add apartment card */
     .hcard-add {
       display: flex; flex-direction: column;
@@ -1619,6 +1622,10 @@
               <input type="number" id="f-rooms" placeholder="auto" min="1" max="30" step="1" style="opacity:.7">
             </div>
             <div>
+              <div class="field-label">Listing URL <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <input type="url" id="f-link" placeholder="https://...">
+            </div>
+            <div>
               <div class="field-label">Balcony</div>
               <div class="dim-row">
                 <input type="number" id="f-balcony-w" placeholder="W" min="0" step="1" class="dim-w">
@@ -1836,60 +1843,74 @@
 
     const DEFAULT_DATA = {
       hertzog: {
-        key: 'hertzog', label: '0 · hertzog', num: 0, price: null, color: '#c9c2b0', current: true,
+        key: 'hertzog', label: '0 · hertzog', num: 0, price: null, color: '#c9c2b0', current: true, link: null,
         rooms: 4, beds: 3, interior: 70.5, balcony: 13.8,
         cat: { living: 25.3, kitchen: 9.3, bedrooms: 24.5, service: 11.4, hallway: 0 },
         bedList: [7.3, 8.2, 9.0, null],
-        service: { mainBath: 3.7, masterBath: 3.2, closet: 2.5, thirdBath: null }
+        service: { mainBath: 3.7, masterBath: 3.2, closet: 2.5, thirdBath: null },
+        dims: { living: '633×400', kitchen: '285×325', hallway: null, master: '350×210', bed2: '298×275', bed3: '321×280', bed4: null, mainbath: '170×220', masterbath: '190×170', closet: '170×150', thirdbath: null, balcony: '300×460' },
+        images: []
       },
       Liors_apartment: {
-        key: 'Liors_apartment', label: '1 · Liors_apartment', num: 1, price: 4.70, color: '#9bcf4f',
+        key: 'Liors_apartment', label: '1 · Liors_apartment', num: 1, price: 4.70, color: '#9bcf4f', link: null,
         rooms: 5, beds: 4, interior: 101.7, balcony: 29.0,
         cat: { living: 38.0, kitchen: 6.8, bedrooms: 43.7, service: 13.2, hallway: 0 },
         bedList: [8.3, 9.6, 10.0, 15.8],
-        service: { mainBath: 4.5, masterBath: 4.3, closet: 2.1, thirdBath: null }
+        service: { mainBath: 4.5, masterBath: 4.3, closet: 2.1, thirdBath: null },
+        dims: { living: '753×505', kitchen: '190×360', hallway: null, master: '255×325', bed2: '320×300', bed3: '345×290', bed4: '450×350', mainbath: '255×175', masterbath: '275×155', closet: '190×110', thirdbath: null, balcony: '774×375' },
+        images: []
       },
       Katzir_10: {
-        key: 'Katzir_10', label: '2 · Katzir_10', num: 2, price: 4.55, color: '#e0a13a',
+        key: 'Katzir_10', label: '2 · Katzir_10', num: 2, price: 4.55, color: '#e0a13a', link: null,
         rooms: 5, beds: 4, interior: 108.7, balcony: 9.0,
         cat: { living: 34.2, kitchen: 10.8, bedrooms: 43.4, service: 13.7, hallway: 6.6 },
         bedList: [12.0, 11.0, 9.4, 11.0],
-        service: { mainBath: 4.6, masterBath: 3.2, closet: 2.9, thirdBath: 0.9 }
+        service: { mainBath: 4.6, masterBath: 3.2, closet: 2.9, thirdBath: 0.9 },
+        dims: { living: '435×275', kitchen: '298×361', hallway: '229×290', master: '320×375', bed2: '368×299', bed3: '325×290', bed4: '400×275', mainbath: '246×185', masterbath: '204×159', closet: '185×159', thirdbath: '109×80', balcony: '270×334' },
+        images: []
       },
       Anesiim_42: {
-        key: 'Anesiim_42', label: '3 · Anesiim_42', num: 3, price: 4.80, color: '#5aa9e6',
+        key: 'Anesiim_42', label: '3 · Anesiim_42', num: 3, price: 4.80, color: '#5aa9e6', link: null,
         rooms: 5, beds: 4, interior: 104.6, balcony: 15.2,
         cat: { living: 34.4, kitchen: 11.3, bedrooms: 44.3, service: 14.6, hallway: 0 },
         bedList: [12.2, 11.1, 10.9, 10.1],
-        service: { mainBath: 4.2, masterBath: 2.9, closet: 3.4, thirdBath: 1.9 }
+        service: { mainBath: 4.2, masterBath: 2.9, closet: 3.4, thirdBath: 1.9 },
+        dims: { living: '800×430', kitchen: '405×280', hallway: null, master: '380×320', bed2: '390×285', bed3: '330×330', bed4: '360×280', mainbath: '250×170', masterbath: '170×170', closet: '200×170', thirdbath: '190×100', balcony: '400×380' },
+        images: []
       },
       Golda_floor_9: {
-        key: 'Golda_floor_9', label: '4 · Golda_floor_9', num: 4, price: 4.50, color: '#9b7fe0',
+        key: 'Golda_floor_9', label: '4 · Golda_floor_9', num: 4, price: 4.50, color: '#9b7fe0', link: null,
         rooms: 5, beds: 4, interior: 104.7, balcony: 16.9,
         cat: { living: 35.4, kitchen: 11.5, bedrooms: 41.3, service: 16.5, hallway: 0 },
         bedList: [10.2, 10.3, 10.7, 10.1],
-        service: { mainBath: 4.8, masterBath: 3.9, closet: 2.7, thirdBath: 1.4 }
+        service: { mainBath: 4.8, masterBath: 3.9, closet: 2.7, thirdBath: 1.4 },
+        dims: { living: '808×438', kitchen: '398×290', hallway: null, master: '320×320', bed2: '355×290', bed3: '373×286', bed4: '339×298', mainbath: '282×170', masterbath: '230×168', closet: '195×140', thirdbath: '170×85', balcony: '540×313' },
+        images: []
       },
       Golda_floor_12: {
-        key: 'Golda_floor_12', label: '5 · Golda_floor_12', num: 5, price: 4.50, color: '#d957a8',
+        key: 'Golda_floor_12', label: '5 · Golda_floor_12', num: 5, price: 4.50, color: '#d957a8', link: null,
         rooms: 5, beds: 4, interior: 103.7, balcony: 16.9,
         cat: { living: 35.4, kitchen: 11.5, bedrooms: 40.3, service: 16.5, hallway: 0 },
         bedList: [10.2, 10.3, 9.7, 10.1],
-        service: { mainBath: 4.8, masterBath: 3.9, closet: 2.7, thirdBath: 1.4 }
+        service: { mainBath: 4.8, masterBath: 3.9, closet: 2.7, thirdBath: 1.4 },
+        dims: { living: '808×438', kitchen: '398×290', hallway: null, master: '320×320', bed2: '355×290', bed3: '340×286', bed4: '339×298', mainbath: '282×170', masterbath: '230×168', closet: '195×140', thirdbath: '170×85', balcony: '540×313' },
+        images: []
       },
       katzir_22: {
-        key: 'katzir_22', label: '6 · katzir 22', num: 6, price: null, color: '#4dd0c8',
+        key: 'katzir_22', label: '6 · katzir 22', num: 6, price: null, color: '#4dd0c8', link: null,
         rooms: 5, beds: 4, interior: 108.3, balcony: 21.8,
         cat: { living: 29.7, kitchen: 10.7, bedrooms: 49.3, service: 18.6, hallway: 0 },
         bedList: [15.8, 9.7, 9.7, 14.3],
-        service: { mainBath: 5.1, masterBath: 6.1, closet: 2.6, thirdBath: 1.6 }
+        service: { mainBath: 5.1, masterBath: 6.1, closet: 2.6, thirdBath: 1.6 },
+        dims: { living: '540×550', kitchen: '258×415', hallway: null, master: '450×350', bed2: '351×275', bed3: '280×345', bed4: '380×375', mainbath: '185×275', masterbath: '210×290', closet: '175×150', thirdbath: '175×90', balcony: '326×670' },
+        images: []
       }
     };
     const DEFAULT_ORDER = ['hertzog', 'Liors_apartment', 'Katzir_10', 'Anesiim_42', 'Golda_floor_9', 'Golda_floor_12', 'katzir_22'];
 
     let DATA, VERDICTS, ORDER;
     let active = {};
-    const STORAGE_KEY = 'apt_data_v1';
+    const STORAGE_KEY = 'apt_data_v2';
 
     function saveStore() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
@@ -2090,9 +2111,12 @@
         const dtxt = (isCurr || !h) ? '' : `<div class="delta">vs baseline interior: <b class="${sign}">${delta > 0 ? '+' : ''}${r1(delta)} m²</b></div>`;
         const priceLine = a.price ? `<div class="price"><span>₪${a.price.toFixed(2)}M</span><span class="ppm">₪${Math.round(a.price * 1000 / a.interior).toLocaleString()}/m²</span></div>` : '';
         const gallery = buildGalleryStrip(k);
-        const deleteBtn = !isCurr ? `<button class="apt-action-btn apt-action-del" onclick="event.stopPropagation();confirmDeleteApt('${k}')">Delete</button>` : '';
+        const baselineBtn = !isCurr
+          ? `<button class="apt-action-btn apt-action-base" onclick="event.stopPropagation();setBaseline('${k}')" title="Set as baseline for comparisons">Set baseline</button>`
+          : '';
+        const linkIcon = a.link ? `<a class="hcard-link-icon" href="${a.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="View listing">🔗</a>` : '';
         html += `<div class="hcard ${active[k] ? '' : 'off'}" style="--c:${a.color}" data-key="${k}">
-      <div class="nm">${a.label} ${isCurr ? '<span class="currbadge">Current</span>' : ''}</div>
+      <div class="nm">${a.label} ${isCurr ? '<span class="currbadge">Baseline</span>' : ''} ${linkIcon}</div>
       <div class="big">${a.interior}<small> m² interior</small></div>
       <div class="rooms">${a.rooms} rooms · 1 living + ${a.beds} beds</div>
       ${priceLine}
@@ -2101,7 +2125,8 @@
       ${gallery}
       <div class="hcard-actions">
         <button class="apt-action-btn" onclick="event.stopPropagation();openAptModal('${k}')">Edit</button>
-        ${deleteBtn}
+        ${baselineBtn}
+        <button class="apt-action-btn apt-action-del" onclick="event.stopPropagation();confirmDeleteApt('${k}')">Delete</button>
       </div>
     </div>`;
       });
@@ -2120,7 +2145,7 @@
       ORDER.forEach(k => {
         const a = DATA[k];
         html += `<button class="chip ${active[k] ? 'on' : ''}" data-apt="${k}" style="--c:${a.color};--c-bg:${hexA(a.color, 0.14)}">
-      <span class="dot"></span>${a.label}${a.current ? '<span class="crown">current</span>' : ''}
+      <span class="dot"></span>${a.label}${a.current ? '<span class="crown">baseline</span>' : ''}
     </button>`;
       });
       document.getElementById('aptChips').innerHTML = html;
@@ -2385,7 +2410,7 @@
       html += `<div class="rt-head" style="grid-template-columns:${gridCols}"><div>Room</div>`;
       cols.forEach(k => {
         const a = DATA[k];
-        html += `<div><div class="rt-aptname"><span class="bar" style="background:${a.color}"></span><span class="nm">${a.label}</span>${a.current ? `<span class="curr-tag" style="--c:${a.color}">Current</span>` : ''}</div></div>`;
+        html += `<div><div class="rt-aptname"><span class="bar" style="background:${a.color}"></span><span class="nm">${a.label}</span>${a.current ? `<span class="curr-tag" style="--c:${a.color}">Baseline</span>` : ''}</div></div>`;
       });
       html += '</div>';
 
@@ -2495,7 +2520,7 @@
         const a = DATA[k];
         const won = (winCategories[k] || []);
         html += `<div class="tcard" style="--c:${a.color}">
-      <div class="tn">${a.label} ${a.current ? `<span class="curr-tag" style="--c:${a.color}">Current</span>` : ''}</div>
+      <div class="tn">${a.label} ${a.current ? `<span class="curr-tag" style="--c:${a.color}">Baseline</span>` : ''}</div>
       <div class="tbig">${winTally[k] || 0}</div>
       <div class="tlbl">categories won</div>`+
           (won.length ? `<div class="twon"><ul>${won.map(name => `<li>${name}</li>`).join('')}</ul></div>` : '') +
@@ -2804,6 +2829,7 @@
         document.getElementById('f-label').value = a.label || '';
         document.getElementById('f-color').value = a.color || '#e8623a';
         document.getElementById('f-price').value = a.price != null ? a.price : '';
+        document.getElementById('f-link').value = a.link || '';
         document.getElementById('f-rooms').value = a.rooms || '';
         document.getElementById('f-rooms').dataset.manual = 'yes';
         // Fixed beds
@@ -2862,6 +2888,7 @@
         price: nv('f-price'),
         color: document.getElementById('f-color').value,
         current: _editKey ? DATA[_editKey].current : false,
+        link: document.getElementById('f-link').value.trim() || null,
         rooms: parseInt(document.getElementById('f-rooms').value) || (1 + totalBedCount),
         beds: totalBedCount,
         balcony: dimAreaFromInputs('balcony') ?? 0,
@@ -2910,17 +2937,31 @@
     }
 
     function deleteApt(key) {
-      if (DATA[key] && DATA[key].current) return;
+      if (!DATA[key]) return;
+      const wasCurrent = DATA[key].current;
       delete DATA[key]; delete VERDICTS[key];
       const idx = ORDER.indexOf(key); if (idx > -1) ORDER.splice(idx, 1);
       delete active[key];
+      if (wasCurrent && ORDER.length > 0) {
+        DATA[ORDER[0]].current = true;
+        active[ORDER[0]] = true;
+      }
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
+    }
+
+    function setBaseline(key) {
+      if (!DATA[key]) return;
+      Object.keys(DATA).forEach(k => { DATA[k].current = false; });
+      DATA[key].current = true;
+      active[key] = true;
       saveStore(); buildHero(); buildAptChips(); redrawAll();
     }
 
     function confirmDeleteApt(key) {
       const a = DATA[key]; if (!a) return;
       document.getElementById('confirmTitle').textContent = `Delete "${a.label}"?`;
-      document.getElementById('confirmMsg').textContent = 'This will permanently remove this apartment. This cannot be undone.';
+      const baselineNote = a.current && ORDER.length > 1 ? ' The next apartment will become the baseline.' : '';
+      document.getElementById('confirmMsg').textContent = 'This will permanently remove this apartment. This cannot be undone.' + baselineNote;
       document.getElementById('confirmOkBtn').onclick = () => { deleteApt(key); closeConfirmModal(); };
       document.getElementById('confirmModal').classList.add('open');
     }
