@@ -1506,9 +1506,9 @@
   <header>
     <div class="container">
       <div class="eyebrow fade">Side-by-side dossier</div>
-      <h1 class="fade" style="animation-delay:.05s">Seven homes, <em>one decision.</em></h1>
-      <p class="lede fade" style="animation-delay:.1s">A room-by-room comparison anchored against your current home.
-        Hertzog stays pinned as the baseline — every other apartment is a candidate to weigh against it.</p>
+      <h1 class="fade" style="animation-delay:.05s"><span id="headerAptCount">—</span> homes, <em>one decision.</em></h1>
+      <p class="lede fade" style="animation-delay:.1s">A room-by-room comparison anchored against the baseline apartment.
+        Every other apartment is a candidate to weigh against it.</p>
       <div class="sync-bar">
         <button class="sync-btn" id="syncSettingsBtn" onclick="openGistModal()">⚙ Sync settings</button>
         <span class="sync-status" id="syncStatus"></span>
@@ -2303,6 +2303,8 @@
     function activeList() { return ORDER.filter(k => active[k]) }
 
     function buildHero() {
+      const countEl = document.getElementById('headerAptCount');
+      if (countEl) countEl.textContent = ORDER.length;
       const h = Object.values(DATA).find(a => a.current) || DATA[ORDER[0]];
       let html = '';
       ORDER.forEach(k => {
