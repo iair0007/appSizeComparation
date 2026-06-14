@@ -1683,7 +1683,7 @@
           <div class="form-section">
             <div class="form-section-title">Living areas <span class="dim-hint">width × height in cm</span></div>
             <div class="dim-field">
-              <div class="field-label">Living / Dining</div>
+              <div class="field-label">Living room</div>
               <div class="dim-row">
                 <input type="number" id="f-living-w" placeholder="W" min="0" step="1" class="dim-w">
                 <span class="dim-sep">×</span>
@@ -1693,6 +1693,27 @@
               </div>
             </div>
             <div class="dim-field">
+              <div class="field-label">Dining area <span style="color:var(--txt3);font-size:.68rem">(optional, if separate)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-dining-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-dining-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-dining-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Extra living space <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-extraliving-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-extraliving-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-extraliving-m2">—</span>
+              </div>
+            </div>
+            <div class="computed-row" style="margin-top:.6rem">Living zone total: <strong id="f-living-total">—</strong> m²</div>
+            <div class="dim-field" style="margin-top:.75rem">
               <div class="field-label">Kitchen</div>
               <div class="dim-row">
                 <input type="number" id="f-kitchen-w" placeholder="W" min="0" step="1" class="dim-w">
@@ -1788,6 +1809,19 @@
                 <span class="dim-unit">cm</span>
                 <span class="dim-result" id="f-thirdbath-m2">—</span>
               </div>
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--txt2);cursor:pointer;user-select:none;margin-top:.45rem">
+                <input type="checkbox" id="f-hasshower"> 3rd bathroom has a shower
+              </label>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Laundry room <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-laundry-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-laundry-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-laundry-m2">—</span>
+              </div>
             </div>
             <div class="computed-row" style="margin-top:.6rem">Service total: <strong id="f-svc-total">—</strong> m²</div>
           </div>
@@ -1830,9 +1864,6 @@
               <div id="f-cons-list"></div>
               <button type="button" class="btn-additem" onclick="addConRow()">+ Add con</button>
             </div>
-            <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--txt2);cursor:pointer;user-select:none">
-              <input type="checkbox" id="f-hasshower"> Third bathroom has shower
-            </label>
           </div>
         </form>
       </div>
@@ -2133,7 +2164,7 @@
     }
     function computeCalcFields(apt) {
       apt.cat.bedrooms = apt.bedList.reduce((s, v) => s + (v ?? 0), 0);
-      apt.cat.service = apt.service.mainBath + apt.service.masterBath + apt.service.closet + (apt.service.thirdBath ?? 0);
+      apt.cat.service = apt.service.mainBath + apt.service.masterBath + apt.service.closet + (apt.service.thirdBath ?? 0) + (apt.service.laundry ?? 0);
       apt.interior = r1(apt.cat.living + apt.cat.kitchen + apt.cat.bedrooms + apt.cat.service + apt.cat.hallway);
     }
 
@@ -2565,10 +2596,11 @@
     ];
 
     const ROW_TO_DIM_TABLE = {
-      'Living room': 'living', 'Kitchen': 'kitchen', 'Hallway': 'hallway',
+      'Living room': 'living', 'Dining area': 'dining', 'Extra living space': 'extraliving',
+      'Kitchen': 'kitchen', 'Hallway': 'hallway',
       'Master bedroom': 'master', 'Bedroom 2': 'bed2', 'Bedroom 3': 'bed3', 'Bedroom 4': 'bed4',
       'Main bathroom': 'mainbath', 'Master bathroom': 'masterbath', 'Master closet': 'closet',
-      'Third bathroom': 'thirdbath', 'Balcony': 'balcony'
+      'Third bathroom': 'thirdbath', 'Laundry room': 'laundry', 'Balcony': 'balcony'
     };
 
     function resolveCell(row, k) {
@@ -2580,7 +2612,10 @@
           if (dimStr) {
             const parts = dimStr.split('×').map(Number);
             const area = (parts.length === 2 && parts[0] && parts[1]) ? r1(parts[0] * parts[1] / 10000) : null;
-            if (area != null) return [area, dimStr];
+            if (area != null) {
+              const tag = (row.name === 'Third bathroom' && DATA[k].hasShower) ? 'Shower' : undefined;
+              return tag ? [area, dimStr, tag] : [area, dimStr];
+            }
           }
         }
       }
@@ -2919,7 +2954,7 @@
     function nv(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
 
     // Dim helpers: read W×H inputs, compute m², update display
-    const DIM_ROOMS = ['living','kitchen','hallway','bed1','bed2','mainbath','masterbath','closet','thirdbath','balcony'];
+    const DIM_ROOMS = ['living','dining','extraliving','kitchen','hallway','bed1','bed2','mainbath','masterbath','closet','thirdbath','laundry','balcony'];
     function dimAreaFromInputs(key) {
       const w = nv('f-' + key + '-w'), h = nv('f-' + key + '-h');
       return (w != null && h != null) ? r1(w * h / 10000) : null;
@@ -2965,7 +3000,9 @@
         const res = document.getElementById('f-xbed-' + idx + '-m2');
         if (res) { res.textContent = area != null ? area + ' m²' : '—'; res.classList.toggle('has-val', area != null); }
       });
-      const living  = dimAreaFromInputs('living')    ?? 0;
+      const livingZone = (dimAreaFromInputs('living')      ?? 0)
+                       + (dimAreaFromInputs('dining')      ?? 0)
+                       + (dimAreaFromInputs('extraliving') ?? 0);
       const kitchen = dimAreaFromInputs('kitchen')   ?? 0;
       const hallway = dimAreaFromInputs('hallway')   ?? 0;
       const fixedBeds = ['bed1','bed2'].map(k => dimAreaFromInputs(k) ?? 0);
@@ -2976,8 +3013,11 @@
       const svc = (dimAreaFromInputs('mainbath')   ?? 0)
                 + (dimAreaFromInputs('masterbath') ?? 0)
                 + (dimAreaFromInputs('closet')     ?? 0)
-                + (dimAreaFromInputs('thirdbath')  ?? 0);
-      const interior = r1(living + kitchen + hallway + bedTotal + svc);
+                + (dimAreaFromInputs('thirdbath')  ?? 0)
+                + (dimAreaFromInputs('laundry')    ?? 0);
+      const interior = r1(livingZone + kitchen + hallway + bedTotal + svc);
+      const livingTotalEl = document.getElementById('f-living-total');
+      if (livingTotalEl) livingTotalEl.textContent = r1(livingZone) + ' m²';
       const balcony = dimAreaFromInputs('balcony') ?? 0;
       // Auto-fill room count: 1 living + fixed beds (2) + extra beds
       const totalBedCount = 2 + extraBedAreas.length;
@@ -3040,18 +3080,22 @@
         const extraCount = Math.max(0, (a.bedList || []).length - 2);
         for (let i = 0; i < extraCount; i++) addExtraBed(aptDimStr(key, extraDimKeys[i]));
         // Other dims
-        setDimInputs('living',    aptDimStr(key, 'living'));
+        setDimInputs('living',      aptDimStr(key, 'living'));
+        setDimInputs('dining',      aptDimStr(key, 'dining'));
+        setDimInputs('extraliving', aptDimStr(key, 'extraliving'));
         setDimInputs('kitchen',   aptDimStr(key, 'kitchen'));
         setDimInputs('hallway',   aptDimStr(key, 'hallway'));
         setDimInputs('mainbath',  aptDimStr(key, 'mainbath'));
         setDimInputs('masterbath',aptDimStr(key, 'masterbath'));
         setDimInputs('closet',    aptDimStr(key, 'closet'));
         setDimInputs('thirdbath', aptDimStr(key, 'thirdbath'));
+        setDimInputs('laundry',   aptDimStr(key, 'laundry'));
         setDimInputs('balcony',   aptDimStr(key, 'balcony'));
+        // Third bathroom shower — prefer apt flag, fall back to verdict
+        document.getElementById('f-hasshower').checked = a.hasShower != null ? !!a.hasShower : !!v.hasShower;
         // Verdict
         document.getElementById('f-vtitle').value = v.title || '';
         document.getElementById('f-vdesc').value = v.desc || '';
-        document.getElementById('f-hasshower').checked = !!v.hasShower;
         renderProsList(v.pros || []);
         renderConsList(v.cons || []);
         // User-uploaded images (not the hardcoded IMAGES const)
@@ -3092,15 +3136,17 @@
         rooms: 1 + totalBedCount,
         beds: totalBedCount,
         balcony: dimAreaFromInputs('balcony') ?? 0,
-        cat: { living: ga('living'), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: ga('hallway') },
+        cat: { living: r1(ga('living') + ga('dining') + ga('extraliving')), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: ga('hallway') },
         bedList: beds,
-        service: { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath') },
+        service: { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath'), laundry: dimAreaFromInputs('laundry') },
+        hasShower: document.getElementById('f-hasshower').checked,
         interior: 0,
         dims: {
-          living: gd('living'), kitchen: gd('kitchen'), hallway: gd('hallway'),
+          living: gd('living'), dining: gd('dining'), extraliving: gd('extraliving'),
+          kitchen: gd('kitchen'), hallway: gd('hallway'),
           master: gd('bed1'), bed2: gd('bed2'),
           mainbath: gd('mainbath'), masterbath: gd('masterbath'), closet: gd('closet'),
-          thirdbath: gd('thirdbath'), balcony: gd('balcony'),
+          thirdbath: gd('thirdbath'), laundry: gd('laundry'), balcony: gd('balcony'),
           ...extraDims
         },
         images: _formImages
