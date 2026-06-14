@@ -1205,6 +1205,299 @@
         transform: none
       }
     }
+
+    /* ── CRUD Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.78);
+      z-index: 200; display: none;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(5px);
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--panel);
+      border: 1px solid var(--line2);
+      border-radius: 20px;
+      width: min(660px, 100%);
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.75);
+    }
+    .modal-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem 1rem;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    .modal-header h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.45rem; font-weight: 500;
+    }
+    .modal-close {
+      background: none; border: none; color: var(--txt3);
+      font-size: 1.1rem; cursor: pointer; padding: .4rem .5rem;
+      border-radius: 6px; transition: color .2s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--txt); }
+    .modal-body { overflow-y: auto; flex: 1; padding: 1.5rem 2rem; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: .75rem;
+      padding: 1rem 2rem 1.5rem;
+      border-top: 1px solid var(--line); flex-shrink: 0;
+    }
+    .form-section {
+      margin-bottom: 1.6rem; padding-bottom: 1.6rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .form-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .form-section-title {
+      font-size: .7rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--gold);
+      font-weight: 500; margin-bottom: .9rem;
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .field-group {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: .75rem; margin-bottom: .75rem;
+    }
+    .field-group.fg-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .field-label {
+      font-size: .7rem; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--txt2);
+      font-weight: 500; margin-bottom: .3rem;
+    }
+    .modal-body input[type="text"],
+    .modal-body input[type="number"],
+    .modal-body input[type="url"],
+    .modal-body textarea,
+    .modal-body select {
+      background: var(--panel2);
+      border: 1px solid var(--line2);
+      color: var(--txt);
+      border-radius: 8px; padding: .6rem .8rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: .93rem; width: 100%;
+      transition: border-color .2s;
+    }
+    .modal-body input[type="color"] {
+      background: var(--panel2);
+      border: 1px solid var(--line2);
+      border-radius: 8px; padding: .2rem .3rem;
+      width: 100%; height: 42px; cursor: pointer;
+    }
+    .modal-body input:focus,
+    .modal-body textarea:focus { outline: none; border-color: var(--gold); }
+    .modal-body textarea { resize: vertical; min-height: 76px; }
+    .computed-row {
+      font-size: .83rem; color: var(--txt2); margin-top: .35rem;
+    }
+    .computed-row strong { color: var(--txt); }
+    .computed-preview {
+      background: rgba(224,161,58,0.07);
+      border: 1px solid rgba(224,161,58,0.2);
+      border-radius: 10px; padding: .85rem 1.1rem;
+      margin: 1.1rem 0; font-size: .88rem;
+      display: flex; gap: 2rem; flex-wrap: wrap; color: var(--txt2);
+    }
+    .computed-preview strong { color: var(--gold); }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px;
+      padding: .65rem 1.4rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500; font-size: .93rem; transition: opacity .2s;
+    }
+    .btn-primary:hover { opacity: .85; }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--line2);
+      color: var(--txt2); border-radius: 8px;
+      padding: .65rem 1.4rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: .93rem; transition: all .2s;
+    }
+    .btn-ghost:hover { color: var(--txt); border-color: var(--txt3); }
+    .btn-danger {
+      background: var(--neg); color: #fff;
+      border: none; border-radius: 8px;
+      padding: .65rem 1.4rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500; font-size: .93rem; transition: opacity .2s;
+    }
+    .btn-danger:hover { opacity: .85; }
+    .btn-autogen {
+      background: rgba(224,161,58,0.1);
+      border: 1px solid rgba(224,161,58,0.28);
+      color: var(--gold); border-radius: 6px;
+      padding: .28rem .75rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: .76rem; font-weight: 500; transition: all .2s;
+    }
+    .btn-autogen:hover { background: rgba(224,161,58,0.2); }
+    .btn-additem {
+      background: none; border: 1px dashed var(--line2);
+      color: var(--txt3); border-radius: 6px;
+      padding: .38rem .8rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: .8rem; margin-top: .35rem; transition: all .2s;
+    }
+    .btn-additem:hover { border-color: var(--txt3); color: var(--txt2); }
+    .pro-con-row {
+      display: flex; align-items: center;
+      gap: .45rem; margin-bottom: .4rem;
+    }
+    .pro-con-row input { flex: 1; }
+    .pro-con-row .rm-btn {
+      background: none; border: none; color: var(--txt3);
+      cursor: pointer; padding: .3rem .45rem; font-size: .85rem;
+      border-radius: 4px; flex-shrink: 0; transition: color .2s; line-height: 1;
+    }
+    .pro-con-row .rm-btn:hover { color: var(--neg); }
+    .confirm-box {
+      background: var(--panel); border: 1px solid var(--line2);
+      border-radius: 16px; padding: 2rem;
+      width: min(400px, 100%);
+      box-shadow: 0 16px 60px rgba(0,0,0,0.75);
+    }
+    .confirm-box h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.25rem; margin-bottom: .55rem;
+    }
+    .confirm-box p {
+      color: var(--txt2); font-size: .9rem;
+      margin-bottom: 1.4rem; line-height: 1.55;
+    }
+    .confirm-actions { display: flex; gap: .75rem; justify-content: flex-end; }
+    /* hero card actions */
+    .hcard-actions {
+      display: flex; gap: .4rem;
+      margin-top: .65rem; padding-top: .55rem;
+      border-top: 1px solid var(--line);
+      opacity: 0; transition: opacity .2s;
+    }
+    .hcard:hover .hcard-actions { opacity: 1; }
+    .apt-action-btn {
+      flex: 1; background: var(--panel2);
+      border: 1px solid var(--line2); color: var(--txt2);
+      border-radius: 6px; padding: .32rem .5rem;
+      cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-size: .72rem; transition: all .2s;
+    }
+    .apt-action-btn:hover { color: var(--txt); }
+    .apt-action-del:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
+    .apt-action-base:hover { color: var(--gold); border-color: rgba(224,161,58,.4); }
+    .hcard-link-icon { font-size: .85rem; text-decoration: none; opacity: .7; vertical-align: middle; }
+    .hcard-link-icon:hover { opacity: 1; }
+    /* add apartment card */
+    .hcard-add {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; border-style: dashed;
+      min-height: 150px; gap: .4rem; transition: all .3s;
+    }
+    .hcard-add::before { display: none; }
+    .hcard-add:hover { border-color: var(--gold); background: rgba(224,161,58,0.05); transform: translateY(-3px); }
+    .add-icon { font-size: 1.8rem; color: var(--txt3); transition: color .2s; line-height: 1; }
+    .hcard-add:hover .add-icon { color: var(--gold); }
+    .add-label { font-size: .75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt3); transition: color .2s; }
+    .hcard-add:hover .add-label { color: var(--gold); }
+    /* dim inputs */
+    .dim-row {
+      display: flex; align-items: center; gap: .45rem; flex-wrap: nowrap;
+    }
+    .dim-row input.dim-w, .dim-row input.dim-h {
+      width: 88px !important; flex: none !important; padding: .55rem .65rem;
+    }
+    .dim-sep { color: var(--txt3); font-size: 1.1rem; font-weight: 300; }
+    .dim-unit { font-size: .76rem; color: var(--txt3); white-space: nowrap; flex-shrink: 0; }
+    .dim-result {
+      background: rgba(224,161,58,0.09); border: 1px solid rgba(224,161,58,0.18);
+      border-radius: 6px; padding: .32rem .65rem;
+      font-size: .84rem; font-weight: 500; color: var(--gold);
+      min-width: 52px; text-align: center; white-space: nowrap; flex-shrink: 0;
+    }
+    .dim-result.has-val { background: rgba(224,161,58,0.15); border-color: rgba(224,161,58,0.32); }
+    .dim-field { margin-bottom: .8rem; }
+    .dim-hint { font-size: .64rem; letter-spacing: 0.06em; color: var(--txt3); text-transform: none; font-weight: 400; }
+    /* safe room badge */
+    .mamad-badge {
+      font-size: .68rem; font-weight: 600; letter-spacing: 0.04em;
+      background: rgba(232,98,58,0.18); color: var(--accent);
+      border: 1px solid rgba(232,98,58,0.35);
+      border-radius: 4px; padding: 1px 6px; font-family: 'Outfit', sans-serif;
+    }
+    /* extra bed item */
+    .extra-bed-item .rm-btn {
+      background: var(--panel2); border: 1px solid var(--line2);
+      color: var(--txt3); border-radius: 6px; padding: .22rem .6rem;
+      cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-size: .72rem; transition: all .2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .extra-bed-item .rm-btn:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
+    /* image upload */
+    .img-upload-btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: none; border: 1px dashed var(--line2); color: var(--txt2);
+      border-radius: 8px; padding: .5rem 1rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif; font-size: .85rem;
+      transition: all .2s; margin-top: .4rem;
+    }
+    .img-upload-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .img-preview-item {
+      display: flex; gap: .75rem; align-items: flex-start;
+      padding: .75rem; background: var(--panel2);
+      border: 1px solid var(--line); border-radius: 10px;
+      margin-bottom: .5rem;
+    }
+    .img-preview-item img {
+      width: 80px; height: 60px; object-fit: cover;
+      border-radius: 6px; cursor: pointer; flex-shrink: 0;
+      border: 1px solid var(--line2);
+    }
+    .img-prev-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .4rem; }
+    .img-label-input { font-size: .85rem !important; padding: .4rem .6rem !important; }
+    .img-prev-controls { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .img-fp-label {
+      display: flex; align-items: center; gap: .35rem;
+      font-size: .82rem; color: var(--txt2); cursor: pointer; user-select: none;
+    }
+    .img-fp-label input[type="checkbox"] { accent-color: var(--gold); width: 14px; height: 14px; }
+
+    /* Gist sync */
+    .sync-bar {
+      display: flex; align-items: center; gap: .65rem;
+      margin-top: 1.1rem; flex-wrap: wrap;
+    }
+    .sync-btn {
+      background: none; border: 1px solid var(--line2); color: var(--txt2);
+      border-radius: 8px; padding: .38rem .85rem;
+      font-family: 'Outfit', sans-serif; font-size: .82rem;
+      cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .sync-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .sync-btn.connected { border-color: rgba(155,207,79,.35); color: var(--pos); }
+    .sync-status {
+      font-size: .78rem; color: var(--txt3); display: flex; align-items: center; gap: .35rem;
+    }
+    .sync-status.ok { color: var(--pos); }
+    .sync-status.err { color: var(--neg); }
+    .sync-status.busy { color: var(--gold); }
+    #gistModal .modal-box { max-width: 480px; }
+    #gistModal .gist-field { margin-bottom: .9rem; }
+    #gistModal .gist-field label { display: block; font-size: .8rem; color: var(--txt2); margin-bottom: .35rem; }
+    #gistModal .gist-field input {
+      width: 100%; background: var(--panel2); border: 1px solid var(--line2);
+      color: var(--txt); border-radius: 8px; padding: .6rem .8rem;
+      font-family: 'Outfit', sans-serif; font-size: .88rem;
+    }
+    #gistModal .gist-field input:focus { outline: none; border-color: var(--gold); }
+    #gistModal .gist-note { font-size: .78rem; color: var(--txt3); margin-top: .35rem; line-height: 1.5; }
+    #gistModal .gist-note a { color: var(--gold); }
+    #gistModal .gist-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.1rem; }
+    #gistModal .gist-disconnect { margin-right: auto; background: none; border: 1px solid rgba(217,122,90,.35); color: var(--neg); border-radius: 8px; padding: .45rem .9rem; font-family:'Outfit',sans-serif; font-size:.85rem; cursor:pointer; }
+    #gistModal .gist-disconnect:hover { border-color: var(--neg); }
   </style>
 </head>
 
@@ -1213,9 +1506,13 @@
   <header>
     <div class="container">
       <div class="eyebrow fade">Side-by-side dossier</div>
-      <h1 class="fade" style="animation-delay:.05s">Seven homes, <em>one decision.</em></h1>
-      <p class="lede fade" style="animation-delay:.1s">A room-by-room comparison anchored against your current home.
-        Hertzog stays pinned as the baseline — every other apartment is a candidate to weigh against it.</p>
+      <h1 class="fade" style="animation-delay:.05s"><span id="headerAptCount">—</span> homes, <em>one decision.</em></h1>
+      <p class="lede fade" style="animation-delay:.1s">A room-by-room comparison anchored against the baseline apartment.
+        Every other apartment is a candidate to weigh against it.</p>
+      <div class="sync-bar">
+        <button class="sync-btn" id="syncSettingsBtn" onclick="openGistModal()">⚙ Sync settings</button>
+        <span class="sync-status" id="syncStatus"></span>
+      </div>
       <div class="hero" id="heroCards"></div>
     </div>
   </header>
@@ -1239,9 +1536,6 @@
         <div class="controls">
           <span class="ctl-label">Apartments</span>
           <div id="aptChips" style="display:contents"></div>
-          <button id="addAptBtn" class="chip" style="--c:#2bbf93;--c-bg:rgba(43,191,147,.14)" onclick="openAptModal()">
-            <span class="dot"></span>＋ Add apartment
-          </button>
         </div>
       </div>
     </section>
@@ -1314,7 +1608,7 @@
         <label class="toggle" id="vsToggleWrap">
           <input type="checkbox" id="vsToggle" checked>
           <span class="track"></span>
-          <span>Show "vs baseline" deltas</span>
+          <span>Show "vs hertzog" deltas</span>
         </label>
       </div>
       <div class="rt-wrap">
@@ -1340,61 +1634,288 @@
     </footer>
   </div>
 
-  <style>
-    .aptmodal { position: fixed; inset: 0; z-index: 200; display: none; align-items: flex-start; justify-content: center; background: rgba(8, 8, 6, .72); backdrop-filter: blur(3px); overflow-y: auto; padding: 3rem 1rem; }
-    .aptmodal.open { display: flex; }
-    .am-box { background: #1b1a15; border: 1px solid rgba(255, 255, 255, .12); border-radius: 18px; width: 100%; max-width: 640px; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); }
-    .am-head { display: flex; align-items: center; justify-content: space-between; padding: 1.3rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, .08); }
-    .am-head h3 { margin: 0; font-size: 1.15rem; font-weight: 600; }
-    .am-x { background: none; border: none; color: #a59f90; font-size: 1.4rem; cursor: pointer; line-height: 1; }
-    .am-body { padding: 1.2rem 1.5rem; }
-    .am-meta { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 1rem; margin-bottom: 1rem; }
-    .am-field { display: flex; flex-direction: column; gap: .3rem; }
-    .am-field label, .am-rl { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #a59f90; }
-    .am-box input[type=text], .am-box input[type=number] { background: #11100c; border: 1px solid rgba(255, 255, 255, .12); border-radius: 8px; color: #ece7da; padding: .5rem .6rem; font-family: inherit; font-size: .9rem; width: 100%; }
-    .am-box input:focus { outline: none; border-color: #2bbf93; }
-    .am-meta-inline { display: flex; align-items: center; gap: .5rem; }
-    .am-group { margin: 1.1rem 0 .5rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: #e0a13a; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, .08); padding-bottom: .3rem; }
-    .am-row { display: grid; grid-template-columns: 1.4fr .8fr 1fr; gap: .6rem; align-items: end; margin-bottom: .55rem; }
-    .am-row.has-shower { grid-template-columns: 1.4fr .8fr 1fr auto; }
-    .am-rl { display: flex; align-items: center; gap: .35rem; padding-bottom: .15rem; }
-    .am-mamad { font-size: .6rem; color: #6f6a5e; }
-    .am-shower { display: flex; align-items: center; gap: .35rem; font-size: .72rem; color: #a59f90; text-transform: none; letter-spacing: 0; white-space: nowrap; padding-bottom: .45rem; cursor: pointer; }
-    .am-shower input { width: 16px; height: 16px; accent-color: #2bbf93; }
-    .am-foot { display: flex; align-items: center; gap: .7rem; padding: 1.1rem 1.5rem; border-top: 1px solid rgba(255, 255, 255, .08); }
-    .am-btn { border: none; border-radius: 9px; padding: .6rem 1.2rem; font-family: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
-    .am-save { background: #2bbf93; color: #11100c; }
-    .am-cancel { background: rgba(255, 255, 255, .08); color: #ece7da; }
-    .am-del { background: rgba(232, 98, 58, .15); color: #e8623a; margin-left: auto; }
-    .am-reset { background: none; border: none; color: #6f6a5e; font-size: .75rem; cursor: pointer; text-decoration: underline; }
-    .hcard-edit { position: absolute; top: .7rem; right: .7rem; z-index: 3; background: rgba(0, 0, 0, .35); border: 1px solid rgba(255, 255, 255, .14); color: #ece7da; width: 26px; height: 26px; border-radius: 7px; cursor: pointer; font-size: .8rem; line-height: 1; }
-    .hcard-edit:hover { background: rgba(43, 191, 147, .25); border-color: #2bbf93; }
-    @media (max-width:560px) { .am-row, .am-row.has-shower { grid-template-columns: 1fr 1fr; } .am-rl { grid-column: 1 / -1; } .am-shower { grid-column: 1 / -1; padding-bottom: 0; } }
-  </style>
-
-  <div id="aptModal" class="aptmodal" onclick="if(event.target===this)closeAptModal()">
-    <div class="am-box">
-      <div class="am-head">
-        <h3 id="aptModalTitle">Add apartment</h3>
-        <button class="am-x" onclick="closeAptModal()">✕</button>
+  <!-- Apartment modal -->
+  <div id="aptModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add apartment</h2>
+        <button class="modal-close" onclick="closeAptModal()" aria-label="Close">✕</button>
       </div>
-      <div class="am-body">
-        <div class="am-meta">
-          <div class="am-field"><label>Name</label><input type="text" id="am_name" placeholder="e.g. Rothschild 5"></div>
-          <div class="am-field"><label>Price (₪M, optional)</label><input type="number" step="0.01" min="0" id="am_price" placeholder="e.g. 4.65"></div>
-          <div class="am-field"><label>Bedrooms</label><input type="number" step="1" min="0" id="am_beds" placeholder="4"></div>
-          <div class="am-field"><label>Color</label><input type="color" id="am_color" value="#2bbf93" style="height:38px;padding:2px"></div>
-          <div class="am-field" style="grid-column:1 / -1">
-            <label class="am-meta-inline" style="cursor:pointer"><input type="checkbox" id="am_current" style="width:16px;height:16px;accent-color:#2bbf93"> Use as baseline (the home everything is compared against)</label>
+      <div class="modal-body">
+        <form id="aptForm" onsubmit="return false">
+          <!-- Identity -->
+          <div class="form-section">
+            <div class="form-section-title">Identity</div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Display name</div>
+              <input type="text" id="f-label" placeholder="e.g. 7 · Park Avenue">
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Listing URL <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <input type="url" id="f-link" placeholder="https://...">
+            </div>
+            <div class="field-group">
+              <div>
+                <div class="field-label">Color</div>
+                <input type="color" id="f-color" value="#e8623a">
+              </div>
+              <div>
+                <div class="field-label">Price (M ILS, optional)</div>
+                <input type="number" id="f-price" placeholder="4.50" step="0.01" min="0">
+              </div>
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Total rooms <span style="color:var(--txt3);font-size:.68rem">(auto-filled)</span></div>
+              <input type="number" id="f-rooms" placeholder="auto" min="1" max="30" step="1" style="opacity:.5" readonly>
+            </div>
+            <div>
+              <div class="field-label">Balcony</div>
+              <div class="dim-row">
+                <input type="number" id="f-balcony-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-balcony-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-balcony-m2">—</span>
+              </div>
+            </div>
+          </div>
+          <!-- Living areas -->
+          <div class="form-section">
+            <div class="form-section-title">Living areas <span class="dim-hint">width × height in cm</span></div>
+            <div class="dim-field">
+              <div class="field-label">Living room</div>
+              <div class="dim-row">
+                <input type="number" id="f-living-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-living-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-living-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Dining area <span style="color:var(--txt3);font-size:.68rem">(optional, if separate)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-dining-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-dining-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-dining-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Extra living space <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-extraliving-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-extraliving-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-extraliving-m2">—</span>
+              </div>
+            </div>
+            <div class="computed-row" style="margin-top:.6rem">Living zone total: <strong id="f-living-total">—</strong> m²</div>
+            <div class="dim-field" style="margin-top:.75rem">
+              <div class="field-label">Kitchen</div>
+              <div class="dim-row">
+                <input type="number" id="f-kitchen-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-kitchen-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-kitchen-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Hallway <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-hallway-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-hallway-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-hallway-m2">—</span>
+              </div>
+            </div>
+          </div>
+          <!-- Bedrooms -->
+          <div class="form-section">
+            <div class="form-section-title">Bedrooms <span class="dim-hint">width × height in cm</span></div>
+            <!-- Master bedroom (fixed) -->
+            <div class="dim-field">
+              <div class="field-label">Master bedroom</div>
+              <div class="dim-row">
+                <input type="number" id="f-bed1-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-bed1-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-bed1-m2">—</span>
+              </div>
+            </div>
+            <!-- Safe room / ממ"ד (fixed, always bed 2) -->
+            <div class="dim-field">
+              <div class="field-label" style="display:flex;align-items:center;gap:.5rem">
+                Safe room
+                <span class="mamad-badge">ממ"ד</span>
+              </div>
+              <div class="dim-row">
+                <input type="number" id="f-bed2-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-bed2-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-bed2-m2">—</span>
+              </div>
+            </div>
+            <!-- Dynamic extra bedrooms -->
+            <div id="f-extra-beds"></div>
+            <button type="button" class="btn-additem" onclick="addExtraBed()" style="margin-top:.4rem">+ Add bedroom</button>
+            <div class="computed-row" style="margin-top:.7rem">Bedrooms total: <strong id="f-bed-total">—</strong> m²</div>
+          </div>
+          <!-- Service -->
+          <div class="form-section">
+            <div class="form-section-title">Service areas <span class="dim-hint">width × height in cm</span></div>
+            <div class="dim-field">
+              <div class="field-label">Main bathroom</div>
+              <div class="dim-row">
+                <input type="number" id="f-mainbath-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-mainbath-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-mainbath-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Master bathroom</div>
+              <div class="dim-row">
+                <input type="number" id="f-masterbath-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-masterbath-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-masterbath-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Master closet</div>
+              <div class="dim-row">
+                <input type="number" id="f-closet-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-closet-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-closet-m2">—</span>
+              </div>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">3rd bathroom <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-thirdbath-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-thirdbath-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-thirdbath-m2">—</span>
+              </div>
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--txt2);cursor:pointer;user-select:none;margin-top:.45rem">
+                <input type="checkbox" id="f-hasshower"> 3rd bathroom has a shower
+              </label>
+            </div>
+            <div class="dim-field">
+              <div class="field-label">Laundry room <span style="color:var(--txt3);font-size:.68rem">(optional)</span></div>
+              <div class="dim-row">
+                <input type="number" id="f-laundry-w" placeholder="W" min="0" step="1" class="dim-w">
+                <span class="dim-sep">×</span>
+                <input type="number" id="f-laundry-h" placeholder="H" min="0" step="1" class="dim-h">
+                <span class="dim-unit">cm</span>
+                <span class="dim-result" id="f-laundry-m2">—</span>
+              </div>
+            </div>
+            <div class="computed-row" style="margin-top:.6rem">Service total: <strong id="f-svc-total">—</strong> m²</div>
+          </div>
+          <!-- Photos & Floor plan -->
+          <div class="form-section">
+            <div class="form-section-title">Photos &amp; Floor plan</div>
+            <div id="f-images-list"></div>
+            <label class="img-upload-btn">
+              <input type="file" id="f-img-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(this)">
+              + Add photos / floor plan
+            </label>
+            <div style="font-size:.73rem;color:var(--txt3);margin-top:.5rem">Images are resized and stored locally in your browser. Check "Floor plan" to mark a blueprint image.</div>
+          </div>
+          <!-- Live summary -->
+          <div class="computed-preview">
+            <div>Interior total: <strong id="f-int-preview">—</strong> m²</div>
+            <div>Interior + balcony: <strong id="f-tot-preview">—</strong> m²</div>
+          </div>
+          <!-- Verdict -->
+          <div class="form-section">
+            <div class="form-section-title">
+              Verdict
+              <button type="button" class="btn-autogen" onclick="applyAutoGenVerdict()">✦ Auto-generate</button>
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Title</div>
+              <input type="text" id="f-vtitle" placeholder="e.g. The entertainer">
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Description</div>
+              <textarea id="f-vdesc" rows="3" placeholder="A brief narrative about this apartment..."></textarea>
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Pros</div>
+              <div id="f-pros-list"></div>
+              <button type="button" class="btn-additem" onclick="addProRow()">+ Add pro</button>
+            </div>
+            <div style="margin-bottom:.75rem">
+              <div class="field-label">Cons</div>
+              <div id="f-cons-list"></div>
+              <button type="button" class="btn-additem" onclick="addConRow()">+ Add con</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeAptModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveAptForm()">Save apartment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <!-- Gist Sync Modal -->
+  <div id="gistModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:480px">
+      <div class="modal-header">
+        <span class="modal-title">GitHub Gist sync</span>
+        <button class="modal-close" onclick="closeGistModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:1.2rem 1.5rem 1.5rem">
+        <p style="font-size:.85rem;color:var(--txt2);margin-bottom:1.1rem;line-height:1.6">
+          Your apartment data will be saved to a private GitHub Gist so you can access it from any device.
+          Data syncs automatically every time you make a change.
+        </p>
+        <div class="gist-field">
+          <label>GitHub Personal Access Token <span style="color:var(--neg)">*</span></label>
+          <input type="password" id="g-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+          <div class="gist-note">
+            Create one at <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> →
+            select <b>Classic</b> → tick the <b>gist</b> scope only. The token is stored only in your browser.
           </div>
         </div>
-        <div id="amRooms"></div>
+        <div class="gist-field">
+          <label>Gist ID <span style="color:var(--txt3);font-weight:400">(leave empty to create a new one)</span></label>
+          <input type="text" id="g-gistid" placeholder="e.g. 4a3b2c1d0e..." autocomplete="off">
+          <div class="gist-note">You can find this in the Gist URL: gist.github.com/user/<b>GIST_ID</b></div>
+        </div>
+        <div class="gist-actions">
+          <button class="gist-disconnect" id="gistDisconnectBtn" onclick="disconnectGist()" style="display:none">Disconnect</button>
+          <button class="btn-ghost" onclick="closeGistModal()">Cancel</button>
+          <button class="btn-primary" onclick="saveGistSettings()">Connect &amp; sync</button>
+        </div>
       </div>
-      <div class="am-foot">
-        <button class="am-btn am-save" onclick="saveApt()">Save</button>
-        <button class="am-btn am-cancel" onclick="closeAptModal()">Cancel</button>
-        <button class="am-btn am-del" id="amDelete" onclick="deleteApt()" style="display:none">Delete</button>
-        <button class="am-reset" id="amReset" onclick="resetAll()" title="Restore the original seven apartments">Reset all</button>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal-overlay">
+    <div class="confirm-box">
+      <h3 id="confirmTitle"></h3>
+      <p id="confirmMsg"></p>
+      <div class="confirm-actions">
+        <button class="btn-ghost" onclick="closeConfirmModal()">Cancel</button>
+        <button class="btn-danger" id="confirmOkBtn">Delete</button>
       </div>
     </div>
   </div>
@@ -1428,202 +1949,225 @@
 
 
 
-    // ─── Single source of truth ────────────────────────────────────────────
-    // Every apartment is described room-by-room (area in m² + optional
-    // dimensions). All aggregates (DATA / TABLE / TOTALS) are DERIVED from this,
-    // so the add/edit form has one field per room and nothing can drift.
-    //
-    // Layout used both for the comparison table and for generating the form.
-    const ROOM_GROUPS = [
-      {
-        group: 'Living areas', rows: [
-          { field: 'livingRoom', name: 'Living room' },
-          { field: 'diningArea', name: 'Dining area' },
-          { field: 'extraLiving', name: 'Extra living space' },
-          { subtotal: true, name: 'Living zone total', sum: ['livingRoom', 'diningArea', 'extraLiving'] },
-          { field: 'kitchen', name: 'Kitchen' }
-        ]
-      },
-      {
-        group: 'Bedrooms', rows: [
-          { field: 'master', name: 'Master bedroom' },
-          { field: 'bed2', name: 'Bedroom 2', mamad: true },
-          { field: 'bed3', name: 'Bedroom 3' },
-          { field: 'bed4', name: 'Bedroom 4' }
-        ]
-      },
-      {
-        group: 'Service areas', rows: [
-          { field: 'mainBath', name: 'Main bathroom' },
-          { field: 'masterBath', name: 'Master bathroom' },
-          { field: 'masterCloset', name: 'Master closet' },
-          { field: 'thirdBath', name: 'Third bathroom', shower: true },
-          { field: 'laundry', name: 'Laundry room' },
-          { field: 'hallway', name: 'Hallway' }
-        ]
-      },
-      {
-        group: 'Outdoor', rows: [
-          { field: 'balcony', name: 'Balcony' }
-        ]
-      }
-    ];
-    const LIVING_FIELDS = ['livingRoom', 'diningArea', 'extraLiving'];
-    const BED_FIELDS = ['master', 'bed2', 'bed3', 'bed4'];
-    const SERVICE_FIELDS = ['mainBath', 'masterBath', 'masterCloset', 'thirdBath', 'laundry'];
-
-    // The authoritative model. rooms[field] = [areaOrNull, dimsString].
-    const APTS = {
+    const DEFAULT_DATA = {
       hertzog: {
-        key: 'hertzog', label: '0 · hertzog', num: 0, price: null, color: '#c9c2b0', current: true, beds: 3, shower: false,
-        rooms: {
-          livingRoom: [25.3, '633×400'], diningArea: [null, ''], extraLiving: [null, ''], kitchen: [9.3, '285×325'],
-          master: [7.3, '350×210'], bed2: [8.2, '298×275'], bed3: [9.0, '321×280'], bed4: [null, ''],
-          mainBath: [3.7, '170×220'], masterBath: [3.2, '190×170'], masterCloset: [2.5, '170×150'], thirdBath: [null, ''], laundry: [2.0, '90×220'], hallway: [null, ''],
-          balcony: [13.8, '300×460']
-        }
+        key: 'hertzog', label: '0 · hertzog', num: 0, price: null, color: '#c9c2b0', current: true, link: null,
+        rooms: 4, beds: 3, interior: 70.5, balcony: 13.8,
+        cat: { living: 25.3, kitchen: 9.3, bedrooms: 24.5, service: 11.4, hallway: 0 },
+        bedList: [7.3, 8.2, 9.0, null],
+        service: { mainBath: 3.7, masterBath: 3.2, closet: 2.5, thirdBath: null },
+        dims: { living: '633×400', kitchen: '285×325', hallway: null, master: '350×210', bed2: '298×275', bed3: '321×280', bed4: null, mainbath: '170×220', masterbath: '190×170', closet: '170×150', thirdbath: null, balcony: '300×460' },
+        images: []
       },
       Liors_apartment: {
-        key: 'Liors_apartment', label: '1 · Liors_apartment', num: 1, price: 4.70, color: '#9bcf4f', current: false, beds: 4, shower: false,
-        rooms: {
-          livingRoom: [38.0, '753×505'], diningArea: [null, 'in living'], extraLiving: [null, ''], kitchen: [6.8, '190×360'],
-          master: [8.3, '255×325'], bed2: [9.6, '320×300'], bed3: [10.0, '345×290'], bed4: [15.8, '450×350'],
-          mainBath: [4.5, '255×175'], masterBath: [4.3, '275×155'], masterCloset: [2.1, '190×110'], thirdBath: [null, ''], laundry: [2.3, '175×130'], hallway: [null, ''],
-          balcony: [29.0, '774×375']
-        }
+        key: 'Liors_apartment', label: '1 · Liors_apartment', num: 1, price: 4.70, color: '#9bcf4f', link: null,
+        rooms: 5, beds: 4, interior: 101.7, balcony: 29.0,
+        cat: { living: 38.0, kitchen: 6.8, bedrooms: 43.7, service: 13.2, hallway: 0 },
+        bedList: [8.3, 9.6, 10.0, 15.8],
+        service: { mainBath: 4.5, masterBath: 4.3, closet: 2.1, thirdBath: null },
+        dims: { living: '753×505', kitchen: '190×360', hallway: null, master: '255×325', bed2: '320×300', bed3: '345×290', bed4: '450×350', mainbath: '255×175', masterbath: '275×155', closet: '190×110', thirdbath: null, balcony: '774×375' },
+        images: []
       },
       Katzir_10: {
-        key: 'Katzir_10', label: '2 · Katzir_10', num: 2, price: 4.55, color: '#e0a13a', current: false, beds: 4, shower: false,
-        rooms: {
-          livingRoom: [12.0, '435×275'], diningArea: [9.1, '295×307'], extraLiving: [13.1, '435×300'], kitchen: [10.8, '298×361'],
-          master: [12.0, '320×375'], bed2: [11.0, '368×299'], bed3: [9.4, '325×290'], bed4: [11.0, '400×275'],
-          mainBath: [4.6, '246×185'], masterBath: [3.2, '204×159'], masterCloset: [2.9, '185×159'], thirdBath: [0.9, '109×80'], laundry: [2.1, '98×216'], hallway: [6.6, '229×290'],
-          balcony: [9.0, '270×334']
-        }
+        key: 'Katzir_10', label: '2 · Katzir_10', num: 2, price: 4.55, color: '#e0a13a', link: null,
+        rooms: 5, beds: 4, interior: 108.7, balcony: 9.0,
+        cat: { living: 34.2, kitchen: 10.8, bedrooms: 43.4, service: 13.7, hallway: 6.6 },
+        bedList: [12.0, 11.0, 9.4, 11.0],
+        service: { mainBath: 4.6, masterBath: 3.2, closet: 2.9, thirdBath: 0.9 },
+        dims: { living: '435×275', kitchen: '298×361', hallway: '229×290', master: '320×375', bed2: '368×299', bed3: '325×290', bed4: '400×275', mainbath: '246×185', masterbath: '204×159', closet: '185×159', thirdbath: '109×80', balcony: '270×334' },
+        images: []
       },
       Anesiim_42: {
-        key: 'Anesiim_42', label: '3 · Anesiim_42', num: 3, price: 4.80, color: '#5aa9e6', current: false, beds: 4, shower: true,
-        rooms: {
-          livingRoom: [34.4, '800×430'], diningArea: [null, 'in living'], extraLiving: [null, ''], kitchen: [11.3, '405×280'],
-          master: [12.2, '380×320'], bed2: [11.1, '390×285'], bed3: [10.9, '330×330'], bed4: [10.1, '360×280'],
-          mainBath: [4.2, '250×170'], masterBath: [2.9, '170×170'], masterCloset: [3.4, '200×170'], thirdBath: [1.9, '190×100'], laundry: [2.2, '165×135'], hallway: [null, ''],
-          balcony: [15.2, '400×380']
-        }
+        key: 'Anesiim_42', label: '3 · Anesiim_42', num: 3, price: 4.80, color: '#5aa9e6', link: null,
+        rooms: 5, beds: 4, interior: 104.6, balcony: 15.2,
+        cat: { living: 34.4, kitchen: 11.3, bedrooms: 44.3, service: 14.6, hallway: 0 },
+        bedList: [12.2, 11.1, 10.9, 10.1],
+        service: { mainBath: 4.2, masterBath: 2.9, closet: 3.4, thirdBath: 1.9 },
+        dims: { living: '800×430', kitchen: '405×280', hallway: null, master: '380×320', bed2: '390×285', bed3: '330×330', bed4: '360×280', mainbath: '250×170', masterbath: '170×170', closet: '200×170', thirdbath: '190×100', balcony: '400×380' },
+        images: []
       },
       Golda_floor_9: {
-        key: 'Golda_floor_9', label: '4 · Golda_floor_9', num: 4, price: 4.50, color: '#9b7fe0', current: false, beds: 4, shower: true,
-        rooms: {
-          livingRoom: [35.4, '808×438'], diningArea: [null, 'in living'], extraLiving: [null, ''], kitchen: [11.5, '398×290'],
-          master: [10.2, '320×320'], bed2: [10.3, '355×290'], bed3: [10.7, '373×286'], bed4: [10.1, '339×298'],
-          mainBath: [4.8, '282×170'], masterBath: [3.9, '230×168'], masterCloset: [2.7, '195×140'], thirdBath: [1.4, '170×85'], laundry: [3.7, '282×130'], hallway: [null, ''],
-          balcony: [16.9, '540×313']
-        }
+        key: 'Golda_floor_9', label: '4 · Golda_floor_9', num: 4, price: 4.50, color: '#9b7fe0', link: null,
+        rooms: 5, beds: 4, interior: 104.7, balcony: 16.9,
+        cat: { living: 35.4, kitchen: 11.5, bedrooms: 41.3, service: 16.5, hallway: 0 },
+        bedList: [10.2, 10.3, 10.7, 10.1],
+        service: { mainBath: 4.8, masterBath: 3.9, closet: 2.7, thirdBath: 1.4 },
+        dims: { living: '808×438', kitchen: '398×290', hallway: null, master: '320×320', bed2: '355×290', bed3: '373×286', bed4: '339×298', mainbath: '282×170', masterbath: '230×168', closet: '195×140', thirdbath: '170×85', balcony: '540×313' },
+        images: []
       },
       Golda_floor_12: {
-        key: 'Golda_floor_12', label: '5 · Golda_floor_12', num: 5, price: 4.50, color: '#d957a8', current: false, beds: 4, shower: true,
-        rooms: {
-          livingRoom: [35.4, '808×438'], diningArea: [null, 'in living'], extraLiving: [null, ''], kitchen: [11.5, '398×290'],
-          master: [10.2, '320×320'], bed2: [10.3, '355×290'], bed3: [9.7, '340×286'], bed4: [10.1, '339×298'],
-          mainBath: [4.8, '282×170'], masterBath: [3.9, '230×168'], masterCloset: [2.7, '195×140'], thirdBath: [1.4, '170×85'], laundry: [3.7, '282×130'], hallway: [null, ''],
-          balcony: [16.9, '540×313']
-        }
+        key: 'Golda_floor_12', label: '5 · Golda_floor_12', num: 5, price: 4.50, color: '#d957a8', link: null,
+        rooms: 5, beds: 4, interior: 103.7, balcony: 16.9,
+        cat: { living: 35.4, kitchen: 11.5, bedrooms: 40.3, service: 16.5, hallway: 0 },
+        bedList: [10.2, 10.3, 9.7, 10.1],
+        service: { mainBath: 4.8, masterBath: 3.9, closet: 2.7, thirdBath: 1.4 },
+        dims: { living: '808×438', kitchen: '398×290', hallway: null, master: '320×320', bed2: '355×290', bed3: '340×286', bed4: '339×298', mainbath: '282×170', masterbath: '230×168', closet: '195×140', thirdbath: '170×85', balcony: '540×313' },
+        images: []
       },
       katzir_22: {
-        key: 'katzir_22', label: '6 · katzir 22', num: 6, price: null, color: '#4dd0c8', current: false, beds: 4, shower: true,
-        rooms: {
-          livingRoom: [29.7, '540×550'], diningArea: [null, 'in living'], extraLiving: [null, ''], kitchen: [10.7, '258×415'],
-          master: [15.8, '450×350'], bed2: [9.7, '351×275'], bed3: [9.7, '280×345'], bed4: [14.3, '380×375'],
-          mainBath: [5.1, '185×275'], masterBath: [6.1, '210×290'], masterCloset: [2.6, '175×150'], thirdBath: [1.6, '175×90'], laundry: [3.2, '230×140'], hallway: [null, ''],
-          balcony: [21.8, '326×670']
-        }
+        key: 'katzir_22', label: '6 · katzir 22', num: 6, price: null, color: '#4dd0c8', link: null,
+        rooms: 5, beds: 4, interior: 108.3, balcony: 21.8,
+        cat: { living: 29.7, kitchen: 10.7, bedrooms: 49.3, service: 18.6, hallway: 0 },
+        bedList: [15.8, 9.7, 9.7, 14.3],
+        service: { mainBath: 5.1, masterBath: 6.1, closet: 2.6, thirdBath: 1.6 },
+        dims: { living: '540×550', kitchen: '258×415', hallway: null, master: '450×350', bed2: '351×275', bed3: '280×345', bed4: '380×375', mainbath: '185×275', masterbath: '210×290', closet: '175×150', thirdbath: '175×90', balcony: '326×670' },
+        images: []
       }
     };
-    const ORDER = ['hertzog', 'Liors_apartment', 'Katzir_10', 'Anesiim_42', 'Golda_floor_9', 'Golda_floor_12', 'katzir_22'];
+    const DEFAULT_ORDER = ['hertzog', 'Liors_apartment', 'Katzir_10', 'Anesiim_42', 'Golda_floor_9', 'Golda_floor_12', 'katzir_22'];
 
-    // Derived views — recomputed by refreshModel() whenever the model changes.
-    let DATA = {}, TABLE = [], TOTALS = [], BASELINE = 'hertzog';
+    let DATA, VERDICTS, ORDER;
+    let active = {};
+    const STORAGE_KEY = 'apt_data_v2';
 
-    const roundDerive = (n) => Math.round(n * 10) / 10;
-    const cellArea = (R, f) => (R[f] && R[f][0] != null ? R[f][0] : 0);
+    const GIST_KEY = 'apt_gist_cfg'; // { token, gistId }
+    const GIST_FILE = 'apt-comparison-data.json';
 
-    function deriveDATA() {
-      const D = {};
-      ORDER.forEach(k => {
-        const a = APTS[k], R = a.rooms;
-        const living = LIVING_FIELDS.reduce((s, f) => s + cellArea(R, f), 0);
-        const bedrooms = BED_FIELDS.reduce((s, f) => s + cellArea(R, f), 0);
-        const service = SERVICE_FIELDS.reduce((s, f) => s + cellArea(R, f), 0);
-        const kitchen = cellArea(R, 'kitchen');
-        const hallway = cellArea(R, 'hallway');
-        const interior = roundDerive(living + kitchen + bedrooms + service + hallway);
-        D[k] = {
-          key: k, label: a.label, num: a.num, price: a.price, color: a.color, current: !!a.current,
-          rooms: a.beds + 1, beds: a.beds, interior, balcony: cellArea(R, 'balcony'),
-          cat: { living: roundDerive(living), kitchen: roundDerive(kitchen), bedrooms: roundDerive(bedrooms), service: roundDerive(service), hallway: roundDerive(hallway) },
-          bedList: BED_FIELDS.map(f => (R[f] && R[f][0] != null ? R[f][0] : null)),
-          service: { mainBath: cellArea(R, 'mainBath'), masterBath: cellArea(R, 'masterBath'), closet: cellArea(R, 'masterCloset'), thirdBath: (R.thirdBath && R.thirdBath[0] != null ? R.thirdBath[0] : null) },
-          shower: !!a.shower
-        };
+    function getGistCfg() {
+      try { return JSON.parse(localStorage.getItem(GIST_KEY)) || null; } catch { return null; }
+    }
+    function setGistCfg(cfg) { localStorage.setItem(GIST_KEY, JSON.stringify(cfg)); }
+    function clearGistCfg() { localStorage.removeItem(GIST_KEY); }
+
+    function setSyncStatus(msg, cls = '') {
+      const el = document.getElementById('syncStatus');
+      if (!el) return;
+      el.textContent = msg; el.className = 'sync-status' + (cls ? ' ' + cls : '');
+      const btn = document.getElementById('syncSettingsBtn');
+      if (btn) btn.className = 'sync-btn' + (cls === 'ok' ? ' connected' : '');
+    }
+
+    async function gistFetch(token, gistId, payload = null) {
+      const url = `https://api.github.com/gists/${gistId}`;
+      const opts = {
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github+json' }
+      };
+      if (payload) { opts.method = 'PATCH'; opts.body = JSON.stringify(payload); }
+      else opts.method = 'GET';
+      const res = await fetch(url, opts);
+      if (!res.ok) throw new Error(`GitHub ${res.status}: ${res.statusText}`);
+      return res.json();
+    }
+
+    async function gistCreate(token, content) {
+      const res = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github+json' },
+        body: JSON.stringify({ description: 'Apartment comparison data', public: false, files: { [GIST_FILE]: { content } } })
       });
-      return D;
+      if (!res.ok) throw new Error(`GitHub ${res.status}: ${res.statusText}`);
+      return res.json();
     }
 
-    function deriveTABLE() {
-      return ROOM_GROUPS.map(g => ({
-        group: g.group,
-        rows: g.rows.map(r => {
-          if (r.subtotal) {
-            const row = { name: r.name, subtotal: true };
-            ORDER.forEach(k => {
-              const R = APTS[k].rooms;
-              row[k] = [roundDerive(r.sum.reduce((s, f) => s + cellArea(R, f), 0)), ''];
-            });
-            return row;
-          }
-          const row = { name: r.name };
-          if (r.mamad) row.mamad = true;
-          ORDER.forEach(k => {
-            const a = APTS[k], cell = a.rooms[r.field] || [null, ''];
-            const arr = [cell[0] != null ? cell[0] : null, cell[1] || ''];
-            if (r.shower && a.shower && cell[0] != null) arr.push('Shower');
-            row[k] = arr;
-          });
-          return row;
-        })
-      }));
-    }
-
-    function deriveTOTALS() {
-      const t = [{ name: 'Interior total', first: true }, { name: 'Interior + balcony' }];
-      ORDER.forEach(k => { t[0][k] = DATA[k].interior; t[1][k] = roundDerive(DATA[k].interior + DATA[k].balcony); });
-      return t;
-    }
-
-    function refreshModel() {
-      DATA = deriveDATA();
-      TABLE = deriveTABLE();
-      TOTALS = deriveTOTALS();
-      const cur = ORDER.find(k => APTS[k].current);
-      BASELINE = cur || ORDER[0];
-    }
-
-    // ─── Persistence ───────────────────────────────────────────────────────
-    const LS_KEY = 'aptCompare.v1';
-    function persistState() {
-      try { localStorage.setItem(LS_KEY, JSON.stringify({ order: ORDER, apts: APTS })); } catch (e) { }
-    }
-    function loadState() {
+    async function pushToGist() {
+      const cfg = getGistCfg(); if (!cfg) return;
+      const content = JSON.stringify({ DATA, VERDICTS, ORDER });
       try {
-        const s = JSON.parse(localStorage.getItem(LS_KEY));
-        if (s && s.apts && Array.isArray(s.order) && s.order.length) {
-          Object.keys(APTS).forEach(k => delete APTS[k]);
-          s.order.forEach(k => { if (s.apts[k]) APTS[k] = s.apts[k]; });
-          ORDER.length = 0;
-          s.order.forEach(k => { if (APTS[k]) ORDER.push(k); });
-        }
-      } catch (e) { }
+        setSyncStatus('Syncing…', 'busy');
+        await gistFetch(cfg.token, cfg.gistId, { files: { [GIST_FILE]: { content } } });
+        setSyncStatus('✓ Synced', 'ok');
+      } catch (e) {
+        setSyncStatus('Sync error — check settings', 'err');
+        console.error('Gist push error', e);
+      }
     }
-    loadState();
+
+    async function pullFromGist(token, gistId) {
+      const data = await gistFetch(token, gistId);
+      const file = data.files[GIST_FILE];
+      if (!file) throw new Error('File not found in Gist');
+      return JSON.parse(file.content);
+    }
+
+    function saveStore() {
+      const payload = { DATA, VERDICTS, ORDER };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      const cfg = getGistCfg();
+      if (cfg) pushToGist();
+    }
+
+    function loadStore() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try { const s = JSON.parse(raw); DATA = s.DATA; VERDICTS = s.VERDICTS; ORDER = s.ORDER; }
+        catch(e) { DATA = JSON.parse(JSON.stringify(DEFAULT_DATA)); VERDICTS = JSON.parse(JSON.stringify(DEFAULT_VERDICTS)); ORDER = [...DEFAULT_ORDER]; saveStore(); }
+      } else {
+        DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        VERDICTS = JSON.parse(JSON.stringify(DEFAULT_VERDICTS));
+        ORDER = [...DEFAULT_ORDER];
+        saveStore();
+      }
+      active = {};
+      ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+      // If Gist configured, pull latest in background and refresh UI
+      const cfg = getGistCfg();
+      if (cfg) {
+        setSyncStatus('Syncing…', 'busy');
+        pullFromGist(cfg.token, cfg.gistId).then(s => {
+          DATA = s.DATA; VERDICTS = s.VERDICTS; ORDER = s.ORDER;
+          active = {}; ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
+          buildHero(); buildAptChips(); redrawAll();
+          setSyncStatus('✓ Synced', 'ok');
+        }).catch(e => {
+          setSyncStatus('Sync error — check settings', 'err');
+          console.error('Gist pull error', e);
+        });
+      }
+    }
+
+    function openGistModal() {
+      const cfg = getGistCfg();
+      document.getElementById('g-token').value = cfg ? cfg.token : '';
+      document.getElementById('g-gistid').value = cfg ? cfg.gistId : '';
+      document.getElementById('gistDisconnectBtn').style.display = cfg ? '' : 'none';
+      document.getElementById('gistModal').classList.add('open');
+    }
+    function closeGistModal() { document.getElementById('gistModal').classList.remove('open'); }
+
+    async function saveGistSettings() {
+      const token = document.getElementById('g-token').value.trim();
+      const gistId = document.getElementById('g-gistid').value.trim();
+      if (!token) { alert('Please enter your GitHub token.'); return; }
+      setSyncStatus('Connecting…', 'busy');
+      try {
+        let finalGistId = gistId;
+        if (!finalGistId) {
+          // Create a new Gist seeded with current data
+          const content = JSON.stringify({ DATA, VERDICTS, ORDER });
+          const created = await gistCreate(token, content);
+          finalGistId = created.id;
+          document.getElementById('g-gistid').value = finalGistId;
+        } else {
+          // Validate + pull latest from existing Gist
+          const remote = await pullFromGist(token, finalGistId);
+          DATA = remote.DATA; VERDICTS = remote.VERDICTS; ORDER = remote.ORDER;
+          active = {}; ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
+          buildHero(); buildAptChips(); redrawAll();
+        }
+        setGistCfg({ token, gistId: finalGistId });
+        document.getElementById('gistDisconnectBtn').style.display = '';
+        setSyncStatus('✓ Connected · Gist ID: ' + finalGistId.slice(0, 8) + '…', 'ok');
+        closeGistModal();
+      } catch (e) {
+        setSyncStatus('Connection failed — check token/ID', 'err');
+        alert('Connection failed: ' + e.message);
+      }
+    }
+
+    function disconnectGist() {
+      clearGistCfg();
+      setSyncStatus('');
+      document.getElementById('syncSettingsBtn').className = 'sync-btn';
+      closeGistModal();
+    }
+    function computeCalcFields(apt) {
+      apt.cat.bedrooms = apt.bedList.reduce((s, v) => s + (v ?? 0), 0);
+      apt.cat.service = apt.service.mainBath + apt.service.masterBath + apt.service.closet + (apt.service.thirdBath ?? 0) + (apt.service.laundry ?? 0);
+      apt.interior = r1(apt.cat.living + apt.cat.kitchen + apt.cat.bedrooms + apt.cat.service + apt.cat.hallway);
+    }
+
     const r1 = (n) => Math.round(n * 10) / 10;
 
 
@@ -1634,8 +2178,9 @@
     const zoomLevels = [1, 1.5, 2, 2.5, 3];
 
     function openGallery(aptKey, startIdx = 0) {
-      if (!IMAGES[aptKey]) return;
-      lightboxState = { aptKey, images: IMAGES[aptKey], currentIdx: startIdx, zoomLevel: 1 };
+      const imgs = getAptImages(aptKey);
+      if (!imgs.length) return;
+      lightboxState = { aptKey, images: imgs, currentIdx: startIdx, zoomLevel: 1 };
       showLightboxImage();
       document.getElementById('lightbox').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -1749,9 +2294,17 @@
       };
     }
 
+    function getAptImages(aptKey) {
+      const stored = (DATA[aptKey] && DATA[aptKey].images) ? DATA[aptKey].images : [];
+      const builtin = IMAGES[aptKey] || [];
+      // Stored images override/supplement built-in ones (stored first if any)
+      return stored.length > 0 ? stored : builtin;
+    }
+
     function buildGalleryStrip(aptKey) {
-      if (!IMAGES[aptKey]) return '';
-      return '<div class="gallery-strip">' + IMAGES[aptKey].map((img, i) =>
+      const imgs = getAptImages(aptKey);
+      if (!imgs.length) return '';
+      return '<div class="gallery-strip">' + imgs.map((img, i) =>
         `<div class="gallery-thumb" onclick="openGallery('${aptKey}',${i})" title="${img.label}">
       <img src="${img.data}" alt="${img.label}">
     </div>`).join('') + '</div>';
@@ -1767,7 +2320,6 @@
 
     function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})` }
 
-    let active = {}; ORDER.forEach(k => active[k] = true);
     let metricsOn = { interior: true, balcony: false, livingDining: false, kitchen: false, bedAvg: false };
     let showVs = true;
 
@@ -1782,29 +2334,45 @@
     function activeList() { return ORDER.filter(k => active[k]) }
 
     function buildHero() {
-      const h = DATA[BASELINE];
+      const countEl = document.getElementById('headerAptCount');
+      if (countEl) countEl.textContent = ORDER.length;
+      const h = Object.values(DATA).find(a => a.current) || DATA[ORDER[0]];
       let html = '';
       ORDER.forEach(k => {
-        const a = DATA[k]; const isCurr = a.current;
-        const delta = !isCurr ? (a.interior - h.interior) : 0;
+        const a = DATA[k]; if (!a) return;
+        const isCurr = a.current;
+        const delta = (!isCurr && h) ? (a.interior - h.interior) : 0;
         const sign = delta > 0 ? 'pos' : (delta < 0 ? 'neg' : 'eq');
-        const dtxt = isCurr ? '' : `<div class="delta">vs baseline interior: <b class="${sign}">${delta > 0 ? '+' : ''}${r1(delta)} m²</b></div>`;
+        const dtxt = (isCurr || !h) ? '' : `<div class="delta">vs baseline interior: <b class="${sign}">${delta > 0 ? '+' : ''}${r1(delta)} m²</b></div>`;
         const priceLine = a.price ? `<div class="price"><span>₪${a.price.toFixed(2)}M</span><span class="ppm">₪${Math.round(a.price * 1000 / a.interior).toLocaleString()}/m²</span></div>` : '';
         const gallery = buildGalleryStrip(k);
+        const baselineBtn = !isCurr
+          ? `<button class="apt-action-btn apt-action-base" onclick="event.stopPropagation();setBaseline('${k}')" title="Set as baseline for comparisons">Set baseline</button>`
+          : '';
+        const linkIcon = a.link ? `<a class="hcard-link-icon" href="${a.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="View listing">🔗</a>` : '';
         html += `<div class="hcard ${active[k] ? '' : 'off'}" style="--c:${a.color}" data-key="${k}">
-      <button class="hcard-edit" data-edit="${k}" title="Edit apartment">✎</button>
-      <div class="nm">${a.label} ${isCurr ? '<span class="currbadge">Current</span>' : ''}</div>
+      <div class="nm">${a.label} ${isCurr ? '<span class="currbadge">Baseline</span>' : ''} ${linkIcon}</div>
       <div class="big">${a.interior}<small> m² interior</small></div>
       <div class="rooms">${a.rooms} rooms · 1 living + ${a.beds} beds</div>
       ${priceLine}
       <div class="tot"><span>+ balcony ${a.balcony}</span><b>${r1(a.interior + a.balcony)} m² total</b></div>
       ${dtxt}
       ${gallery}
+      <div class="hcard-actions">
+        <button class="apt-action-btn" onclick="event.stopPropagation();openAptModal('${k}')">Edit</button>
+        ${baselineBtn}
+        <button class="apt-action-btn apt-action-del" onclick="event.stopPropagation();confirmDeleteApt('${k}')">Delete</button>
+      </div>
     </div>`;
       });
+      html += `<div class="hcard hcard-add" onclick="openAptModal()">
+      <div class="add-icon">+</div>
+      <div class="add-label">Add apartment</div>
+    </div>`;
       document.getElementById('heroCards').innerHTML = html;
-      document.querySelectorAll('.hcard').forEach(c => c.addEventListener('click', e => { if (!e.target.closest('.gallery-thumb') && !e.target.closest('.hcard-edit')) toggleApt(c.dataset.key) }));
-      document.querySelectorAll('.hcard-edit').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openAptModal(b.dataset.edit); }));
+      document.querySelectorAll('.hcard:not(.hcard-add)').forEach(c => c.addEventListener('click', e => {
+        if (!e.target.closest('.gallery-thumb') && !e.target.closest('.hcard-actions')) toggleApt(c.dataset.key);
+      }));
     }
 
     function buildAptChips() {
@@ -1812,7 +2380,7 @@
       ORDER.forEach(k => {
         const a = DATA[k];
         html += `<button class="chip ${active[k] ? 'on' : ''}" data-apt="${k}" style="--c:${a.color};--c-bg:${hexA(a.color, 0.14)}">
-      <span class="dot"></span>${a.label}${a.current ? '<span class="crown">current</span>' : ''}
+      <span class="dot"></span>${a.label}${a.current ? '<span class="crown">baseline</span>' : ''}
     </button>`;
       });
       document.getElementById('aptChips').innerHTML = html;
@@ -1918,12 +2486,12 @@
 
     function buildStats() {
       const list = activeList().map(k => DATA[k]);
-      const h = DATA[BASELINE]; const incH = active[BASELINE];
+      const h = Object.values(DATA).find(a => a.current) || DATA[ORDER[0]]; const incH = h && active[h.key];
       function avgBed(a) { const b = a.bedList.filter(x => x != null); return b.reduce((s, x) => s + x, 0) / b.length }
       function deltaTxt(val, baseline, unit = ' m²') {
         if (!incH) return '';
-        const d = r1(val - baseline); if (d === 0) return ' · same as baseline';
-        return ` · ${d > 0 ? '+' : ''}${d}${unit} vs baseline`;
+        const d = r1(val - baseline); if (d === 0) return ' · same as hertzog';
+        return ` · ${d > 0 ? '+' : ''}${d}${unit} vs hertzog`;
       }
       let cards = [];
       const bigInt = list.reduce((a, b) => b.interior > a.interior ? b : a);
@@ -1988,10 +2556,77 @@
     </div>`).join('');
     }
 
+    const TABLE = [
+      {
+        group: 'Living areas', rows: [
+          { name: 'Living room', hertzog: [25.3, '633×400'], Liors_apartment: [38.0, '753×505'], Katzir_10: [12.0, '435×275'], Golda_floor_9: [35.4, '808×438'], Golda_floor_12: [35.4, '808×438'], Anesiim_42: [34.4, '800×430'], katzir_22: [29.7, '540×550'] },
+          { name: 'Dining area', hertzog: [null, ''], Liors_apartment: [null, 'in living'], Katzir_10: [9.1, '295×307'], Golda_floor_9: [null, 'in living'], Golda_floor_12: [null, 'in living'], Anesiim_42: [null, 'in living'], katzir_22: [null, 'in living'] },
+          { name: 'Extra living space', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [13.1, '435×300'], Golda_floor_9: [null, ''], Golda_floor_12: [null, ''], Anesiim_42: [null, ''], katzir_22: [null, ''] },
+          { name: 'Living zone total', subtotal: true, hertzog: [25.3, ''], Liors_apartment: [38.0, ''], Katzir_10: [34.2, ''], Golda_floor_9: [35.4, ''], Golda_floor_12: [35.4, ''], Anesiim_42: [34.4, ''], katzir_22: [29.7, ''] },
+          { name: 'Kitchen', hertzog: [9.3, '285×325'], Liors_apartment: [6.8, '190×360'], Katzir_10: [10.8, '298×361'], Golda_floor_9: [11.5, '398×290'], Golda_floor_12: [11.5, '398×290'], Anesiim_42: [11.3, '405×280'], katzir_22: [10.7, '258×415'] }
+        ]
+      },
+      {
+        group: 'Bedrooms', rows: [
+          { name: 'Master bedroom', hertzog: [7.3, '350×210'], Liors_apartment: [8.3, '255×325'], Katzir_10: [12.0, '320×375'], Golda_floor_9: [10.2, '320×320'], Golda_floor_12: [10.2, '320×320'], Anesiim_42: [12.2, '380×320'], katzir_22: [15.8, '450×350'] },
+          { name: 'Bedroom 2', mamad: true, hertzog: [8.2, '298×275'], Liors_apartment: [9.6, '320×300'], Katzir_10: [11.0, '368×299'], Golda_floor_9: [10.3, '355×290'], Golda_floor_12: [10.3, '355×290'], Anesiim_42: [11.1, '390×285'], katzir_22: [9.7, '351×275'] },
+          { name: 'Bedroom 3', hertzog: [9.0, '321×280'], Liors_apartment: [10.0, '345×290'], Katzir_10: [9.4, '325×290'], Golda_floor_9: [10.7, '373×286'], Golda_floor_12: [9.7, '340×286'], Anesiim_42: [10.9, '330×330'], katzir_22: [9.7, '280×345'] },
+          { name: 'Bedroom 4', hertzog: [null, ''], Liors_apartment: [15.8, '450×350'], Katzir_10: [11.0, '400×275'], Golda_floor_9: [10.1, '339×298'], Golda_floor_12: [10.1, '339×298'], Anesiim_42: [10.1, '360×280'], katzir_22: [14.3, '380×375'] }
+        ]
+      },
+      {
+        group: 'Service areas', rows: [
+          { name: 'Main bathroom', hertzog: [3.7, '170×220'], Liors_apartment: [4.5, '255×175'], Katzir_10: [4.6, '246×185'], Golda_floor_9: [4.8, '282×170'], Golda_floor_12: [4.8, '282×170'], Anesiim_42: [4.2, '250×170'], katzir_22: [5.1, '185×275'] },
+          { name: 'Master bathroom', hertzog: [3.2, '190×170'], Liors_apartment: [4.3, '275×155'], Katzir_10: [3.2, '204×159'], Golda_floor_9: [3.9, '230×168'], Golda_floor_12: [3.9, '230×168'], Anesiim_42: [2.9, '170×170'], katzir_22: [6.1, '210×290'] },
+          { name: 'Master closet', hertzog: [2.5, '170×150'], Liors_apartment: [2.1, '190×110'], Katzir_10: [2.9, '185×159'], Golda_floor_9: [2.7, '195×140'], Golda_floor_12: [2.7, '195×140'], Anesiim_42: [3.4, '200×170'], katzir_22: [2.6, '175×150'] },
+          { name: 'Third bathroom', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [0.9, '109×80'], Golda_floor_9: [1.4, '170×85', 'Shower'], Golda_floor_12: [1.4, '170×85', 'Shower'], Anesiim_42: [1.9, '190×100', 'Shower'], katzir_22: [1.6, '175×90', 'Shower'] },
+          { name: 'Laundry room', hertzog: [2.0, '90×220'], Liors_apartment: [2.3, '175×130'], Katzir_10: [2.1, '98×216'], Golda_floor_9: [3.7, '282×130'], Golda_floor_12: [3.7, '282×130'], Anesiim_42: [2.2, '165×135'], katzir_22: [3.2, '230×140'] },
+          { name: 'Hallway', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [6.6, '229×290'], Golda_floor_9: [null, ''], Golda_floor_12: [null, ''], Anesiim_42: [null, ''], katzir_22: [null, ''] }
+        ]
+      },
+      {
+        group: 'Outdoor', rows: [
+          { name: 'Balcony', hertzog: [13.8, '300×460'], Liors_apartment: [29.0, '774×375'], Katzir_10: [9.0, '270×334'], Golda_floor_9: [16.9, '540×313'], Golda_floor_12: [16.9, '540×313'], Anesiim_42: [15.2, '400×380'], katzir_22: [21.8, '326×670'] }
+        ]
+      }
+    ];
+    const TOTALS = [
+      { name: 'Interior total', first: true, hertzog: 70.5, Liors_apartment: 101.7, Katzir_10: 108.7, Golda_floor_9: 104.7, Golda_floor_12: 103.7, Anesiim_42: 104.6, katzir_22: 108.3 },
+      { name: 'Interior + balcony', hertzog: 84.3, Liors_apartment: 130.7, Katzir_10: 117.7, Golda_floor_9: 121.6, Golda_floor_12: 120.6, Anesiim_42: 119.8, katzir_22: 130.1 }
+    ];
+
+    const ROW_TO_DIM_TABLE = {
+      'Living room': 'living', 'Dining area': 'dining', 'Extra living space': 'extraliving',
+      'Kitchen': 'kitchen', 'Hallway': 'hallway',
+      'Master bedroom': 'master', 'Bedroom 2': 'bed2', 'Bedroom 3': 'bed3', 'Bedroom 4': 'bed4',
+      'Main bathroom': 'mainbath', 'Master bathroom': 'masterbath', 'Master closet': 'closet',
+      'Third bathroom': 'thirdbath', 'Laundry room': 'laundry', 'Balcony': 'balcony'
+    };
+
+    function resolveCell(row, k) {
+      if (row[k] !== undefined) return row[k];
+      if (DATA[k] && DATA[k].dims) {
+        const dk = ROW_TO_DIM_TABLE[row.name];
+        if (dk) {
+          const dimStr = DATA[k].dims[dk];
+          if (dimStr) {
+            const parts = dimStr.split('×').map(Number);
+            const area = (parts.length === 2 && parts[0] && parts[1]) ? r1(parts[0] * parts[1] / 10000) : null;
+            if (area != null) {
+              const tag = (row.name === 'Third bathroom' && DATA[k].hasShower) ? 'Shower' : undefined;
+              return tag ? [area, dimStr, tag] : [area, dimStr];
+            }
+          }
+        }
+      }
+      return undefined;
+    }
+
     function winnerOf(row, cols) {
       let best = -Infinity, who = [];
       cols.forEach(k => {
-        const v = row[k]?.[0]; if (v == null) return;
+        const cell = resolveCell(row, k);
+        const v = cell?.[0]; if (v == null) return;
         if (v > best) { best = v; who = [k] } else if (v === best) { who.push(k) }
       });
       return { who };
@@ -2005,6 +2640,7 @@
       ORDER.forEach(k => { winTally[k] = 0; winCategories[k] = [] });
       const cols = activeList();
       const colCount = cols.length;
+      const bk = cols.find(k => DATA[k] && DATA[k].current) || null;
       const minCol = cols.length >= 5 ? '130px' : '150px';
       const gridCols = `minmax(160px,1.6fr) ${cols.map(() => `minmax(${minCol},1fr)`).join(' ')}`;
       const minTblWidth = cols.length >= 5 ? (160 + parseInt(minCol) * cols.length) + 'px' : 'auto';
@@ -2013,7 +2649,7 @@
       html += `<div class="rt-head" style="grid-template-columns:${gridCols}"><div>Room</div>`;
       cols.forEach(k => {
         const a = DATA[k];
-        html += `<div><div class="rt-aptname"><span class="bar" style="background:${a.color}"></span><span class="nm">${a.label}</span>${a.current ? `<span class="curr-tag" style="--c:${a.color}">Current</span>` : ''}</div></div>`;
+        html += `<div><div class="rt-aptname"><span class="bar" style="background:${a.color}"></span><span class="nm">${a.label}</span>${a.current ? `<span class="curr-tag" style="--c:${a.color}">Baseline</span>` : ''}</div></div>`;
       });
       html += '</div>';
 
@@ -2024,19 +2660,21 @@
             html += `<div class="rt-subtotal" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span></div>`;
             cols.forEach(k => {
               const isCurr = DATA[k].current;
+              // Fall back to computed cat.living for new apartments
+              const rawVal = row[k]?.[0] ?? DATA[k]?.cat?.living;
               let dh = '';
-              if (showVs && cols.includes(BASELINE)) {
+              if (showVs && bk && cols.includes(bk)) {
                 if (isCurr) dh = '<span class="vsh eq">baseline</span>';
                 else {
-                  const h = row[BASELINE]?.[0];
-                  if (h != null) {
-                    const d = r1(row[k][0] - h);
+                  const hv = row[bk]?.[0] ?? DATA[bk]?.cat?.living;
+                  if (hv != null && rawVal != null) {
+                    const d = r1(rawVal - hv);
                     const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
                     dh = `<span class="vsh ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
                   }
                 }
               }
-              html += `<div class="rt-cell"><span class="val" style="color:var(--txt2)">${row[k][0].toFixed(1)}<span style="font-size:.62em;color:var(--txt3)"> m²</span></span>${dh}</div>`;
+              html += `<div class="rt-cell"><span class="val" style="color:var(--txt2)">${rawVal != null ? rawVal.toFixed(1) : '—'}<span style="font-size:.62em;color:var(--txt3)"> m²</span></span>${dh}</div>`;
             });
             html += '</div>';
             return;
@@ -2044,7 +2682,7 @@
           const { who } = winnerOf(row, cols);
           html += `<div class="rt-row" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span>${row.mamad ? '<span class="rmamad">ממ"ד · safe room</span>' : ''}</div>`;
           cols.forEach(k => {
-            const cell = row[k];
+            const cell = resolveCell(row, k);
             const isCurr = DATA[k].current;
             if (!cell || cell[0] == null) {
               html += `<div class="rt-cell ${isCurr ? 'curr' : ''}"><span class="rt-na">${cell?.[1] || '—'}</span></div>`;
@@ -2053,12 +2691,12 @@
             const isWin = who.length && who.includes(k) && who.length < colCount;
             if (isWin) { winTally[k]++; winCategories[k].push(row.name); }
             let dh = '';
-            if (showVs && cols.includes(BASELINE) && row.name !== 'Living room') {
+            if (showVs && bk && cols.includes(bk) && row.name !== 'Living room') {
               if (isCurr) dh = '<span class="vsh eq">baseline</span>';
               else {
-                const h = row[BASELINE]?.[0];
-                if (h != null) {
-                  const d = r1(cell[0] - h);
+                const hv = row[bk]?.[0];
+                if (hv != null) {
+                  const d = r1(cell[0] - hv);
                   const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
                   dh = `<span class="vsh ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
                 }
@@ -2077,20 +2715,26 @@
         });
       });
 
-      TOTALS.forEach(row => {
-        const vals = {}; cols.forEach(k => vals[k] = row[k]);
+      const dynamicTotals = [
+        { name: 'Interior total', first: true, getter: a => a.interior },
+        { name: 'Interior + balcony', first: false, getter: a => r1(a.interior + a.balcony) }
+      ];
+      dynamicTotals.forEach(row => {
+        const vals = {}; cols.forEach(k => { if (DATA[k]) vals[k] = row.getter(DATA[k]); });
         let best = -Infinity, who = [];
         cols.forEach(k => { if (vals[k] > best) { best = vals[k]; who = [k] } else if (vals[k] === best) who.push(k) });
+        const baseVal = bk ? vals[bk] : null;
         html += `<div class="rt-total ${row.first ? 'first' : ''}" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span></div>`;
         cols.forEach(k => {
+          if (!DATA[k]) return;
           const isCurr = DATA[k].current;
           const win = who.includes(k) && who.length < colCount;
           const v = vals[k];
           let dh = '';
-          if (showVs && cols.includes(BASELINE)) {
+          if (showVs && bk && cols.includes(bk)) {
             if (isCurr) dh = '<span class="vsh eq">baseline</span>';
-            else {
-              const d = r1(v - row[BASELINE]);
+            else if (baseVal != null) {
+              const d = r1(v - baseVal);
               const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
               dh = `<span class="vsh ${cls}">${d > 0 ? '+' : ''}${d}</span>`;
             }
@@ -2115,7 +2759,7 @@
         const a = DATA[k];
         const won = (winCategories[k] || []);
         html += `<div class="tcard" style="--c:${a.color}">
-      <div class="tn">${a.label} ${a.current ? `<span class="curr-tag" style="--c:${a.color}">Current</span>` : ''}</div>
+      <div class="tn">${a.label} ${a.current ? `<span class="curr-tag" style="--c:${a.color}">Baseline</span>` : ''}</div>
       <div class="tbig">${winTally[k] || 0}</div>
       <div class="tlbl">categories won</div>`+
           (won.length ? `<div class="twon"><ul>${won.map(name => `<li>${name}</li>`).join('')}</ul></div>` : '') +
@@ -2124,7 +2768,7 @@
       document.getElementById('tally').innerHTML = html;
     }
 
-    const VERDICTS = {
+    const DEFAULT_VERDICTS = {
       hertzog: {
         title: 'Your current home', cls: 'h', desc: 'The baseline. Smallest of the seven but punches above its weight on outdoor space. Compact, efficient, 3 bedrooms.', hasShower: false,
         pros: ['Big balcony for its size (13.8 m²)', 'Solid living room (25.3 m²)'],
@@ -2165,13 +2809,7 @@
     function buildVerdicts() {
       let html = '';
       ORDER.forEach(k => {
-        const a = DATA[k];
-        const v = VERDICTS[k] || {
-          title: a.label.replace(/^\d+\s·\s/, ''), cls: '',
-          desc: `${a.interior} m² interior · ${a.beds} bedrooms · ${a.balcony} m² balcony.`,
-          pros: [`Interior ${a.interior} m²`, `Balcony ${a.balcony} m²`, ...(a.shower ? ['Third bathroom with shower'] : [])],
-          cons: []
-        };
+        const v = VERDICTS[k]; const a = DATA[k];
         html += `<div class="vcard ${v.cls} ${active[k] ? '' : 'off'}" style="--c:${a.color};--c-bg:${hexA(a.color, 0.16)}">
       <span class="vtag">${a.label}</span>
       <h3>${v.title}</h3>
@@ -2201,7 +2839,7 @@
     vsToggle.addEventListener('change', () => { showVs = vsToggle.checked; buildTable(); });
 
     function syncVsToggleState() {
-      const has = active[BASELINE];
+      const baseK = ORDER.find(k => DATA[k] && DATA[k].current); const has = baseK && active[baseK];
       if (!has) { vsToggle.checked = false; showVs = false; vsWrap.classList.add('disabled'); vsToggle.disabled = true; }
       else { vsWrap.classList.remove('disabled'); vsToggle.disabled = false; }
     }
@@ -2212,110 +2850,463 @@
       buildStats(); buildTable(); buildVerdicts();
     }
 
-    // ─── Add / Edit apartment modal ─────────────────────────────────────────
-    let editingKey = null;
-    const PALETTE = ['#e8623a', '#2bbf93', '#e0a13a', '#9b7fe0', '#d957a8', '#4dd0c8', '#9bcf4f', '#5aa9e6', '#f2c14e', '#ef6f6c'];
-    const stripNum = (label) => label.replace(/^\d+\s·\s/, '');
+    // ── CRUD ──────────────────────────────────────────────────────────────────
+    let _editKey = null;
+    let _extraBeds = [];   // indices of active extra bed slots
+    let _extraBedSeq = 0;  // ever-increasing counter for unique IDs
+    let _formImages = [];  // { name, label, isFloorPlan, data }
 
-    function openAptModal(key) {
-      editingKey = key || null;
-      const a = key ? APTS[key] : null;
-      document.getElementById('aptModalTitle').textContent = key ? 'Edit apartment' : 'Add apartment';
-      document.getElementById('am_name').value = a ? stripNum(a.label) : '';
-      document.getElementById('am_price').value = a && a.price != null ? a.price : '';
-      document.getElementById('am_beds').value = a ? a.beds : 4;
-      document.getElementById('am_color').value = a ? a.color : PALETTE[ORDER.length % PALETTE.length];
-      document.getElementById('am_current').checked = a ? !!a.current : false;
+    // ── Dynamic extra bedrooms ────────────────────────────────────────────────
+    function addExtraBed(dimStr = null) {
+      const idx = _extraBedSeq++;
+      _extraBeds.push(idx);
+      const bedNum = _extraBeds.length + 2; // display number (3, 4, 5…)
+      const container = document.getElementById('f-extra-beds');
+      container.insertAdjacentHTML('beforeend', `
+        <div class="dim-field extra-bed-item" id="f-xbed-item-${idx}">
+          <div class="field-label">Bedroom ${bedNum}</div>
+          <div class="dim-row">
+            <input type="number" id="f-xbed-${idx}-w" placeholder="W" min="0" step="1" class="dim-w">
+            <span class="dim-sep">×</span>
+            <input type="number" id="f-xbed-${idx}-h" placeholder="H" min="0" step="1" class="dim-h">
+            <span class="dim-unit">cm</span>
+            <span class="dim-result" id="f-xbed-${idx}-m2">—</span>
+            <button type="button" class="rm-btn" onclick="removeExtraBed(${idx})">✕ Remove</button>
+          </div>
+        </div>`);
+      if (dimStr) setDimInputs('xbed-' + idx, dimStr);
+      ['f-xbed-'+idx+'-w','f-xbed-'+idx+'-h'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateComputedPreview);
+      });
+      updateComputedPreview();
+    }
 
-      let html = '';
-      ROOM_GROUPS.forEach(g => {
-        html += `<div class="am-group">${g.group}</div>`;
-        g.rows.forEach(r => {
-          if (r.subtotal) return;
-          const cell = (a && a.rooms[r.field]) ? a.rooms[r.field] : [null, ''];
-          const area = cell[0] != null ? cell[0] : '';
-          const dim = cell[1] || '';
-          html += `<div class="am-row${r.shower ? ' has-shower' : ''}">
-            <span class="am-rl">${r.name}${r.mamad ? ' <span class="am-mamad">ממ"ד</span>' : ''}</span>
-            <input type="number" step="0.1" min="0" class="am-area" data-field="${r.field}" placeholder="m²" value="${area}">
-            <input type="text" class="am-dim" data-field="${r.field}" placeholder="e.g. 320×280" value="${dim.replace(/"/g, '&quot;')}">
-            ${r.shower ? `<label class="am-shower"><input type="checkbox" id="am_shower" ${a && a.shower ? 'checked' : ''}> has shower</label>` : ''}
-          </div>`;
+    function removeExtraBed(idx) {
+      const el = document.getElementById('f-xbed-item-' + idx);
+      if (el) el.remove();
+      _extraBeds = _extraBeds.filter(i => i !== idx);
+      // Renumber remaining labels
+      _extraBeds.forEach((i, pos) => {
+        const lbl = document.querySelector(`#f-xbed-item-${i} .field-label`);
+        if (lbl) lbl.childNodes[0].textContent = 'Bedroom ' + (pos + 3);
+      });
+      updateComputedPreview();
+    }
+
+    // ── Image upload & preview ────────────────────────────────────────────────
+    function handleImageUpload(input) {
+      Array.from(input.files).forEach(file => {
+        resizeImage(file, 1400, (data) => {
+          _formImages.push({ name: file.name, label: file.name.replace(/\.[^.]+$/, ''), isFloorPlan: false, data });
+          renderImagePreviews();
         });
       });
-      document.getElementById('amRooms').innerHTML = html;
-      document.getElementById('amDelete').style.display = (key && ORDER.length > 1) ? 'inline-flex' : 'none';
-      document.getElementById('aptModal').classList.add('open');
+      input.value = '';
     }
 
-    function closeAptModal() { document.getElementById('aptModal').classList.remove('open'); editingKey = null; }
+    function resizeImage(file, maxDim, callback) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          callback(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
 
-    function saveApt() {
-      const name = document.getElementById('am_name').value.trim();
-      if (!name) { alert('Please enter a name for the apartment.'); return; }
-      const priceRaw = document.getElementById('am_price').value.trim();
-      const price = priceRaw === '' ? null : parseFloat(priceRaw);
-      const beds = parseInt(document.getElementById('am_beds').value) || 0;
-      const color = document.getElementById('am_color').value || PALETTE[ORDER.length % PALETTE.length];
-      const current = document.getElementById('am_current').checked;
-      const shower = !!(document.getElementById('am_shower') && document.getElementById('am_shower').checked);
+    function renderImagePreviews() {
+      document.getElementById('f-images-list').innerHTML = _formImages.map((img, i) => `
+        <div class="img-preview-item">
+          <img src="${img.data}" alt="${img.label}" onclick="openGalleryFromFormImages(${i})">
+          <div class="img-prev-right">
+            <input type="text" class="img-label-input" value="${img.label.replace(/"/g,'&quot;')}"
+                   placeholder="Image label" oninput="_formImages[${i}].label=this.value">
+            <div class="img-prev-controls">
+              <label class="img-fp-label">
+                <input type="checkbox" ${img.isFloorPlan ? 'checked' : ''} onchange="_formImages[${i}].isFloorPlan=this.checked">
+                Floor plan
+              </label>
+              <button type="button" class="rm-btn" onclick="removeFormImage(${i})">✕ Remove</button>
+            </div>
+          </div>
+        </div>`).join('');
+    }
 
-      const rooms = {};
-      document.querySelectorAll('#amRooms .am-area').forEach(inp => {
-        const f = inp.dataset.field;
-        const dimEl = document.querySelector(`#amRooms .am-dim[data-field="${f}"]`);
-        const v = inp.value.trim() === '' ? null : parseFloat(inp.value);
-        rooms[f] = [(v == null || isNaN(v)) ? null : v, dimEl ? dimEl.value.trim() : ''];
-      });
+    function removeFormImage(i) { _formImages.splice(i, 1); renderImagePreviews(); }
 
-      let key = editingKey;
-      if (!key) {
-        let base = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'apt';
-        key = base; let i = 2;
-        while (APTS[key]) { key = base + '_' + (i++); }
-        ORDER.push(key);
-        active[key] = true;
+    function openGalleryFromFormImages(startIdx) {
+      if (!_formImages.length) return;
+      lightboxState = { aptKey: null, images: _formImages, currentIdx: startIdx, zoomLevel: 1 };
+      showLightboxImage();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setupImageZoom();
+    }
+
+    function nv(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
+
+    // Dim helpers: read W×H inputs, compute m², update display
+    const DIM_ROOMS = ['living','dining','extraliving','kitchen','hallway','bed1','bed2','mainbath','masterbath','closet','thirdbath','laundry','balcony'];
+    function dimAreaFromInputs(key) {
+      const w = nv('f-' + key + '-w'), h = nv('f-' + key + '-h');
+      return (w != null && h != null) ? r1(w * h / 10000) : null;
+    }
+    function dimStrFromInputs(key) {
+      const w = nv('f-' + key + '-w'), h = nv('f-' + key + '-h');
+      return (w != null && h != null) ? (Math.round(w) + '×' + Math.round(h)) : null;
+    }
+    function setDimInputs(key, dimStr) {
+      if (!dimStr) return;
+      const parts = dimStr.split('×');
+      if (parts.length === 2) {
+        const el_w = document.getElementById('f-' + key + '-w');
+        const el_h = document.getElementById('f-' + key + '-h');
+        if (el_w) el_w.value = parseFloat(parts[0]) || '';
+        if (el_h) el_h.value = parseFloat(parts[1]) || '';
       }
-      const num = editingKey ? APTS[key].num : (ORDER.length - 1);
-      if (current) ORDER.forEach(k => { if (APTS[k]) APTS[k].current = false; });
-      APTS[key] = { key, label: `${num} · ${name}`, num, price: (price == null || isNaN(price)) ? null : price, color, current, beds, shower, rooms };
+    }
+    function updateDimResult(key) {
+      const area = dimAreaFromInputs(key);
+      const el = document.getElementById('f-' + key + '-m2');
+      if (!el) return;
+      if (area != null) { el.textContent = area + ' m²'; el.classList.add('has-val'); }
+      else { el.textContent = '—'; el.classList.remove('has-val'); }
+    }
 
-      persistState();
-      rebuildEverything();
+    function dimAreaFromXBed(idx) {
+      const w = nv('f-xbed-' + idx + '-w'), h = nv('f-xbed-' + idx + '-h');
+      return (w != null && h != null) ? r1(w * h / 10000) : null;
+    }
+    function dimStrFromXBed(idx) {
+      const w = nv('f-xbed-' + idx + '-w'), h = nv('f-xbed-' + idx + '-h');
+      return (w != null && h != null) ? (Math.round(w) + '×' + Math.round(h)) : null;
+    }
+
+    function updateComputedPreview() {
+      DIM_ROOMS.forEach(k => updateDimResult(k));
+      // Update extra beds
+      _extraBeds.forEach(idx => {
+        const el = document.getElementById('f-xbed-item-' + idx);
+        if (!el) return;
+        const area = dimAreaFromXBed(idx);
+        const res = document.getElementById('f-xbed-' + idx + '-m2');
+        if (res) { res.textContent = area != null ? area + ' m²' : '—'; res.classList.toggle('has-val', area != null); }
+      });
+      const livingZone = (dimAreaFromInputs('living')      ?? 0)
+                       + (dimAreaFromInputs('dining')      ?? 0)
+                       + (dimAreaFromInputs('extraliving') ?? 0);
+      const kitchen = dimAreaFromInputs('kitchen')   ?? 0;
+      const hallway = dimAreaFromInputs('hallway')   ?? 0;
+      const fixedBeds = ['bed1','bed2'].map(k => dimAreaFromInputs(k) ?? 0);
+      const extraBedAreas = _extraBeds
+        .filter(idx => document.getElementById('f-xbed-item-' + idx))
+        .map(idx => dimAreaFromXBed(idx) ?? 0);
+      const bedTotal = [...fixedBeds, ...extraBedAreas].reduce((s, v) => s + v, 0);
+      const svc = (dimAreaFromInputs('mainbath')   ?? 0)
+                + (dimAreaFromInputs('masterbath') ?? 0)
+                + (dimAreaFromInputs('closet')     ?? 0)
+                + (dimAreaFromInputs('thirdbath')  ?? 0)
+                + (dimAreaFromInputs('laundry')    ?? 0);
+      const interior = r1(livingZone + kitchen + hallway + bedTotal + svc);
+      const livingTotalEl = document.getElementById('f-living-total');
+      if (livingTotalEl) livingTotalEl.textContent = r1(livingZone) + ' m²';
+      const balcony = dimAreaFromInputs('balcony') ?? 0;
+      // Auto-fill room count: 1 living + fixed beds (2) + extra beds
+      const totalBedCount = 2 + extraBedAreas.length;
+      const roomsEl = document.getElementById('f-rooms');
+      if (roomsEl) roomsEl.value = 1 + totalBedCount;
+      document.getElementById('f-bed-total').textContent = r1(bedTotal) + ' m²';
+      document.getElementById('f-svc-total').textContent = r1(svc) + ' m²';
+      document.getElementById('f-int-preview').textContent = r1(interior);
+      document.getElementById('f-tot-preview').textContent = r1(interior + balcony);
+    }
+
+    function renderProsList(arr) {
+      document.getElementById('f-pros-list').innerHTML = arr.map((t, i) => proConRow('pro', t, i)).join('');
+    }
+    function renderConsList(arr) {
+      document.getElementById('f-cons-list').innerHTML = arr.map((t, i) => proConRow('con', t, i)).join('');
+    }
+    function proConRow(type, text, idx) {
+      const safe = String(text).replace(/"/g, '&quot;');
+      return `<div class="pro-con-row"><input type="text" value="${safe}" placeholder="${type === 'pro' ? 'Pro...' : 'Con...'}" data-${type}-idx="${idx}"><button type="button" class="rm-btn" onclick="this.closest('.pro-con-row').remove()">✕</button></div>`;
+    }
+    function addProRow() { const el = document.getElementById('f-pros-list'); el.insertAdjacentHTML('beforeend', proConRow('pro', '', el.children.length)); }
+    function addConRow() { const el = document.getElementById('f-cons-list'); el.insertAdjacentHTML('beforeend', proConRow('con', '', el.children.length)); }
+    function getProsList() { return [...document.querySelectorAll('#f-pros-list input')].map(i => i.value).filter(Boolean); }
+    function getConsList() { return [...document.querySelectorAll('#f-cons-list input')].map(i => i.value).filter(Boolean); }
+
+    // Get dim string for an apt from stored dims or TABLE
+    function aptDimStr(aptKey, dimKey) {
+      if (DATA[aptKey] && DATA[aptKey].dims && DATA[aptKey].dims[dimKey]) return DATA[aptKey].dims[dimKey];
+      for (const g of TABLE) {
+        for (const row of g.rows) {
+          if (row.subtotal) continue;
+          if (ROW_TO_DIM_TABLE[row.name] === dimKey && row[aptKey] && row[aptKey][1]) return row[aptKey][1];
+        }
+      }
+      return null;
+    }
+
+    function openAptModal(key = null) {
+      _editKey = key;
+      _extraBeds = []; _extraBedSeq = 0; _formImages = [];
+      document.getElementById('f-extra-beds').innerHTML = '';
+      document.getElementById('f-images-list').innerHTML = '';
+      document.getElementById('aptForm').reset();
+      document.getElementById('f-color').value = '#e8623a';
+      renderProsList([]); renderConsList([]);
+      document.getElementById('modalTitle').textContent = key ? 'Edit apartment' : 'Add apartment';
+      if (key) {
+        const a = DATA[key], v = VERDICTS[key] || {};
+        document.getElementById('f-label').value = a.label || '';
+        document.getElementById('f-color').value = a.color || '#e8623a';
+        document.getElementById('f-price').value = a.price != null ? a.price : '';
+        document.getElementById('f-link').value = a.link || '';
+        document.getElementById('f-rooms').value = a.rooms || '';
+        // Fixed beds
+        setDimInputs('bed1', aptDimStr(key, 'master'));
+        setDimInputs('bed2', aptDimStr(key, 'bed2'));
+        // Extra beds from bedList[2+]
+        const extraDimKeys = ['bed3','bed4','bed5','bed6','bed7','bed8'];
+        const extraCount = Math.max(0, (a.bedList || []).length - 2);
+        for (let i = 0; i < extraCount; i++) addExtraBed(aptDimStr(key, extraDimKeys[i]));
+        // Other dims
+        setDimInputs('living',      aptDimStr(key, 'living'));
+        setDimInputs('dining',      aptDimStr(key, 'dining'));
+        setDimInputs('extraliving', aptDimStr(key, 'extraliving'));
+        setDimInputs('kitchen',   aptDimStr(key, 'kitchen'));
+        setDimInputs('hallway',   aptDimStr(key, 'hallway'));
+        setDimInputs('mainbath',  aptDimStr(key, 'mainbath'));
+        setDimInputs('masterbath',aptDimStr(key, 'masterbath'));
+        setDimInputs('closet',    aptDimStr(key, 'closet'));
+        setDimInputs('thirdbath', aptDimStr(key, 'thirdbath'));
+        setDimInputs('laundry',   aptDimStr(key, 'laundry'));
+        setDimInputs('balcony',   aptDimStr(key, 'balcony'));
+        // Third bathroom shower — prefer apt flag, fall back to verdict
+        document.getElementById('f-hasshower').checked = a.hasShower != null ? !!a.hasShower : !!v.hasShower;
+        // Verdict
+        document.getElementById('f-vtitle').value = v.title || '';
+        document.getElementById('f-vdesc').value = v.desc || '';
+        renderProsList(v.pros || []);
+        renderConsList(v.cons || []);
+        // User-uploaded images (not the hardcoded IMAGES const)
+        _formImages = JSON.parse(JSON.stringify(a.images || []));
+        renderImagePreviews();
+      }
+      updateComputedPreview();
+      document.getElementById('aptModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAptModal() {
+      document.getElementById('aptModal').classList.remove('open');
+      document.body.style.overflow = '';
+      _editKey = null;
+    }
+
+    function saveAptForm() {
+      const label = document.getElementById('f-label').value.trim();
+      if (!label) { alert('Please enter a display name.'); return; }
+      const key = _editKey || label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+      if (!_editKey && DATA[key]) { alert('An apartment with this key already exists. Please use a different name.'); return; }
+      const ga = k => dimAreaFromInputs(k) ?? 0;
+      const gd = k => dimStrFromInputs(k);
+      const liveExtra = _extraBeds.filter(idx => document.getElementById('f-xbed-item-' + idx));
+      const extraAreas = liveExtra.map(idx => dimAreaFromXBed(idx));
+      const beds = [dimAreaFromInputs('bed1'), dimAreaFromInputs('bed2'), ...extraAreas];
+      const totalBedCount = 2 + liveExtra.length;
+      const extraDims = {};
+      liveExtra.forEach((idx, pos) => { const d = dimStrFromXBed(idx); if (d) extraDims['bed' + (pos + 3)] = d; });
+      const apt = {
+        key, label,
+        num: _editKey ? DATA[_editKey].num : ORDER.length,
+        price: nv('f-price'),
+        color: document.getElementById('f-color').value,
+        current: _editKey ? DATA[_editKey].current : false,
+        link: document.getElementById('f-link').value.trim() || null,
+        rooms: 1 + totalBedCount,
+        beds: totalBedCount,
+        balcony: dimAreaFromInputs('balcony') ?? 0,
+        cat: { living: r1(ga('living') + ga('dining') + ga('extraliving')), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: ga('hallway') },
+        bedList: beds,
+        service: { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath'), laundry: dimAreaFromInputs('laundry') },
+        hasShower: document.getElementById('f-hasshower').checked,
+        interior: 0,
+        dims: {
+          living: gd('living'), dining: gd('dining'), extraliving: gd('extraliving'),
+          kitchen: gd('kitchen'), hallway: gd('hallway'),
+          master: gd('bed1'), bed2: gd('bed2'),
+          mainbath: gd('mainbath'), masterbath: gd('masterbath'), closet: gd('closet'),
+          thirdbath: gd('thirdbath'), laundry: gd('laundry'), balcony: gd('balcony'),
+          ...extraDims
+        },
+        images: _formImages
+      };
+      const verdict = {
+        title: document.getElementById('f-vtitle').value.trim() || label,
+        cls: key.slice(0, 4),
+        desc: document.getElementById('f-vdesc').value.trim(),
+        hasShower: document.getElementById('f-hasshower').checked,
+        pros: getProsList(),
+        cons: getConsList()
+      };
+      if (_editKey) updateApt(_editKey, apt, verdict);
+      else createApt(key, apt, verdict);
       closeAptModal();
     }
 
-    function deleteApt() {
-      if (!editingKey || ORDER.length <= 1) return;
-      if (!confirm('Delete this apartment?')) return;
-      const key = editingKey;
-      delete APTS[key];
-      const i = ORDER.indexOf(key); if (i > -1) ORDER.splice(i, 1);
+    function createApt(key, apt, verdict) {
+      computeCalcFields(apt);
+      DATA[key] = apt; VERDICTS[key] = verdict;
+      ORDER.push(key); active[key] = true;
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
+    }
+
+    function updateApt(key, apt, verdict) {
+      if (apt.current && !DATA[key].current) {
+        const old = Object.keys(DATA).find(k => DATA[k].current);
+        if (old) DATA[old].current = false;
+      }
+      computeCalcFields(apt);
+      DATA[key] = { ...DATA[key], ...apt };
+      VERDICTS[key] = verdict;
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
+    }
+
+    function deleteApt(key) {
+      if (!DATA[key]) return;
+      const wasCurrent = DATA[key].current;
+      delete DATA[key]; delete VERDICTS[key];
+      const idx = ORDER.indexOf(key); if (idx > -1) ORDER.splice(idx, 1);
       delete active[key];
-      persistState();
-      rebuildEverything();
-      closeAptModal();
+      if (wasCurrent && ORDER.length > 0) {
+        DATA[ORDER[0]].current = true;
+        active[ORDER[0]] = true;
+      }
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
     }
 
-    function resetAll() {
-      if (!confirm('Restore the original apartments and discard all your changes?')) return;
-      try { localStorage.removeItem(LS_KEY); } catch (e) { }
-      location.reload();
+    function setBaseline(key) {
+      if (!DATA[key]) return;
+      Object.keys(DATA).forEach(k => { DATA[k].current = false; });
+      DATA[key].current = true;
+      active[key] = true;
+      saveStore(); buildHero(); buildAptChips(); redrawAll();
     }
 
-    function rebuildEverything() {
-      refreshModel();
-      // keep `active` in sync with the current set of apartments
-      ORDER.forEach(k => { if (!(k in active)) active[k] = true; });
-      Object.keys(active).forEach(k => { if (!APTS[k]) delete active[k]; });
-      if (Object.values(active).filter(Boolean).length === 0 && ORDER.length) active[ORDER[0]] = true;
-      buildHero(); buildAptChips(); redrawAll();
+    function confirmDeleteApt(key) {
+      const a = DATA[key]; if (!a) return;
+      document.getElementById('confirmTitle').textContent = `Delete "${a.label}"?`;
+      const baselineNote = a.current && ORDER.length > 1 ? ' The next apartment will become the baseline.' : '';
+      document.getElementById('confirmMsg').textContent = 'This will permanently remove this apartment. This cannot be undone.' + baselineNote;
+      document.getElementById('confirmOkBtn').onclick = () => { deleteApt(key); closeConfirmModal(); };
+      document.getElementById('confirmModal').classList.add('open');
     }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAptModal(); });
+    function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('open'); }
 
-    refreshModel();
-    buildHero(); buildAptChips(); redrawAll();
+    function autoGenerateVerdict(apt) {
+      const all = Object.values(DATA);
+      const base = all.find(a => a.current) || all[0];
+      const maxOf = fn => Math.max(...all.map(fn));
+      const minOf = fn => Math.min(...all.map(fn));
+      let title = 'The contender';
+      if (apt.cat.living >= maxOf(a => a.cat.living)) title = 'The entertainer';
+      else if (apt.cat.bedrooms >= maxOf(a => a.cat.bedrooms)) title = 'The bedroom champion';
+      else if (apt.cat.kitchen >= maxOf(a => a.cat.kitchen)) title = "The chef's choice";
+      else if (apt.balcony >= maxOf(a => a.balcony)) title = 'The outdoor lover';
+      else if (apt.interior >= maxOf(a => a.interior)) title = 'The space maximizer';
+      const delta = apt.interior - (base ? base.interior : 0);
+      const sign = delta >= 0 ? '+' : '';
+      const lvComp = apt.cat.living > (base ? base.cat.living : 0) ? 'a generous living area' : 'a compact living area';
+      const priceNote = apt.price ? ` Priced at ₪${apt.price.toFixed(2)}M (₪${Math.round(apt.price * 1000 / apt.interior).toLocaleString()}/m²).` : '';
+      const showerNote = apt.service.thirdBath ? ' Includes a third bathroom.' : '';
+      const desc = `${apt.label} offers ${sign}${r1(delta)} m² vs. baseline with ${lvComp} (${r1(apt.cat.living)} m²) and ${apt.beds} bedrooms.${showerNote}${priceNote}`;
+      const pros = [];
+      [
+        { label: `Largest interior (${r1(apt.interior)} m²)`, val: apt.interior, fn: a => a.interior },
+        { label: `Biggest living room (${r1(apt.cat.living)} m²)`, val: apt.cat.living, fn: a => a.cat.living },
+        { label: `Best kitchen (${r1(apt.cat.kitchen)} m²)`, val: apt.cat.kitchen, fn: a => a.cat.kitchen },
+        { label: `Most bedroom space (${r1(apt.cat.bedrooms)} m²)`, val: apt.cat.bedrooms, fn: a => a.cat.bedrooms },
+        { label: `Biggest balcony (${r1(apt.balcony)} m²)`, val: apt.balcony, fn: a => a.balcony },
+        { label: `Largest master bedroom (${r1(apt.bedList[0])} m²)`, val: apt.bedList[0], fn: a => a.bedList[0] ?? 0 },
+        { label: `Largest main bathroom (${r1(apt.service.mainBath)} m²)`, val: apt.service.mainBath, fn: a => a.service.mainBath },
+        { label: `Largest master bathroom (${r1(apt.service.masterBath)} m²)`, val: apt.service.masterBath, fn: a => a.service.masterBath },
+      ].forEach(c => { if (c.val != null && c.val >= maxOf(c.fn)) pros.push(c.label); });
+      if (apt.service.thirdBath) pros.push(`Third bathroom (${r1(apt.service.thirdBath)} m²)`);
+      if (!pros.length) pros.push(delta > 0 ? `${sign}${r1(delta)} m² more interior than baseline` : 'Well-rounded layout');
+      const cons = [];
+      [
+        { label: `Smallest interior (${r1(apt.interior)} m²)`, fn: a => a.interior },
+        { label: `Smallest balcony (${r1(apt.balcony)} m²)`, fn: a => a.balcony },
+        { label: `Smallest kitchen (${r1(apt.cat.kitchen)} m²)`, fn: a => a.cat.kitchen },
+        { label: `Smallest living room (${r1(apt.cat.living)} m²)`, fn: a => a.cat.living },
+      ].forEach(c => { if (c.fn(apt) <= minOf(c.fn)) cons.push(c.label); });
+      if (!apt.service.thirdBath) cons.push('No third bathroom');
+      if (!cons.length) cons.push('No standout weakness vs. the field');
+      return { title, desc, pros, cons, hasShower: !!apt.service.thirdBath };
+    }
+
+    function applyAutoGenVerdict() {
+      const ga = k => dimAreaFromInputs(k) ?? 0;
+      const liveExtraForGen = _extraBeds.filter(idx => document.getElementById('f-xbed-item-' + idx));
+      const beds = [dimAreaFromInputs('bed1'), dimAreaFromInputs('bed2'), ...liveExtraForGen.map(idx => dimAreaFromXBed(idx))];
+      const svc = { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath') };
+      const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
+      const svcTotal = svc.mainBath + svc.masterBath + svc.closet + (svc.thirdBath ?? 0);
+      const living = ga('living'), kitchen = ga('kitchen'), hallway = ga('hallway');
+      const interior = r1(living + kitchen + hallway + bedTotal + svcTotal);
+      const tempApt = {
+        key: _editKey || '_new_', label: document.getElementById('f-label').value || 'New apartment',
+        price: nv('f-price'), beds: parseInt(document.getElementById('f-beds').value) || 0,
+        balcony: ga('balcony'), interior,
+        cat: { living, kitchen, bedrooms: bedTotal, service: svcTotal, hallway },
+        bedList: beds, service: svc
+      };
+      const v = autoGenerateVerdict(tempApt);
+      document.getElementById('f-vtitle').value = v.title;
+      document.getElementById('f-vdesc').value = v.desc;
+      document.getElementById('f-hasshower').checked = v.hasShower;
+      renderProsList(v.pros); renderConsList(v.cons);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (document.getElementById('aptModal').classList.contains('open')) closeAptModal();
+        else if (document.getElementById('confirmModal').classList.contains('open')) closeConfirmModal();
+        else if (document.getElementById('gistModal').classList.contains('open')) closeGistModal();
+      }
+    });
+
+    // wire live preview for all W/H dim inputs
+    DIM_ROOMS.forEach(key => {
+      ['f-' + key + '-w', 'f-' + key + '-h'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateComputedPreview);
+      });
+    });
+    // Mark total rooms as manually edited if user types in it
+
+    // Pick up credentials from URL hash (#k=TOKEN&g=GISTID) on first visit, then strip
+    (function() {
+      const h = location.hash;
+      const km = h.match(/[#&]k=([^&]+)/);
+      const gm = h.match(/[#&]g=([^&]+)/);
+      if (km && gm) {
+        setGistCfg({ token: decodeURIComponent(km[1]), gistId: decodeURIComponent(gm[1]) });
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    })();
+    loadStore(); buildHero(); buildAptChips(); redrawAll();
   </script>
 </body>
 
