@@ -1557,6 +1557,22 @@
     .mfp-toast { color: var(--pos); font-size: .82rem; }
     .mfp-launch { display: inline-flex; align-items: center; gap: .4rem; margin-top: .5rem; }
     .mfp-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: .15rem; }
+    .mfp-sizeline { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+    .mfp-sizeline .mfp-dim { font-size: .9rem; color: var(--txt2); }
+    .mfp-sizeline .mfp-dim strong { color: var(--txt); font-size: 1.05rem; }
+    .mfp-sizeline .mfp-area strong { color: var(--gold); }
+    .mfp-pick-hint { font-size: .85rem; color: var(--txt2); display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+    .mfp-pickbar { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; font-size: .85rem; width: 100%; }
+    .mfp-pickbar > span { margin-right: auto; font-weight: 500; color: var(--txt); }
+    .mfp-roomchips { display: flex; flex-wrap: wrap; gap: .4rem; width: 100%; max-height: 26vh; overflow-y: auto; }
+    .mfp-roomchip {
+      background: var(--panel2); border: 1px solid var(--line2); color: var(--txt);
+      border-radius: 999px; padding: .5rem .9rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif; font-size: .85rem; transition: all .15s; white-space: nowrap;
+    }
+    .mfp-roomchip:hover { border-color: var(--gold); color: var(--gold); background: rgba(224,161,58,.1); }
+    .mfp-roomchip:active { transform: scale(.96); }
+    .mfp-roomchip-new { border-style: dashed; color: var(--txt2); }
   </style>
 </head>
 
@@ -3061,11 +3077,9 @@
     const MFP_STEPS = [
       { key:'calibrating',      label:'1 · Calibrate' },
       { key:'enterKnownLength', label:'2 · Set length' },
-      { key:'measureW',         label:'3 · Width' },
-      { key:'measureH',         label:'4 · Height' },
-      { key:'result',           label:'5 · Result' }
+      { key:'measure',          label:'3 · Measure rooms' }
     ];
-    const MFP_ORDER = ['calibrating','enterKnownLength','measureW','measureH','result'];
+    const MFP_ORDER = ['calibrating','enterKnownLength','measure'];
     const MFP_COLORS = { cal:'#e0a13a', w:'#5aa9ff', h:'#5fd17a' };
 
     let mfp = null;       // active session (null when closed)
@@ -3097,7 +3111,7 @@
         step: 'calibrating', active: 'cal',
         tool: 'draw', ortho: false, spaceDown: false,
         pxPerCm: null, knownCm: null, knownVal: '', knownUnit: 'm',
-        calLine: null, wLine: null, hLine: null,
+        calLine: null, wLine: null, hLine: null, justSaved: null,
         pointers: new Map(), pinch: null, dragPoint: null, panStart: null,
         warn: ''
       };
@@ -3105,11 +3119,27 @@
       sel.innerHTML = fps.map((im, i) => `<option>${String(im.label || ('Floor plan ' + (i + 1))).replace(/</g, '&lt;')}</option>`).join('');
       sel.style.display = fps.length > 1 ? '' : 'none';
       sel.selectedIndex = 0;
+      mfpApplySavedCal(0);   // skip straight to measuring if this plan was calibrated before
       document.getElementById('mfpModal').classList.add('open');
       document.body.style.overflow = 'hidden';
       mfpBindCanvas();
       mfpLoadBitmap();
       mfpSyncUI();
+    }
+
+    // Restore a previously-stored scale for an image so we can skip calibration.
+    function mfpApplySavedCal(idx) {
+      const img = mfp.images[idx];
+      const cal = img && img._mfpCal;
+      if (cal && cal.pxPerCm > 0) {
+        mfp.pxPerCm = cal.pxPerCm; mfp.knownCm = cal.knownCm;
+        mfp.knownVal = cal.knownVal || ''; mfp.knownUnit = cal.knownUnit || 'm';
+        mfp.calLine = cal.calLine || null;
+        mfp.step = 'measure'; mfp.active = 'measure';
+        return true;
+      }
+      mfp.step = 'calibrating'; mfp.active = 'cal';
+      return false;
     }
 
     function closeMeasureTool() {
@@ -3137,9 +3167,10 @@
       }
       mfp.imgIdx = idx;
       mfp.pxPerCm = null; mfp.knownCm = null; mfp.knownVal = '';
-      mfp.calLine = mfp.wLine = mfp.hLine = null;
+      mfp.calLine = mfp.wLine = mfp.hLine = null; mfp.justSaved = null;
       mfp.view = { zoom: 1, panX: 0, panY: 0 };
-      mfp.step = 'calibrating'; mfp.active = 'cal'; mfp.warn = '';
+      mfp.warn = ''; mfp.tool = 'draw';
+      mfpApplySavedCal(idx);
       mfpLoadBitmap();
       mfpSyncUI();
     }
@@ -3226,7 +3257,8 @@
       const iw = mfp.bitmap.naturalWidth, ih = mfp.bitmap.naturalHeight;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(mfp.bitmap, mfp.fitOffX + mfp.view.panX, mfp.fitOffY + mfp.view.panY, iw * S, ih * S);
-      if (mfp.calLine) mfpDrawLine(ctx, mfp.calLine, MFP_COLORS.cal, mfp.knownCm ? 'ref ' + mfpFmt(mfp.knownCm) : 'reference');
+      if (mfp.calLine && (mfp.step === 'calibrating' || mfp.step === 'enterKnownLength'))
+        mfpDrawLine(ctx, mfp.calLine, MFP_COLORS.cal, mfp.knownCm ? 'ref ' + mfpFmt(mfp.knownCm) : 'reference');
       if (mfp.wLine)   mfpDrawLine(ctx, mfp.wLine, MFP_COLORS.w, mfpMeasLabel(mfp.wLine, 'W'));
       if (mfp.hLine)   mfpDrawLine(ctx, mfp.hLine, MFP_COLORS.h, mfpMeasLabel(mfp.hLine, 'H'));
     }
@@ -3258,8 +3290,25 @@
     // ── Pointer interaction ─────────────────────────────────────────────────
     function mfpEditableKey() {
       if (mfp.step === 'calibrating') return 'cal';
-      if (mfp.step === 'measureW') return 'w';
-      if (mfp.step === 'measureH') return 'h';
+      if (mfp.step === 'measure') return 'measure';
+      return null;
+    }
+    // Line keys the current step can draw/edit.
+    function mfpStepLineKeys() {
+      if (mfp.step === 'calibrating') return ['cal'];
+      if (mfp.step === 'measure') return ['w', 'h'];
+      return [];
+    }
+    // Endpoint (of any active line) under a css-space point — latest line wins.
+    function mfpHitTest(keys, css) {
+      for (let i = keys.length - 1; i >= 0; i--) {
+        const line = mfpLineFor(keys[i]);
+        if (!line) continue;
+        const b = mfpImgToCss(line.b);
+        if (Math.hypot(css.x - b.x, css.y - b.y) <= 18) return { key: keys[i], pt: 'b' };
+        const a = mfpImgToCss(line.a);
+        if (Math.hypot(css.x - a.x, css.y - a.y) <= 18) return { key: keys[i], pt: 'a' };
+      }
       return null;
     }
     function mfpLineFor(key) { return key === 'cal' ? mfp.calLine : key === 'w' ? mfp.wLine : mfp.hLine; }
@@ -3296,16 +3345,6 @@
     }
     function mfpPreventCtx(e) { e.preventDefault(); }
 
-    // Which endpoint of the active line (if any) is under a css-space point.
-    function mfpHandleAt(key, css) {
-      const line = mfpLineFor(key);
-      if (!line) return null;
-      const b = mfpImgToCss(line.b);
-      if (Math.hypot(css.x - b.x, css.y - b.y) <= 18) return 'b';
-      const a = mfpImgToCss(line.a);
-      if (Math.hypot(css.x - a.x, css.y - a.y) <= 18) return 'a';
-      return null;
-    }
     // Snap p so the segment from anchor is purely horizontal or vertical.
     function mfpOrthoPoint(anchor, p) {
       const dx = p.x - anchor.x, dy = p.y - anchor.y;
@@ -3336,25 +3375,28 @@
         return;
       }
       if (mfp.pointers.size > 2) return;
-      const key = mfpEditableKey();
+      const keys = mfpStepLineKeys();
       const mousePan = e.pointerType === 'mouse' && (e.button === 1 || e.button === 2);
       const css = mfpClientToCss(e.clientX, e.clientY);
       // In Draw mode, grabbing an existing endpoint always wins (fine-tune).
-      if (key && mfp.tool === 'draw' && !mfp.spaceDown && !mousePan) {
-        const grab = mfpHandleAt(key, css);
-        if (grab) { mfp.dragPoint = { key, pt: grab, createdNew: false, prev: null }; return; }
+      if (keys.length && mfp.tool === 'draw' && !mfp.spaceDown && !mousePan) {
+        const grab = mfpHitTest(keys, css);
+        if (grab) { mfp.dragPoint = { key: grab.key, pt: grab.pt, createdNew: false, prev: null }; return; }
       }
-      const wantPan = !key || mfp.tool === 'pan' || mfp.spaceDown || mousePan;
+      // pick the first not-yet-drawn line for this step (width then height)
+      const targetKey = keys.find(k => !mfpLineFor(k));
+      const wantPan = !keys.length || !targetKey || mfp.tool === 'pan' || mfp.spaceDown || mousePan;
       if (wantPan) {
         mfp.panStart = { x: e.clientX, y: e.clientY, panX: mfp.view.panX, panY: mfp.view.panY };
         mfpUpdateCursor(true);
         return;
       }
       // start a fresh line: anchor A, drag B (Shift / Straight constrains)
-      const prev = mfpLineFor(key);
+      mfp.justSaved = null;
+      const prev = mfpLineFor(targetKey);
       let img = mfpClientToImg(e.clientX, e.clientY);
-      mfpSetLine(key, { a: img, b: { x: img.x, y: img.y } });
-      mfp.dragPoint = { key, pt: 'b', createdNew: true, prev };
+      mfpSetLine(targetKey, { a: img, b: { x: img.x, y: img.y } });
+      mfp.dragPoint = { key: targetKey, pt: 'b', createdNew: true, prev };
       mfpRender();
     }
     function mfpPointerMove(e) {
@@ -3420,10 +3462,13 @@
     }
     function mfpCancelLine() {
       if (!mfp) return;
-      const key = mfpEditableKey();
-      if (!key) return;
-      if (mfp.dragPoint && mfp.dragPoint.createdNew) { mfpSetLine(key, mfp.dragPoint.prev); mfp.dragPoint = null; }
-      else { mfpSetLine(key, null); if (key === 'cal') { mfp.pxPerCm = null; mfp.knownCm = null; } }
+      if (mfp.dragPoint && mfp.dragPoint.createdNew) {
+        mfpSetLine(mfp.dragPoint.key, mfp.dragPoint.prev); mfp.dragPoint = null;
+      } else if (mfp.step === 'calibrating') {
+        mfp.calLine = null; mfp.pxPerCm = null; mfp.knownCm = null;
+      } else if (mfp.step === 'measure') {
+        if (mfp.hLine) mfp.hLine = null; else mfp.wLine = null;
+      } else return;
       mfp.warn = '';
       mfpUpdateCursor();
       mfpRender(); mfpSyncControls(); mfpSyncFooter();
@@ -3451,10 +3496,13 @@
       c.style.cursor = panning ? 'grabbing' : (panMode ? 'grab' : 'crosshair');
     }
     function mfpLiveReadout() {
-      if (mfp.step !== 'measureW' && mfp.step !== 'measureH') return;
-      const cm = mfpLineCm(mfpLineFor(mfp.step === 'measureW' ? 'w' : 'h'));
-      const strong = document.querySelector('#mfp-controls .mfp-live');
-      if (strong) strong.textContent = cm != null ? mfpFmt(cm) : '—';
+      if (!mfp || mfp.step !== 'measure') return;
+      const W = mfpLineCm(mfp.wLine), H = mfpLineCm(mfp.hLine);
+      const area = (W != null && H != null) ? (W * H / 10000) : null;
+      const ew = document.getElementById('mfp-wval'), eh = document.getElementById('mfp-hval'), ea = document.getElementById('mfp-areaval');
+      if (ew) ew.textContent = W != null ? mfpFmt(W) : '—';
+      if (eh) eh.textContent = H != null ? mfpFmt(H) : '—';
+      if (ea) ea.textContent = area != null ? (Math.round(area * 10) / 10) + ' m²' : '—';
     }
 
     // ── Step machine & UI sync ──────────────────────────────────────────────
@@ -3468,14 +3516,9 @@
         mfp.step = 'enterKnownLength'; mfp.active = null;
       } else if (mfp.step === 'enterKnownLength') {
         if (!mfpConfirmCalibration()) return;
-        mfp.step = 'measureW'; mfp.active = 'w';
-      } else if (mfp.step === 'measureW') {
-        if (!mfpLineValid(mfp.wLine)) { mfp.warn = 'Draw the first side (width) first.'; mfpSyncControls(); return; }
-        mfp.step = 'measureH'; mfp.active = 'h';
-      } else if (mfp.step === 'measureH') {
-        if (!mfpLineValid(mfp.hLine)) { mfp.warn = 'Draw the second side (height) first.'; mfpSyncControls(); return; }
-        mfp.step = 'result'; mfp.active = null;
+        mfp.step = 'measure'; mfp.active = 'measure';
       }
+      // 'measure' has no Next — rooms are saved by tapping a chip.
       mfp.tool = 'draw';
       mfpSyncUI();
     }
@@ -3485,7 +3528,7 @@
       const i = MFP_ORDER.indexOf(mfp.step);
       if (i <= 0) return;
       mfp.step = MFP_ORDER[i - 1];
-      mfp.active = mfp.step === 'calibrating' ? 'cal' : mfp.step === 'measureW' ? 'w' : mfp.step === 'measureH' ? 'h' : null;
+      mfp.active = mfp.step === 'calibrating' ? 'cal' : mfp.step === 'measure' ? 'measure' : null;
       mfp.tool = 'draw';
       mfpSyncUI();
     }
@@ -3496,14 +3539,20 @@
       if (px < 3) { mfp.warn = 'Reference line is too short — redraw it.'; mfpSyncControls(); return false; }
       const cm = mfp.knownUnit === 'cm' ? val : val * 100;
       mfp.knownCm = cm; mfp.pxPerCm = px / cm;
+      // remember this plan's scale so reopening skips straight to measuring
+      const img = mfp.images[mfp.imgIdx];
+      if (img) img._mfpCal = { pxPerCm: mfp.pxPerCm, knownCm: cm, knownVal: mfp.knownVal, knownUnit: mfp.knownUnit, calLine: mfp.calLine };
       const big = Math.max(mfp.bitmap.naturalWidth, mfp.bitmap.naturalHeight);
       if (px < 0.05 * big) mfp.warn = 'Tip: a longer reference line gives more accurate results.';
       return true;
     }
+    // Footer "Re-calibrate": forget this plan's scale and redraw the reference.
     function mfpClearAll() {
       if (!mfp) return;
-      mfp.calLine = mfp.wLine = mfp.hLine = null;
+      mfp.calLine = mfp.wLine = mfp.hLine = null; mfp.justSaved = null;
       mfp.pxPerCm = null; mfp.knownCm = null; mfp.knownVal = '';
+      const img = mfp.images[mfp.imgIdx];
+      if (img && img._mfpCal) delete img._mfpCal;
       mfp.step = 'calibrating'; mfp.active = 'cal'; mfp.warn = ''; mfp.tool = 'draw';
       mfpSyncUI();
     }
@@ -3512,10 +3561,11 @@
       const t = mfp.wLine; mfp.wLine = mfp.hLine; mfp.hLine = t;
       mfpSyncControls(); mfpRender();
     }
-    function mfpMeasureAnother() {
+    // Clear the two lines and measure the next room (keeps calibration).
+    function mfpRedoRoom() {
       if (!mfp) return;
-      mfp.wLine = mfp.hLine = null; mfp.step = 'measureW'; mfp.active = 'w'; mfp.warn = ''; mfp.tool = 'draw';
-      mfpSyncUI();
+      mfp.wLine = mfp.hLine = null; mfp.justSaved = null; mfp.warn = ''; mfp.tool = 'draw';
+      mfpSyncControls(); mfpRender();
     }
 
     function mfpHint() {
@@ -3523,9 +3573,7 @@
       switch (mfp.step) {
         case 'calibrating': return 'Draw a line over a KNOWN distance (a labeled wall or scale bar).' + nav;
         case 'enterKnownLength': return 'Now type how long that reference line is in real life.';
-        case 'measureW': return 'Draw a line across one side of the room.' + nav;
-        case 'measureH': return 'Draw a line across the other side of the room.' + nav;
-        case 'result': return 'Check the size, then insert it into a room.';
+        case 'measure': return 'Draw the two sides of a room, then tap its name to save it.' + nav;
         default: return '';
       }
     }
@@ -3547,13 +3595,17 @@
         `<div class="mfp-step ${i === cur ? 'active' : (i < cur ? 'done' : '')}">${s.label}</div>`).join('');
     }
     function mfpSyncFooter() {
-      const back = document.getElementById('mfp-back'), next = document.getElementById('mfp-next');
+      const back = document.getElementById('mfp-back'), next = document.getElementById('mfp-next'), clr = document.getElementById('mfp-clear');
       const i = MFP_ORDER.indexOf(mfp.step);
       back.style.display = i > 0 ? '' : 'none';
-      if (mfp.step === 'result') { next.style.display = 'none'; }
+      if (mfp.step === 'measure') { next.style.display = 'none'; }
       else {
         next.style.display = '';
-        next.textContent = mfp.step === 'enterKnownLength' ? 'Set scale →' : mfp.step === 'measureH' ? 'See result' : 'Next';
+        next.textContent = mfp.step === 'enterKnownLength' ? 'Set scale →' : 'Next';
+      }
+      if (clr) {
+        clr.textContent = 'Re-calibrate';
+        clr.style.display = (mfp.step === 'measure') ? '' : 'none';
       }
     }
     function mfpSyncControls(focusKnown) {
@@ -3574,14 +3626,8 @@
             </select>
             <span>in real life.</span>
           </div>`;
-      } else if (mfp.step === 'measureW' || mfp.step === 'measureH') {
-        const key = mfp.step === 'measureW' ? 'w' : 'h';
-        const tag = key === 'w' ? 'Width' : 'Height';
-        const cm = mfpLineCm(mfpLineFor(key));
-        html = `<span><span class="mfp-swatch" style="background:${MFP_COLORS[key]}"></span>${tag}: <strong class="mfp-live">${cm != null ? mfpFmt(cm) : '—'}</strong></span>`;
-        if (mfpLineFor(key)) html += ` <button class="btn-additem" onclick="mfpCancelLine()">✕ Clear line</button>`;
-      } else if (mfp.step === 'result') {
-        html = mfpResultHtml();
+      } else if (mfp.step === 'measure') {
+        html = mfpMeasureControlsHtml();
       }
       if (mfp.warn) html += `<span class="mfp-warn">${mfp.warn}</span>`;
       el.innerHTML = html;
@@ -3594,24 +3640,35 @@
       const ku = document.getElementById('mfp-known-unit');
       if (ku) ku.onchange = () => { mfp.knownUnit = ku.value; };
     }
-    function mfpResultHtml() {
+    function mfpMeasureControlsHtml() {
       const W = mfpLineCm(mfp.wLine), H = mfpLineCm(mfp.hLine);
       const area = (W != null && H != null) ? (W * H / 10000) : null;
-      const opts = mfpRoomTargets().map(r => `<option value="${r.key}">${r.label}</option>`).join('');
-      return `
-        <div class="mfp-result">
-          <span class="mfp-dim"><span class="mfp-swatch" style="background:${MFP_COLORS.w}"></span>W <strong>${W != null ? mfpFmt(W) : '—'}</strong></span>
-          <span class="mfp-dim"><span class="mfp-swatch" style="background:${MFP_COLORS.h}"></span>H <strong>${H != null ? mfpFmt(H) : '—'}</strong></span>
-          <span class="mfp-dim mfp-area">Area <strong>${area != null ? (Math.round(area * 10) / 10) + ' m²' : '—'}</strong></span>
-          <button class="btn-additem" onclick="mfpSwapWH()">⇄ Swap W/H</button>
-          <button class="btn-additem" onclick="mfpMeasureAnother()">+ Measure another room</button>
-        </div>
-        <div class="mfp-insert">
-          <span>Insert into:</span>
-          <select id="mfp-room-select">${opts}</select>
-          <button class="btn-primary" onclick="mfpInsertSelected()">Insert</button>
-          <span class="mfp-toast" id="mfp-toast"></span>
+      const sizeLine = `<div class="mfp-sizeline">
+          <span class="mfp-dim"><span class="mfp-swatch" style="background:${MFP_COLORS.w}"></span>W <strong id="mfp-wval">${W != null ? mfpFmt(W) : '—'}</strong></span>
+          <span class="mfp-dim"><span class="mfp-swatch" style="background:${MFP_COLORS.h}"></span>H <strong id="mfp-hval">${H != null ? mfpFmt(H) : '—'}</strong></span>
+          <span class="mfp-dim mfp-area">= <strong id="mfp-areaval">${area != null ? (Math.round(area * 10) / 10) + ' m²' : '—'}</strong></span>
         </div>`;
+      // both sides drawn → show the room picker
+      if (mfpLineValid(mfp.wLine) && mfpLineValid(mfp.hLine)) {
+        const chips = mfpRoomTargets().map(r => `<button type="button" class="mfp-roomchip" onclick="mfpPick('${r.key}')">${r.label}</button>`).join('');
+        return sizeLine + `
+          <div class="mfp-pickbar">
+            <span>Save to which room?</span>
+            <button class="btn-additem" onclick="mfpSwapWH()">⇄ Swap W/H</button>
+            <button class="btn-additem" onclick="mfpRedoRoom()">↶ Redo</button>
+          </div>
+          <div class="mfp-roomchips">${chips}<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNew()">＋ New bedroom</button></div>`;
+      }
+      // still drawing
+      let msg;
+      if (mfp.wLine) {
+        msg = 'Now draw the other side. <button class="btn-additem" onclick="mfpCancelLine()">✕ Clear</button>';
+      } else if (mfp.justSaved) {
+        msg = `<span class="mfp-toast">✓ Saved to ${mfp.justSaved}.</span> Draw the next room — first side.`;
+      } else {
+        msg = 'Drag across one side of the room to start.';
+      }
+      return sizeLine + `<div class="mfp-pick-hint">${msg}</div>`;
     }
     function mfpRoomTargets() {
       const list = DIM_ROOMS.map(k => ({ key: k, label: MFP_ROOM_LABELS[k] || k }));
@@ -3619,20 +3676,29 @@
         .forEach((idx, pos) => list.push({ key: 'xbed-' + idx, label: 'Bedroom ' + (pos + 3) }));
       return list;
     }
-    function mfpInsertSelected() {
+    // Tap a room chip → write W×H into that room and loop for the next one.
+    function mfpPick(key) {
       if (!mfp) return;
-      const sel = document.getElementById('mfp-room-select');
-      if (!sel) return;
-      const key = sel.value;
       const W = mfpLineCm(mfp.wLine), H = mfpLineCm(mfp.hLine);
       if (W == null || H == null) return;
-      if (!document.getElementById('f-' + key + '-w')) { return; }
+      if (!document.getElementById('f-' + key + '-w')) return;
       setDimInputs(key, Math.round(W) + '×' + Math.round(H));
       updateDimResult(key);
       updateComputedPreview();
-      const toast = document.getElementById('mfp-toast');
       const label = (mfpRoomTargets().find(r => r.key === key) || {}).label || key;
-      if (toast) toast.textContent = '✓ Saved to ' + label;
+      mfpAfterInsert(label);
+    }
+    // "+ New bedroom" → create a bedroom field and drop the size into it.
+    function mfpPickNew() {
+      if (!mfp) return;
+      const W = mfpLineCm(mfp.wLine), H = mfpLineCm(mfp.hLine);
+      if (W == null || H == null) return;
+      addExtraBed(Math.round(W) + '×' + Math.round(H));
+      mfpAfterInsert('Bedroom ' + (_extraBeds.length + 2));
+    }
+    function mfpAfterInsert(label) {
+      mfp.wLine = null; mfp.hLine = null; mfp.justSaved = label; mfp.warn = ''; mfp.tool = 'draw';
+      mfpSyncControls(); mfpSyncFooter(); mfpRender();
     }
 
     function nv(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
