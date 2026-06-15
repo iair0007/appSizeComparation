@@ -1505,6 +1505,14 @@
     .mfp-box .modal-body { display: flex; flex-direction: column; gap: .8rem; padding: 1rem 1.25rem; }
     .mfp-topbar { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
     .mfp-image-select { max-width: 300px; }
+    .mfp-tools { display: flex; gap: .35rem; margin-left: auto; flex-wrap: wrap; }
+    .mfp-tool {
+      background: var(--panel2); border: 1px solid var(--line2); color: var(--txt2);
+      border-radius: 7px; padding: .4rem .7rem; cursor: pointer;
+      font-family: 'Outfit', sans-serif; font-size: .8rem; transition: all .2s; white-space: nowrap;
+    }
+    .mfp-tool:hover { color: var(--txt); border-color: var(--txt3); }
+    .mfp-tool.active { color: var(--gold); border-color: rgba(224,161,58,.45); background: rgba(224,161,58,.1); font-weight: 600; }
     .mfp-steps { display: flex; gap: .4rem; flex-wrap: wrap; }
     .mfp-step {
       flex: 1; min-width: 78px; text-align: center;
@@ -2007,6 +2015,11 @@
       <div class="modal-body">
         <div class="mfp-topbar">
           <select id="mfp-image-select" class="mfp-image-select" onchange="mfpSelectImage(this.selectedIndex)" style="display:none"></select>
+          <div class="mfp-tools" id="mfp-tools">
+            <button type="button" id="mfp-tool-draw" class="mfp-tool active" onclick="mfpSetTool('draw')" title="Draw lines (tap & drag)">✏️ Draw</button>
+            <button type="button" id="mfp-tool-pan" class="mfp-tool" onclick="mfpSetTool('pan')" title="Move / navigate the map">✋ Move</button>
+            <button type="button" id="mfp-ortho" class="mfp-tool" onclick="mfpToggleOrtho()" title="Keep lines straight — horizontal/vertical (or hold Shift)">⊾ Straight</button>
+          </div>
         </div>
         <div class="mfp-steps" id="mfp-steps"></div>
         <div class="mfp-stage">
@@ -3082,6 +3095,7 @@
         fitScale: 1, fitOffX: 0, fitOffY: 0,
         view: { zoom: 1, panX: 0, panY: 0 },
         step: 'calibrating', active: 'cal',
+        tool: 'draw', ortho: false, spaceDown: false,
         pxPerCm: null, knownCm: null, knownVal: '', knownUnit: 'm',
         calLine: null, wLine: null, hLine: null,
         pointers: new Map(), pinch: null, dragPoint: null, panStart: null,
@@ -3262,8 +3276,11 @@
       mfp._ro = new ResizeObserver(() => { if (mfp && mfp.bitmap) { mfpResizeCanvas(); mfpRender(); } });
       mfp._ro.observe(c);
       mfp._onResize = () => { if (mfp && mfp.bitmap) { mfpResizeCanvas(); mfpRender(); } };
+      mfp._onKeyDown = mfpKeyDown; mfp._onKeyUp = mfpKeyUp;
       window.addEventListener('resize', mfp._onResize);
       window.addEventListener('orientationchange', mfp._onResize);
+      window.addEventListener('keydown', mfp._onKeyDown);
+      window.addEventListener('keyup', mfp._onKeyUp);
     }
     function mfpUnbindCanvas() {
       const c = mfpCanvas();
@@ -3275,8 +3292,33 @@
       c.removeEventListener('contextmenu', mfpPreventCtx);
       if (mfp && mfp._ro) mfp._ro.disconnect();
       if (mfp && mfp._onResize) { window.removeEventListener('resize', mfp._onResize); window.removeEventListener('orientationchange', mfp._onResize); }
+      if (mfp && mfp._onKeyDown) { window.removeEventListener('keydown', mfp._onKeyDown); window.removeEventListener('keyup', mfp._onKeyUp); }
     }
     function mfpPreventCtx(e) { e.preventDefault(); }
+
+    // Which endpoint of the active line (if any) is under a css-space point.
+    function mfpHandleAt(key, css) {
+      const line = mfpLineFor(key);
+      if (!line) return null;
+      const b = mfpImgToCss(line.b);
+      if (Math.hypot(css.x - b.x, css.y - b.y) <= 18) return 'b';
+      const a = mfpImgToCss(line.a);
+      if (Math.hypot(css.x - a.x, css.y - a.y) <= 18) return 'a';
+      return null;
+    }
+    // Snap p so the segment from anchor is purely horizontal or vertical.
+    function mfpOrthoPoint(anchor, p) {
+      const dx = p.x - anchor.x, dy = p.y - anchor.y;
+      return Math.abs(dx) >= Math.abs(dy) ? { x: p.x, y: anchor.y } : { x: anchor.x, y: p.y };
+    }
+    // If a line was just started this gesture but isn't really drawn yet, drop it.
+    function mfpAbortPendingDraw() {
+      if (mfp.dragPoint && mfp.dragPoint.createdNew) {
+        const line = mfpLineFor(mfp.dragPoint.key);
+        if (!line || mfpImgDist(line.a, line.b) < 3) mfpSetLine(mfp.dragPoint.key, mfp.dragPoint.prev);
+      }
+      mfp.dragPoint = null;
+    }
 
     function mfpPointerDown(e) {
       if (!mfp || !mfp.bitmap) return;
@@ -3285,30 +3327,34 @@
       try { c.setPointerCapture(e.pointerId); } catch (_) {}
       mfp.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (mfp.pointers.size === 2) {
+        // two fingers → navigate; cancel any line we only just started
+        mfpAbortPendingDraw();
         const pts = [...mfp.pointers.values()];
         mfp.pinch = { dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y), cx: (pts[0].x + pts[1].x) / 2, cy: (pts[0].y + pts[1].y) / 2 };
-        mfp.dragPoint = null; mfp.panStart = null;
+        mfp.panStart = null;
+        mfpRender();
         return;
       }
       if (mfp.pointers.size > 2) return;
       const key = mfpEditableKey();
-      const wantPan = e.pointerType === 'mouse' && (e.button === 1 || e.button === 2 || e.shiftKey);
-      if (wantPan || !key) {
+      const mousePan = e.pointerType === 'mouse' && (e.button === 1 || e.button === 2);
+      const css = mfpClientToCss(e.clientX, e.clientY);
+      // In Draw mode, grabbing an existing endpoint always wins (fine-tune).
+      if (key && mfp.tool === 'draw' && !mfp.spaceDown && !mousePan) {
+        const grab = mfpHandleAt(key, css);
+        if (grab) { mfp.dragPoint = { key, pt: grab, createdNew: false, prev: null }; return; }
+      }
+      const wantPan = !key || mfp.tool === 'pan' || mfp.spaceDown || mousePan;
+      if (wantPan) {
         mfp.panStart = { x: e.clientX, y: e.clientY, panX: mfp.view.panX, panY: mfp.view.panY };
+        mfpUpdateCursor(true);
         return;
       }
-      // editing the current step's line
-      const css = mfpClientToCss(e.clientX, e.clientY);
-      const line = mfpLineFor(key);
-      if (line) {
-        const a = mfpImgToCss(line.a), b = mfpImgToCss(line.b);
-        if (Math.hypot(css.x - a.x, css.y - a.y) <= 16) { mfp.dragPoint = { key, pt: 'a' }; return; }
-        if (Math.hypot(css.x - b.x, css.y - b.y) <= 16) { mfp.dragPoint = { key, pt: 'b' }; return; }
-      }
-      // start a fresh line: anchor A, drag B
-      const img = mfpClientToImg(e.clientX, e.clientY);
+      // start a fresh line: anchor A, drag B (Shift / Straight constrains)
+      const prev = mfpLineFor(key);
+      let img = mfpClientToImg(e.clientX, e.clientY);
       mfpSetLine(key, { a: img, b: { x: img.x, y: img.y } });
-      mfp.dragPoint = { key, pt: 'b' };
+      mfp.dragPoint = { key, pt: 'b', createdNew: true, prev };
       mfpRender();
     }
     function mfpPointerMove(e) {
@@ -3326,7 +3372,15 @@
       }
       if (mfp.dragPoint) {
         const line = mfpLineFor(mfp.dragPoint.key);
-        if (line) { line[mfp.dragPoint.pt] = mfpClientToImg(e.clientX, e.clientY); mfpRender(); mfpLiveReadout(); }
+        if (line) {
+          let p = mfpClientToImg(e.clientX, e.clientY);
+          if (e.shiftKey || mfp.ortho) {
+            const anchor = mfp.dragPoint.pt === 'b' ? line.a : line.b;
+            p = mfpOrthoPoint(anchor, p);
+          }
+          line[mfp.dragPoint.pt] = p;
+          mfpRender(); mfpLiveReadout();
+        }
         return;
       }
       if (mfp.panStart) {
@@ -3341,10 +3395,60 @@
       try { mfpCanvas().releasePointerCapture(e.pointerId); } catch (_) {}
       if (mfp.pointers.size < 2) mfp.pinch = null;
       if (mfp.pointers.size === 0) {
-        const wasDrawing = !!mfp.dragPoint;
+        const dp = mfp.dragPoint;
+        if (dp && dp.createdNew) {
+          // a tap (no real drag) shouldn't leave a stray dot
+          const line = mfpLineFor(dp.key);
+          if (line && mfpImgDist(line.a, line.b) < 3) mfpSetLine(dp.key, dp.prev);
+        }
+        const wasInteract = !!mfp.dragPoint;
         mfp.dragPoint = null; mfp.panStart = null;
-        if (wasDrawing) { mfpSyncControls(); mfpSyncFooter(); }
+        mfpUpdateCursor();
+        if (wasInteract) { mfpRender(); mfpSyncControls(); mfpSyncFooter(); }
       }
+    }
+    function mfpKeyDown(e) {
+      if (!mfp) return;
+      if (e.key === 'Escape') { mfpCancelLine(); return; }
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      if (e.code === 'Space') { if (!mfp.spaceDown) { mfp.spaceDown = true; mfpUpdateCursor(); } e.preventDefault(); }
+      else if (e.key === 'o' || e.key === 'O') { mfpToggleOrtho(); }
+    }
+    function mfpKeyUp(e) {
+      if (!mfp) return;
+      if (e.code === 'Space') { mfp.spaceDown = false; mfpUpdateCursor(); }
+    }
+    function mfpCancelLine() {
+      if (!mfp) return;
+      const key = mfpEditableKey();
+      if (!key) return;
+      if (mfp.dragPoint && mfp.dragPoint.createdNew) { mfpSetLine(key, mfp.dragPoint.prev); mfp.dragPoint = null; }
+      else { mfpSetLine(key, null); if (key === 'cal') { mfp.pxPerCm = null; mfp.knownCm = null; } }
+      mfp.warn = '';
+      mfpUpdateCursor();
+      mfpRender(); mfpSyncControls(); mfpSyncFooter();
+    }
+    function mfpSetTool(t) {
+      if (!mfp) return;
+      mfp.tool = t; mfp.dragPoint = null; mfp.panStart = null;
+      mfpUpdateToolButtons(); mfpUpdateCursor();
+    }
+    function mfpToggleOrtho() {
+      if (!mfp) return;
+      mfp.ortho = !mfp.ortho; mfpUpdateToolButtons();
+    }
+    function mfpUpdateToolButtons() {
+      if (!mfp) return;
+      const d = document.getElementById('mfp-tool-draw'), p = document.getElementById('mfp-tool-pan'), o = document.getElementById('mfp-ortho');
+      if (d) d.classList.toggle('active', mfp.tool === 'draw');
+      if (p) p.classList.toggle('active', mfp.tool === 'pan');
+      if (o) o.classList.toggle('active', !!mfp.ortho);
+    }
+    function mfpUpdateCursor(panning) {
+      const c = mfpCanvas();
+      if (!c || !mfp) return;
+      const panMode = mfp.tool === 'pan' || mfp.spaceDown || !mfpEditableKey();
+      c.style.cursor = panning ? 'grabbing' : (panMode ? 'grab' : 'crosshair');
     }
     function mfpLiveReadout() {
       if (mfp.step !== 'measureW' && mfp.step !== 'measureH') return;
@@ -3372,6 +3476,7 @@
         if (!mfpLineValid(mfp.hLine)) { mfp.warn = 'Draw the second side (height) first.'; mfpSyncControls(); return; }
         mfp.step = 'result'; mfp.active = null;
       }
+      mfp.tool = 'draw';
       mfpSyncUI();
     }
     function mfpBack() {
@@ -3381,6 +3486,7 @@
       if (i <= 0) return;
       mfp.step = MFP_ORDER[i - 1];
       mfp.active = mfp.step === 'calibrating' ? 'cal' : mfp.step === 'measureW' ? 'w' : mfp.step === 'measureH' ? 'h' : null;
+      mfp.tool = 'draw';
       mfpSyncUI();
     }
     function mfpConfirmCalibration() {
@@ -3394,18 +3500,11 @@
       if (px < 0.05 * big) mfp.warn = 'Tip: a longer reference line gives more accurate results.';
       return true;
     }
-    function mfpRedoLine(key) {
-      if (!mfp) return;
-      mfpSetLine(key, null);
-      if (key === 'cal') { mfp.pxPerCm = null; mfp.knownCm = null; }
-      mfp.active = key; mfp.warn = '';
-      mfpRender(); mfpSyncControls();
-    }
     function mfpClearAll() {
       if (!mfp) return;
       mfp.calLine = mfp.wLine = mfp.hLine = null;
       mfp.pxPerCm = null; mfp.knownCm = null; mfp.knownVal = '';
-      mfp.step = 'calibrating'; mfp.active = 'cal'; mfp.warn = '';
+      mfp.step = 'calibrating'; mfp.active = 'cal'; mfp.warn = ''; mfp.tool = 'draw';
       mfpSyncUI();
     }
     function mfpSwapWH() {
@@ -3415,16 +3514,17 @@
     }
     function mfpMeasureAnother() {
       if (!mfp) return;
-      mfp.wLine = mfp.hLine = null; mfp.step = 'measureW'; mfp.active = 'w'; mfp.warn = '';
+      mfp.wLine = mfp.hLine = null; mfp.step = 'measureW'; mfp.active = 'w'; mfp.warn = ''; mfp.tool = 'draw';
       mfpSyncUI();
     }
 
     function mfpHint() {
+      const nav = '  ·  Two fingers / ✋ to move  ·  Shift = straight';
       switch (mfp.step) {
-        case 'calibrating': return 'Draw a line over a KNOWN distance (a labeled wall or the plan’s scale bar).';
+        case 'calibrating': return 'Draw a line over a KNOWN distance (a labeled wall or scale bar).' + nav;
         case 'enterKnownLength': return 'Now type how long that reference line is in real life.';
-        case 'measureW': return 'Draw a line across one side of the room.';
-        case 'measureH': return 'Draw a line across the other side of the room.';
+        case 'measureW': return 'Draw a line across one side of the room.' + nav;
+        case 'measureH': return 'Draw a line across the other side of the room.' + nav;
         case 'result': return 'Check the size, then insert it into a room.';
         default: return '';
       }
@@ -3433,6 +3533,10 @@
       mfpDrawSteps();
       const hintEl = document.getElementById('mfp-hint');
       if (hintEl) hintEl.textContent = mfpHint();
+      const toolsEl = document.getElementById('mfp-tools');
+      if (toolsEl) toolsEl.style.display = mfpEditableKey() ? 'flex' : 'none';
+      mfpUpdateToolButtons();
+      mfpUpdateCursor();
       mfpSyncControls(true);
       mfpSyncFooter();
       mfpRender();
@@ -3458,8 +3562,8 @@
       let html = '';
       if (mfp.step === 'calibrating') {
         html = mfp.calLine
-          ? `<span><span class="mfp-swatch" style="background:${MFP_COLORS.cal}"></span>Reference line drawn — drag its ends to fine-tune.</span> <button class="btn-additem" onclick="mfpRedoLine('cal')">Redo line</button>`
-          : `<span>Tap and drag on the plan to draw your reference line.</span>`;
+          ? `<span><span class="mfp-swatch" style="background:${MFP_COLORS.cal}"></span>Reference line drawn — drag its ends to fine-tune.</span> <button class="btn-additem" onclick="mfpCancelLine()">✕ Clear line</button>`
+          : `<span>Tap &amp; drag on the plan to draw your reference line.</span>`;
       } else if (mfp.step === 'enterKnownLength') {
         html = `<div class="mfp-known">
             <span><span class="mfp-swatch" style="background:${MFP_COLORS.cal}"></span>The reference line is</span>
@@ -3475,7 +3579,7 @@
         const tag = key === 'w' ? 'Width' : 'Height';
         const cm = mfpLineCm(mfpLineFor(key));
         html = `<span><span class="mfp-swatch" style="background:${MFP_COLORS[key]}"></span>${tag}: <strong class="mfp-live">${cm != null ? mfpFmt(cm) : '—'}</strong></span>`;
-        if (mfpLineFor(key)) html += ` <button class="btn-additem" onclick="mfpRedoLine('${key}')">Redo line</button>`;
+        if (mfpLineFor(key)) html += ` <button class="btn-additem" onclick="mfpCancelLine()">✕ Clear line</button>`;
       } else if (mfp.step === 'result') {
         html = mfpResultHtml();
       }
