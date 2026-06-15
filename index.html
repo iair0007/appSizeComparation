@@ -3077,6 +3077,7 @@
       const el = document.getElementById('f-xbed-item-' + idx);
       if (el) el.remove();
       _extraBeds = _extraBeds.filter(i => i !== idx);
+      _formImages.forEach(im => { if (im._mfpRooms) delete im._mfpRooms['xbed-' + idx]; });
       // Renumber remaining labels
       _extraBeds.forEach((i, pos) => {
         const lbl = document.querySelector(`#f-xbed-item-${i} .field-label`);
@@ -3157,7 +3158,7 @@
       { key:'measure',     label:'2 · Measure rooms' }
     ];
     const MFP_ORDER = ['calibrating','measure'];
-    const MFP_COLORS = { cal:'#e0a13a', w:'#5aa9ff', h:'#5fd17a' };
+    const MFP_COLORS = { cal:'#e0a13a', w:'#5aa9ff', h:'#5fd17a', done:'#b48bff' };
 
     let mfp = null;       // active session (null when closed)
     let mfpRaf = 0;
@@ -3338,6 +3339,8 @@
       if (mfp.calLine && mfp.step === 'calibrating')
         mfpDrawLine(ctx, mfp.calLine, MFP_COLORS.cal, mfp.knownCm ? 'ref ' + mfpFmt(mfp.knownCm) : 'reference');
       if (mfp.step === 'measure') {
+        // rooms already measured & saved (toggle with the "Rooms" button)
+        if (mfp.showRooms) mfpDrawSavedRooms(ctx);
         // already-banked parts of a composite room, dimmed
         if (mfp.parts.length) {
           ctx.save(); ctx.globalAlpha = 0.4;
@@ -3393,6 +3396,60 @@
         ctx.fillStyle = 'rgba(0,0,0,.74)'; mfpRoundRect(ctx, mx - w / 2, my - 11, w, 22, 6); ctx.fill();
         ctx.fillStyle = color; ctx.fillText(label, mx, my);
       }
+    }
+    // Faint outlines + area badges for rooms already saved on this floor plan.
+    function mfpDrawSavedRooms(ctx) {
+      const img = mfp.images[mfp.imgIdx];
+      const rooms = img && img._mfpRooms;
+      if (!rooms) return;
+      Object.keys(rooms).forEach(key => {
+        const r = rooms[key];
+        if (r.shape === 'rect' && r.rect) {
+          const a = mfpImgToCss(r.rect.a), b = mfpImgToCss(r.rect.b);
+          const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y);
+          ctx.save();
+          ctx.fillStyle = 'rgba(180,139,255,0.10)';
+          ctx.fillRect(x, y, w, h);
+          ctx.strokeStyle = 'rgba(180,139,255,0.55)';
+          ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+          ctx.strokeRect(x, y, w, h);
+          ctx.restore();
+        }
+        const c = mfpShapeCentroidImg(r);
+        if (!c) return;
+        const p = mfpImgToCss(c);
+        mfpDrawRoomBadge(ctx, p.x, p.y, r.label, r.areaM2);
+      });
+    }
+    // Rough center point (image space) of a saved room's geometry, for badge placement.
+    function mfpShapeCentroidImg(r) {
+      if (r.shape === 'rect' && r.rect) return { x: (r.rect.a.x + r.rect.b.x) / 2, y: (r.rect.a.y + r.rect.b.y) / 2 };
+      const pts = [];
+      if (r.wLine) pts.push(r.wLine.a, r.wLine.b);
+      if (r.hLine) pts.push(r.hLine.a, r.hLine.b);
+      (r.parts || []).forEach(part => {
+        if (part.rect) pts.push(part.rect.a, part.rect.b);
+        if (part.wLine) pts.push(part.wLine.a, part.wLine.b);
+        if (part.hLine) pts.push(part.hLine.a, part.hLine.b);
+      });
+      if (!pts.length) return null;
+      return { x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length };
+    }
+    // Small two-line "Room name / area" pill, used to mark already-measured rooms.
+    function mfpDrawRoomBadge(ctx, x, y, label, areaM2) {
+      const l1 = label, l2 = areaM2 + ' m²';
+      ctx.font = '600 11px Outfit, sans-serif';
+      const w1 = ctx.measureText(l1).width;
+      ctx.font = '700 12px Outfit, sans-serif';
+      const w2 = ctx.measureText(l2).width;
+      const w = Math.max(w1, w2) + 16, h = 36;
+      ctx.fillStyle = 'rgba(34,24,56,.82)';
+      mfpRoundRect(ctx, x - w / 2, y - h / 2, w, h, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(180,139,255,0.5)'; ctx.lineWidth = 1; ctx.setLineDash([]);
+      mfpRoundRect(ctx, x - w / 2, y - h / 2, w, h, 7); ctx.stroke();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = '600 11px Outfit, sans-serif'; ctx.fillStyle = MFP_COLORS.done; ctx.fillText(l1, x, y - 8);
+      ctx.font = '700 12px Outfit, sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(l2, x, y + 8);
     }
     function mfpRoundRect(ctx, x, y, w, h, r) {
       ctx.beginPath(); ctx.moveTo(x + r, y);
@@ -3775,6 +3832,7 @@
       mfp.showRooms = !mfp.showRooms;
       const b = document.getElementById('mfp-rooms'); if (b) b.classList.toggle('active', mfp.showRooms);
       mfpSyncControls();
+      mfpRender();
     }
     function mfpSyncUI() {
       mfpDrawSteps();
@@ -3910,6 +3968,17 @@
       const a = dimAreaFromInputs(key);
       return a != null ? a + ' m²' : '';
     }
+    // Remember this room's shape/area on the floor plan so it can be shown as "already measured".
+    function mfpSaveRoomShape(key, label) {
+      const img = mfp.images[mfp.imgIdx];
+      if (!img) return;
+      const snap = { shape: mfp.shape, label, areaM2: Math.round((mfpTotalAreaCm2() / 10000) * 10) / 10 };
+      if (mfp.shape === 'rect') snap.rect = mfp.rect;
+      else { snap.wLine = mfp.wLine; snap.hLine = mfp.hLine; }
+      if (mfp.parts.length) snap.parts = mfp.parts.map(p => ({ ...p }));
+      img._mfpRooms = img._mfpRooms || {};
+      img._mfpRooms[key] = snap;
+    }
     // Tap a room chip → write W×H into that room and loop for the next one.
     function mfpPick(key) {
       if (!mfp) return;
@@ -3920,6 +3989,7 @@
       updateDimResult(key);
       updateComputedPreview();
       const label = (mfpRoomTargets().find(r => r.key === key) || {}).label || key;
+      mfpSaveRoomShape(key, label);
       mfpAfterInsert(label);
     }
     // "+ New bedroom" → create a bedroom field and drop the size into it.
@@ -3928,7 +3998,10 @@
       const { W, H } = mfpInsertWH();
       if (W == null || H == null) return;
       addExtraBed(Math.round(W) + '×' + Math.round(H));
-      mfpAfterInsert('Bedroom ' + (_extraBeds.length + 2));
+      const idx = _extraBeds[_extraBeds.length - 1];
+      const label = 'Bedroom ' + (_extraBeds.length + 2);
+      mfpSaveRoomShape('xbed-' + idx, label);
+      mfpAfterInsert(label);
     }
     function mfpAfterInsert(label) {
       mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.parts = []; mfp.justSaved = label; mfp.warn = ''; mfp.tool = 'draw';
