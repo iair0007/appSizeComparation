@@ -1552,6 +1552,14 @@
       color: var(--txt); font-size: 1.05rem; cursor: pointer; line-height: 1;
     }
     .mfp-zoomctl button:hover { border-color: var(--gold); color: var(--gold); }
+    .mfp-stagebtns { position: absolute; left: 10px; top: 10px; display: flex; gap: .35rem; }
+    .mfp-stagebtns button {
+      height: 34px; padding: 0 .8rem; border-radius: 8px;
+      background: rgba(0,0,0,.6); border: 1px solid var(--line2);
+      color: var(--txt); font-size: .85rem; cursor: pointer; line-height: 1;
+      font-family: 'Outfit', sans-serif;
+    }
+    .mfp-stagebtns button:hover { border-color: var(--neg); color: var(--neg); }
     .mfp-controls { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; font-size: .86rem; color: var(--txt2); min-height: 24px; }
     .mfp-controls strong { color: var(--txt); }
     .mfp-known { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
@@ -1769,6 +1777,18 @@
               </div>
             </div>
           </div>
+          <!-- Photos & Floor plan -->
+          <div class="form-section">
+            <div class="form-section-title">Photos &amp; Floor plan</div>
+            <div id="f-images-list"></div>
+            <label class="img-upload-btn">
+              <input type="file" id="f-img-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(this)">
+              + Add photos / floor plan
+            </label>
+            <button type="button" id="mfp-launch-btn" class="btn-additem mfp-launch" onclick="openMeasureTool()" style="display:none">📐 Measure from floor plan</button>
+            <div id="mfp-launch-hint" style="font-size:.73rem;color:var(--txt3);margin-top:.4rem;display:none">Tick "Floor plan" on an image above to measure rooms from it.</div>
+            <div style="font-size:.73rem;color:var(--txt3);margin-top:.5rem">Images are resized and stored locally in your browser. Check "Floor plan" to mark a blueprint image.</div>
+          </div>
           <!-- Living areas -->
           <div class="form-section">
             <div class="form-section-title">Living areas <span class="dim-hint">width × height in cm</span></div>
@@ -1915,18 +1935,6 @@
             </div>
             <div class="computed-row" style="margin-top:.6rem">Service total: <strong id="f-svc-total">—</strong> m²</div>
           </div>
-          <!-- Photos & Floor plan -->
-          <div class="form-section">
-            <div class="form-section-title">Photos &amp; Floor plan</div>
-            <div id="f-images-list"></div>
-            <label class="img-upload-btn">
-              <input type="file" id="f-img-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(this)">
-              + Add photos / floor plan
-            </label>
-            <button type="button" id="mfp-launch-btn" class="btn-additem mfp-launch" onclick="openMeasureTool()" style="display:none">📐 Measure from floor plan</button>
-            <div id="mfp-launch-hint" style="font-size:.73rem;color:var(--txt3);margin-top:.4rem;display:none">Tick "Floor plan" on an image above to measure rooms from it.</div>
-            <div style="font-size:.73rem;color:var(--txt3);margin-top:.5rem">Images are resized and stored locally in your browser. Check "Floor plan" to mark a blueprint image.</div>
-          </div>
           <!-- Live summary -->
           <div class="computed-preview">
             <div>Interior total: <strong id="f-int-preview">—</strong> m²</div>
@@ -2054,12 +2062,17 @@
             <button type="button" id="mfp-tool-draw" class="mfp-tool active" onclick="mfpSetTool('draw')" title="Draw (tap & drag)">✏️ Draw</button>
             <button type="button" id="mfp-tool-pan" class="mfp-tool" onclick="mfpSetTool('pan')" title="Move / navigate the map">✋ Move</button>
             <button type="button" id="mfp-ortho" class="mfp-tool" onclick="mfpToggleOrtho()" title="Keep lines straight — horizontal/vertical (or hold Shift)">⊾ Straight</button>
+            <button type="button" id="mfp-rooms" class="mfp-tool" onclick="mfpToggleRooms()" title="Show / hide the room list and what you've measured">📋 Rooms</button>
+            <button type="button" id="mfp-help" class="mfp-tool" onclick="mfpToggleHint()" title="Show / hide help">？ Help</button>
           </div>
         </div>
         <div class="mfp-steps" id="mfp-steps"></div>
         <div class="mfp-stage">
           <canvas id="mfp-canvas"></canvas>
-          <div class="mfp-hint" id="mfp-hint"></div>
+          <div class="mfp-hint" id="mfp-hint" style="display:none"></div>
+          <div class="mfp-stagebtns" id="mfp-stagebtns">
+            <button type="button" id="mfp-undo" onclick="mfpUndo()" title="Undo / clear the last thing you drew" style="display:none">↶ Undo</button>
+          </div>
           <div class="mfp-zoomctl">
             <button type="button" onclick="mfpZoomBtn(1.35)" title="Zoom in">+</button>
             <button type="button" onclick="mfpZoomBtn(0.74)" title="Zoom out">−</button>
@@ -3128,7 +3141,7 @@
         tool: 'draw', shape: 'rect', ortho: false, spaceDown: false,
         pxPerCm: null, knownCm: null, knownVal: '', knownUnit: 'm',
         calLine: null, wLine: null, hLine: null, rect: null, rectSwap: false, parts: [], justSaved: null,
-        hintHidden: false, _hintStep: null, _calBoxShown: false,
+        hintHidden: true, showRooms: false, _calBoxShown: false,
         pointers: new Map(), pinch: null, dragPoint: null, panStart: null,
         warn: ''
       };
@@ -3292,6 +3305,7 @@
           if (mfp.hLine) mfpDrawLine(ctx, mfp.hLine, MFP_COLORS.h, mfpMeasLabel(mfp.hLine, 'H'));
         }
       }
+      mfpUpdateStageBtns();
     }
     function mfpMeasLabel(line, tag) { const cm = mfpLineCm(line); return cm != null ? tag + ' ' + mfpFmt(cm) : tag; }
     function mfpDrawRect(ctx, rect, noLabel) {
@@ -3579,14 +3593,8 @@
       mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.dragPoint = null; mfp.justSaved = null;
       mfpUpdateToolButtons();
       const o = document.getElementById('mfp-ortho'); if (o) o.style.display = (s === 'lines') ? '' : 'none';
-      const h = document.getElementById('mfp-hint');
-      if (h && !mfp.hintHidden) h.innerHTML = `<span>${mfpHint()}</span><button class="mfp-hint-x" onclick="mfpHideHint()" title="Hide">✕</button>`;
+      mfpRenderHint();   // keep help text current if it's open
       mfpSyncControls(); mfpRender();
-    }
-    function mfpHideHint() {
-      if (!mfp) return;
-      mfp.hintHidden = true;
-      const el = document.getElementById('mfp-hint'); if (el) el.style.display = 'none';
     }
     function mfpUpdateToolButtons() {
       if (!mfp) return;
@@ -3656,6 +3664,23 @@
       mfp.parts.pop();
       mfpSyncControls(); mfpRender();
     }
+    // Single visible Undo (works on touch): clears the last thing drawn.
+    function mfpUndo() {
+      if (!mfp) return;
+      if (mfp.step === 'calibrating') { mfpCancelLine(); return; }
+      if (mfp.wLine || mfp.hLine || mfp.rect) mfpCancelLine();
+      else if (mfp.parts.length) mfpUndoPart();
+    }
+    function mfpCanUndo() {
+      if (!mfp) return false;
+      if (mfp.step === 'calibrating') return !!mfp.calLine || !!(mfp.dragPoint && mfp.dragPoint.createdNew);
+      if (mfp.step === 'measure') return !!(mfp.wLine || mfp.hLine || mfp.rect || mfp.parts.length);
+      return false;
+    }
+    function mfpUpdateStageBtns() {
+      const u = document.getElementById('mfp-undo');
+      if (u && mfp) u.style.display = mfpCanUndo() ? '' : 'none';
+    }
     // Footer "Re-calibrate": forget this plan's scale and redraw the reference.
     function mfpClearAll() {
       if (!mfp) return;
@@ -3684,19 +3709,34 @@
       if (mfp.shape === 'rect') return 'Drag a box over a room, then tap the room to save it.  ·  L-shaped? Use “Add part”.  ·  Two fingers move.';
       return 'Draw the two sides of a room, then tap the room to save.  ·  L-shaped? Use “Add part”.  ·  Shift = straight.';
     }
+    // Render the help banner only when the user has asked for it.
+    function mfpRenderHint() {
+      const hintEl = document.getElementById('mfp-hint');
+      if (!hintEl || !mfp) return;
+      if (mfp.hintHidden) hintEl.style.display = 'none';
+      else { hintEl.style.display = 'flex'; hintEl.innerHTML = `<span>${mfpHint()}</span><button class="mfp-hint-x" onclick="mfpToggleHint()" title="Hide help">✕</button>`; }
+      const b = document.getElementById('mfp-help'); if (b) b.classList.toggle('active', !mfp.hintHidden);
+    }
+    function mfpToggleHint() {
+      if (!mfp) return;
+      mfp.hintHidden = !mfp.hintHidden;
+      mfpRenderHint();
+    }
+    function mfpToggleRooms() {
+      if (!mfp) return;
+      mfp.showRooms = !mfp.showRooms;
+      const b = document.getElementById('mfp-rooms'); if (b) b.classList.toggle('active', mfp.showRooms);
+      mfpSyncControls();
+    }
     function mfpSyncUI() {
       mfpDrawSteps();
-      // hint: reshow once per step; the user can dismiss it with the ✕
-      if (mfp._hintStep !== mfp.step) { mfp.hintHidden = false; mfp._hintStep = mfp.step; }
-      const hintEl = document.getElementById('mfp-hint');
-      if (hintEl) {
-        if (mfp.hintHidden) hintEl.style.display = 'none';
-        else { hintEl.style.display = 'flex'; hintEl.innerHTML = `<span>${mfpHint()}</span><button class="mfp-hint-x" onclick="mfpHideHint()" title="Hide">✕</button>`; }
-      }
+      mfpRenderHint();
       const toolsEl = document.getElementById('mfp-tools');
       if (toolsEl) toolsEl.style.display = mfpEditableKey() ? 'flex' : 'none';
       const shapesEl = document.getElementById('mfp-shapes');
       if (shapesEl) shapesEl.style.display = (mfp.step === 'measure') ? 'inline-flex' : 'none';
+      const roomsEl = document.getElementById('mfp-rooms');
+      if (roomsEl) { roomsEl.style.display = (mfp.step === 'measure') ? '' : 'none'; roomsEl.classList.toggle('active', mfp.showRooms); }
       const orthoEl = document.getElementById('mfp-ortho');
       if (orthoEl) orthoEl.style.display = (mfp.step === 'calibrating' || (mfp.step === 'measure' && mfp.shape === 'lines')) ? '' : 'none';
       mfpUpdateToolButtons();
@@ -3751,6 +3791,16 @@
       const ku = document.getElementById('mfp-known-unit');
       if (ku) ku.onchange = () => { mfp.knownUnit = ku.value; };
     }
+    // The room chip list: rooms still to do first, then "Already set" ones with sizes.
+    function mfpChipsHtml() {
+      const targets = mfpRoomTargets();
+      const todo = targets.filter(r => !mfpRoomDone(r.key));
+      const done = targets.filter(r => mfpRoomDone(r.key));
+      const chip = r => `<button type="button" class="mfp-roomchip${mfpRoomDone(r.key) ? ' mfp-roomchip-done' : ''}" onclick="mfpPick('${r.key}')">${mfpRoomDone(r.key) ? '✓ ' : ''}${r.label}${mfpRoomDone(r.key) ? ` <span class="mfp-chip-size">${mfpRoomSizeLabel(r.key)}</span>` : ''}</button>`;
+      const newChip = `<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNew()">＋ New bedroom</button>`;
+      const doneBar = done.length ? `<div class="mfp-donebar">Already set — tap to overwrite</div>` : '';
+      return `<div class="mfp-roomchips">${todo.map(chip).join('')}${newChip}${doneBar}${done.map(chip).join('')}</div>`;
+    }
     function mfpMeasureControlsHtml() {
       const { W, H } = mfpGetWH();
       const partsN = mfp.parts.length;
@@ -3772,12 +3822,6 @@
       }
       // a part is drawn, or parts already banked → show the room picker
       if (mfpHasAny()) {
-        const targets = mfpRoomTargets();
-        const todo = targets.filter(r => !mfpRoomDone(r.key));
-        const done = targets.filter(r => mfpRoomDone(r.key));
-        const chip = r => `<button type="button" class="mfp-roomchip${mfpRoomDone(r.key) ? ' mfp-roomchip-done' : ''}" onclick="mfpPick('${r.key}')">${mfpRoomDone(r.key) ? '✓ ' : ''}${r.label}${mfpRoomDone(r.key) ? ` <span class="mfp-chip-size">${mfpRoomSizeLabel(r.key)}</span>` : ''}</button>`;
-        const newChip = `<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNew()">＋ New bedroom</button>`;
-        const doneBar = done.length ? `<div class="mfp-donebar">Already set — tap to overwrite</div>` : '';
         const addPart = mfpHasMeasure() ? `<button class="btn-additem" onclick="mfpAddPart()" title="L-shaped room — bank this part, then draw the next">➕ Add part</button>` : '';
         const swap = partsN === 0 ? `<button class="btn-additem" onclick="mfpSwapWH()">⇄ Swap W/H</button>` : '';
         const partHint = (partsN > 0 && !mfpHasMeasure())
@@ -3788,10 +3832,9 @@
             ${addPart}${swap}
             <button class="btn-additem" onclick="mfpRedoRoom()">↶ Redo</button>
           </div>
-          ${partHint}
-          <div class="mfp-roomchips">${todo.map(chip).join('')}${newChip}${doneBar}${done.map(chip).join('')}</div>`;
+          ${partHint}${mfpChipsHtml()}`;
       }
-      // still drawing the first part
+      // idle (nothing being measured right now)
       let msg;
       if (mfp.shape === 'lines' && mfp.wLine) {
         msg = 'Now draw the other side. <button class="btn-additem" onclick="mfpCancelLine()">✕ Clear</button>';
@@ -3800,7 +3843,9 @@
       } else {
         msg = mfp.shape === 'rect' ? 'Drag a box over the room to measure it.' : 'Drag across one side of the room to start.';
       }
-      return sizeLine + `<div class="mfp-pick-hint">${msg}</div>`;
+      let out = sizeLine + `<div class="mfp-pick-hint">${msg}</div>`;
+      if (mfp.showRooms) out += `<div class="mfp-donebar" style="margin-top:.5rem">Your rooms — measure one, then tap it to fill</div>${mfpChipsHtml()}`;
+      return out;
     }
     function mfpRoomTargets() {
       const list = DIM_ROOMS.map(k => ({ key: k, label: MFP_ROOM_LABELS[k] || k }));
