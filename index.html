@@ -2623,16 +2623,16 @@
     });
     function drawMetric() {
       const ks = activeList(); const ms = METRIC_ORDER.filter(m => metricsOn[m]);
-      chMetric.data.labels = ks.map(k => DATA[k].label);
-      chMetric.data.datasets = ms.map(m => ({
-        label: METRICS[m].label,
-        data: ks.map(k => r1(METRICS[m].get(DATA[k]))),
-        backgroundColor: METRICS[m].color,
+      chMetric.data.labels = ms.map(m => METRICS[m].label);
+      chMetric.data.datasets = ks.map(k => ({
+        label: DATA[k].label,
+        data: ms.map(m => r1(METRICS[m].get(DATA[k]))),
+        backgroundColor: DATA[k].color,
         borderRadius: 6, maxBarThickness: 48
       }));
       chMetric.update();
-      document.getElementById('metricLegend').innerHTML = ms.map(m =>
-        `<span><span class="sw" style="background:${METRICS[m].color}"></span>${METRICS[m].label}</span>`).join('');
+      document.getElementById('metricLegend').innerHTML = ks.map(k =>
+        `<span><span class="sw" style="background:${DATA[k].color}"></span>${DATA[k].label}</span>`).join('');
       const names = ms.map(m => METRICS[m].label.toLowerCase());
       let txt;
       if (names.length === 0) txt = 'Select at least one measure above.';
