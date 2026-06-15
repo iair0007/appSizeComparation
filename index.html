@@ -4326,7 +4326,7 @@
       const interior = r1(living + kitchen + hallway + bedTotal + svcTotal);
       const tempApt = {
         key: _editKey || '_new_', label: document.getElementById('f-label').value || 'New apartment',
-        price: nv('f-price'), beds: parseInt(document.getElementById('f-beds').value) || 0,
+        price: nv('f-price'), beds: 2 + liveExtraForGen.length,
         balcony: ga('balcony'), interior,
         cat: { living, kitchen, bedrooms: bedTotal, service: svcTotal, hallway },
         bedList: beds, service: svc
