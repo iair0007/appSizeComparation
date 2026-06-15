@@ -3158,7 +3158,7 @@
       { key:'measure',     label:'2 · Measure rooms' }
     ];
     const MFP_ORDER = ['calibrating','measure'];
-    const MFP_COLORS = { cal:'#e0a13a', w:'#5aa9ff', h:'#5fd17a', done:'#b48bff' };
+    const MFP_COLORS = { cal:'#e0a13a', w:'#5aa9ff', h:'#5fd17a', done:'#ffd54f' };
 
     let mfp = null;       // active session (null when closed)
     let mfpRaf = 0;
@@ -3398,40 +3398,56 @@
       }
     }
     // Faint outlines + area badges for rooms already saved on this floor plan.
+    // L-shaped (multi-part) rooms are drawn as all their rectangles together,
+    // with a single badge for the whole room's total area.
     function mfpDrawSavedRooms(ctx) {
       const img = mfp.images[mfp.imgIdx];
       const rooms = img && img._mfpRooms;
       if (!rooms) return;
       Object.keys(rooms).forEach(key => {
         const r = rooms[key];
-        if (r.shape === 'rect' && r.rect) {
-          const a = mfpImgToCss(r.rect.a), b = mfpImgToCss(r.rect.b);
+        const rects = mfpSavedRoomRects(r);
+        rects.forEach(rect => {
+          const a = mfpImgToCss(rect.a), b = mfpImgToCss(rect.b);
           const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y);
           ctx.save();
-          ctx.fillStyle = 'rgba(180,139,255,0.10)';
+          ctx.fillStyle = 'rgba(255,213,79,0.12)';
           ctx.fillRect(x, y, w, h);
-          ctx.strokeStyle = 'rgba(180,139,255,0.55)';
+          ctx.strokeStyle = 'rgba(255,213,79,0.6)';
           ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
           ctx.strokeRect(x, y, w, h);
           ctx.restore();
-        }
-        const c = mfpShapeCentroidImg(r);
+        });
+        const c = mfpShapeCentroidImg(r, rects);
         if (!c) return;
         const p = mfpImgToCss(c);
         mfpDrawRoomBadge(ctx, p.x, p.y, r.label, r.areaM2);
       });
     }
-    // Rough center point (image space) of a saved room's geometry, for badge placement.
-    function mfpShapeCentroidImg(r) {
-      if (r.shape === 'rect' && r.rect) return { x: (r.rect.a.x + r.rect.b.x) / 2, y: (r.rect.a.y + r.rect.b.y) / 2 };
+    // All rectangles making up a saved room (handles plain boxes and L-shaped/composite rooms).
+    function mfpSavedRoomRects(r) {
+      const rects = [];
+      (r.parts || []).forEach(part => { if (part.rect) rects.push(part.rect); });
+      if (r.rect) rects.push(r.rect);
+      if (r.rects) rects.push(...r.rects);
+      return rects;
+    }
+    // Center point (image space) of a saved room's geometry, for badge placement.
+    // For multi-rect (L-shaped) rooms this is the center of the combined bounding box.
+    function mfpShapeCentroidImg(r, rects) {
+      if (rects && rects.length) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        rects.forEach(rect => {
+          [rect.a, rect.b].forEach(p => {
+            minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+            minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+          });
+        });
+        return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+      }
       const pts = [];
       if (r.wLine) pts.push(r.wLine.a, r.wLine.b);
       if (r.hLine) pts.push(r.hLine.a, r.hLine.b);
-      (r.parts || []).forEach(part => {
-        if (part.rect) pts.push(part.rect.a, part.rect.b);
-        if (part.wLine) pts.push(part.wLine.a, part.wLine.b);
-        if (part.hLine) pts.push(part.hLine.a, part.hLine.b);
-      });
       if (!pts.length) return null;
       return { x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length };
     }
@@ -3443,9 +3459,9 @@
       ctx.font = '700 12px Outfit, sans-serif';
       const w2 = ctx.measureText(l2).width;
       const w = Math.max(w1, w2) + 16, h = 36;
-      ctx.fillStyle = 'rgba(34,24,56,.82)';
+      ctx.fillStyle = 'rgba(46,38,16,.82)';
       mfpRoundRect(ctx, x - w / 2, y - h / 2, w, h, 7); ctx.fill();
-      ctx.strokeStyle = 'rgba(180,139,255,0.5)'; ctx.lineWidth = 1; ctx.setLineDash([]);
+      ctx.strokeStyle = 'rgba(255,213,79,0.6)'; ctx.lineWidth = 1; ctx.setLineDash([]);
       mfpRoundRect(ctx, x - w / 2, y - h / 2, w, h, 7); ctx.stroke();
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.font = '600 11px Outfit, sans-serif'; ctx.fillStyle = MFP_COLORS.done; ctx.fillText(l1, x, y - 8);
