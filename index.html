@@ -3188,7 +3188,7 @@
         view: { zoom: 1, panX: 0, panY: 0 },
         step: 'calibrating', active: 'cal',
         tool: 'draw', shape: 'rect', ortho: false, spaceDown: false,
-        pxPerCm: null, knownCm: null, knownVal: '', knownUnit: 'm',
+        pxPerCm: null, knownCm: null, knownVal: '', knownUnit: 'cm',
         calLine: null, wLine: null, hLine: null, rect: null, rectSwap: false, parts: [], justSaved: null,
         hintHidden: true, showRooms: false, _calBoxShown: false,
         pointers: new Map(), pinch: null, dragPoint: null, panStart: null,
@@ -3212,7 +3212,7 @@
       const cal = img && img._mfpCal;
       if (cal && cal.pxPerCm > 0) {
         mfp.pxPerCm = cal.pxPerCm; mfp.knownCm = cal.knownCm;
-        mfp.knownVal = cal.knownVal || ''; mfp.knownUnit = cal.knownUnit || 'm';
+        mfp.knownVal = cal.knownVal || ''; mfp.knownUnit = cal.knownUnit || 'cm';
         mfp.calLine = cal.calLine || null;
         mfp.step = 'measure'; mfp.active = 'measure';
         return true;
