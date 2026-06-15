@@ -3325,8 +3325,8 @@
       if (mfp.calLine && mfp.step === 'calibrating')
         mfpDrawLine(ctx, mfp.calLine, MFP_COLORS.cal, mfp.knownCm ? 'ref ' + mfpFmt(mfp.knownCm) : 'reference');
       if (mfp.step === 'measure') {
-        // rooms already measured & saved (toggle with the "Rooms" button)
-        if (mfp.showRooms) mfpDrawSavedRooms(ctx);
+        // rooms already measured & saved on this floor plan — shown automatically
+        mfpDrawSavedRooms(ctx);
         // already-banked parts of a composite room, dimmed
         if (mfp.parts.length) {
           ctx.save(); ctx.globalAlpha = 0.4;
