@@ -1443,6 +1443,14 @@
       font-size: .72rem; transition: all .2s; white-space: nowrap; flex-shrink: 0;
     }
     .extra-bed-item .rm-btn:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
+    /* extra hallway item */
+    .extra-hall-item .rm-btn {
+      background: var(--panel2); border: 1px solid var(--line2);
+      color: var(--txt3); border-radius: 6px; padding: .22rem .6rem;
+      cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-size: .72rem; transition: all .2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .extra-hall-item .rm-btn:hover { color: var(--neg); border-color: rgba(217,122,90,.4); }
     /* image upload */
     .img-upload-btn {
       display: inline-flex; align-items: center; gap: .5rem;
@@ -1854,6 +1862,10 @@
                 <span class="dim-result" id="f-hallway-m2">—</span>
               </div>
             </div>
+            <!-- Dynamic extra hallways -->
+            <div id="f-extra-hallways"></div>
+            <button type="button" class="btn-additem" onclick="addExtraHallway()" style="margin-top:.4rem">+ Add hallway</button>
+            <div class="computed-row" style="margin-top:.4rem">Hallway total: <strong id="f-hallway-total">—</strong> m²</div>
           </div>
           <!-- Bedrooms -->
           <div class="form-section">
@@ -2758,7 +2770,10 @@
           { name: 'Master closet', hertzog: [2.5, '170×150'], Liors_apartment: [2.1, '190×110'], Katzir_10: [2.9, '185×159'], Golda_floor_9: [2.7, '195×140'], Golda_floor_12: [2.7, '195×140'], Anesiim_42: [3.4, '200×170'], katzir_22: [2.6, '175×150'] },
           { name: 'Third bathroom', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [0.9, '109×80'], Golda_floor_9: [1.4, '170×85', 'Shower'], Golda_floor_12: [1.4, '170×85', 'Shower'], Anesiim_42: [1.9, '190×100', 'Shower'], katzir_22: [1.6, '175×90', 'Shower'] },
           { name: 'Laundry room', hertzog: [2.0, '90×220'], Liors_apartment: [2.3, '175×130'], Katzir_10: [2.1, '98×216'], Golda_floor_9: [3.7, '282×130'], Golda_floor_12: [3.7, '282×130'], Anesiim_42: [2.2, '165×135'], katzir_22: [3.2, '230×140'] },
-          { name: 'Hallway', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [6.6, '229×290'], Golda_floor_9: [null, ''], Golda_floor_12: [null, ''], Anesiim_42: [null, ''], katzir_22: [null, ''] }
+          { name: 'Hallway 1', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [6.6, '229×290'], Golda_floor_9: [null, ''], Golda_floor_12: [null, ''], Anesiim_42: [null, ''], katzir_22: [null, ''] },
+          { name: 'Hallway 2', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [null, ''], Golda_floor_9: [null, ''], Golda_floor_12: [null, ''], Anesiim_42: [null, ''], katzir_22: [null, ''] },
+          { name: 'Hallway 3', hertzog: [null, ''], Liors_apartment: [null, ''], Katzir_10: [null, ''], Golda_floor_9: [null, ''], Golda_floor_12: [null, ''], Anesiim_42: [null, ''], katzir_22: [null, ''] },
+          { name: 'Hallway total', subtotal: true, catKey: 'hallway', hertzog: [0, ''], Liors_apartment: [0, ''], Katzir_10: [6.6, ''], Golda_floor_9: [0, ''], Golda_floor_12: [0, ''], Anesiim_42: [0, ''], katzir_22: [0, ''] }
         ]
       },
       {
@@ -2774,7 +2789,7 @@
 
     const ROW_TO_DIM_TABLE = {
       'Living room': 'living', 'Dining area': 'dining', 'Extra living space': 'extraliving',
-      'Kitchen': 'kitchen', 'Hallway': 'hallway',
+      'Kitchen': 'kitchen', 'Hallway 1': 'hallway', 'Hallway 2': 'hall2', 'Hallway 3': 'hall3',
       'Master bedroom': 'master', 'Bedroom 2': 'bed2', 'Bedroom 3': 'bed3', 'Bedroom 4': 'bed4',
       'Main bathroom': 'mainbath', 'Master bathroom': 'masterbath', 'Master closet': 'closet',
       'Third bathroom': 'thirdbath', 'Laundry room': 'laundry', 'Balcony': 'balcony'
@@ -2834,16 +2849,17 @@
         html += `<div class="rt-group">${g.group}</div>`;
         g.rows.forEach(row => {
           if (row.subtotal) {
+            const catKey = row.catKey || 'living';
             html += `<div class="rt-subtotal" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span></div>`;
             cols.forEach(k => {
               const isCurr = DATA[k].current;
-              // Fall back to computed cat.living for new apartments
-              const rawVal = row[k]?.[0] ?? DATA[k]?.cat?.living;
+              // Fall back to the computed category total for new apartments
+              const rawVal = row[k]?.[0] ?? DATA[k]?.cat?.[catKey];
               let dh = '';
               if (showVs && bk && cols.includes(bk)) {
                 if (isCurr) dh = '<span class="vsh eq">baseline</span>';
                 else {
-                  const hv = row[bk]?.[0] ?? DATA[bk]?.cat?.living;
+                  const hv = row[bk]?.[0] ?? DATA[bk]?.cat?.[catKey];
                   if (hv != null && rawVal != null) {
                     const d = r1(rawVal - hv);
                     const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
@@ -3031,6 +3047,8 @@
     let _editKey = null;
     let _extraBeds = [];   // indices of active extra bed slots
     let _extraBedSeq = 0;  // ever-increasing counter for unique IDs
+    let _extraHallways = [];  // indices of active extra hallway slots
+    let _extraHallwaySeq = 0; // ever-increasing counter for unique IDs
     let _formImages = [];  // { name, label, isFloorPlan, data }
 
     // ── Dynamic extra bedrooms ────────────────────────────────────────────────
@@ -3068,6 +3086,45 @@
       _extraBeds.forEach((i, pos) => {
         const lbl = document.querySelector(`#f-xbed-item-${i} .field-label`);
         if (lbl) lbl.childNodes[0].textContent = 'Bedroom ' + (pos + 3);
+      });
+      updateComputedPreview();
+    }
+
+    // ── Dynamic extra hallways ─────────────────────────────────────────────
+    function addExtraHallway(dimStr = null) {
+      const idx = _extraHallwaySeq++;
+      _extraHallways.push(idx);
+      const hallNum = _extraHallways.length + 1; // display number (2, 3…)
+      const container = document.getElementById('f-extra-hallways');
+      container.insertAdjacentHTML('beforeend', `
+        <div class="dim-field extra-hall-item" id="f-xhall-item-${idx}">
+          <div class="field-label">Hallway ${hallNum}</div>
+          <div class="dim-row">
+            <input type="number" id="f-xhall-${idx}-w" placeholder="W" min="0" step="1" class="dim-w">
+            <span class="dim-sep">×</span>
+            <input type="number" id="f-xhall-${idx}-h" placeholder="H" min="0" step="1" class="dim-h">
+            <span class="dim-unit">cm</span>
+            <span class="dim-result" id="f-xhall-${idx}-m2">—</span>
+            <button type="button" class="rm-btn" onclick="removeExtraHallway(${idx})">✕ Remove</button>
+          </div>
+        </div>`);
+      if (dimStr) setDimInputs('xhall-' + idx, dimStr);
+      ['f-xhall-'+idx+'-w','f-xhall-'+idx+'-h'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateComputedPreview);
+      });
+      updateComputedPreview();
+    }
+
+    function removeExtraHallway(idx) {
+      const el = document.getElementById('f-xhall-item-' + idx);
+      if (el) el.remove();
+      _extraHallways = _extraHallways.filter(i => i !== idx);
+      _formImages.forEach(im => { if (im._mfpRooms) delete im._mfpRooms['xhall-' + idx]; });
+      // Renumber remaining labels
+      _extraHallways.forEach((i, pos) => {
+        const lbl = document.querySelector(`#f-xhall-item-${i} .field-label`);
+        if (lbl) lbl.childNodes[0].textContent = 'Hallway ' + (pos + 2);
       });
       updateComputedPreview();
     }
@@ -3906,8 +3963,9 @@
       const done = targets.filter(r => mfpRoomDone(r.key));
       const chip = r => `<button type="button" class="mfp-roomchip${mfpRoomDone(r.key) ? ' mfp-roomchip-done' : ''}" onclick="mfpPick('${r.key}')">${mfpRoomDone(r.key) ? '✓ ' : ''}${r.label}${mfpRoomDone(r.key) ? ` <span class="mfp-chip-size">${mfpRoomSizeLabel(r.key)}</span>` : ''}</button>`;
       const newChip = `<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNew()">＋ New bedroom</button>`;
+      const newHallChip = `<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNewHallway()">＋ New hallway</button>`;
       const doneBar = done.length ? `<div class="mfp-donebar">Already set — tap to overwrite</div>` : '';
-      return `<div class="mfp-roomchips">${todo.map(chip).join('')}${newChip}${doneBar}${done.map(chip).join('')}</div>`;
+      return `<div class="mfp-roomchips">${todo.map(chip).join('')}${newChip}${newHallChip}${doneBar}${done.map(chip).join('')}</div>`;
     }
     function mfpMeasureControlsHtml() {
       const { W, H } = mfpGetWH();
@@ -3959,6 +4017,8 @@
       const list = DIM_ROOMS.map(k => ({ key: k, label: MFP_ROOM_LABELS[k] || k }));
       _extraBeds.filter(idx => document.getElementById('f-xbed-item-' + idx))
         .forEach((idx, pos) => list.push({ key: 'xbed-' + idx, label: 'Bedroom ' + (pos + 3) }));
+      _extraHallways.filter(idx => document.getElementById('f-xhall-item-' + idx))
+        .forEach((idx, pos) => list.push({ key: 'xhall-' + idx, label: 'Hallway ' + (pos + 2) }));
       return list;
     }
     // A room is "done" once both its W and H inputs are filled.
@@ -4005,6 +4065,17 @@
       mfpSaveRoomShape('xbed-' + idx, label);
       mfpAfterInsert(label);
     }
+    // "+ New hallway" → create a hallway field and drop the size into it.
+    function mfpPickNewHallway() {
+      if (!mfp) return;
+      const { W, H } = mfpInsertWH();
+      if (W == null || H == null) return;
+      addExtraHallway(Math.round(W) + '×' + Math.round(H));
+      const idx = _extraHallways[_extraHallways.length - 1];
+      const label = 'Hallway ' + (_extraHallways.length + 1);
+      mfpSaveRoomShape('xhall-' + idx, label);
+      mfpAfterInsert(label);
+    }
     function mfpAfterInsert(label) {
       mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.parts = []; mfp.justSaved = label; mfp.warn = ''; mfp.tool = 'draw';
       mfpSyncControls(); mfpSyncFooter(); mfpRender();
@@ -4049,6 +4120,15 @@
       return (w != null && h != null) ? (Math.round(w) + '×' + Math.round(h)) : null;
     }
 
+    function dimAreaFromXHall(idx) {
+      const w = nv('f-xhall-' + idx + '-w'), h = nv('f-xhall-' + idx + '-h');
+      return (w != null && h != null) ? r1(w * h / 10000) : null;
+    }
+    function dimStrFromXHall(idx) {
+      const w = nv('f-xhall-' + idx + '-w'), h = nv('f-xhall-' + idx + '-h');
+      return (w != null && h != null) ? (Math.round(w) + '×' + Math.round(h)) : null;
+    }
+
     function updateComputedPreview() {
       DIM_ROOMS.forEach(k => updateDimResult(k));
       // Update extra beds
@@ -4059,11 +4139,22 @@
         const res = document.getElementById('f-xbed-' + idx + '-m2');
         if (res) { res.textContent = area != null ? area + ' m²' : '—'; res.classList.toggle('has-val', area != null); }
       });
+      // Update extra hallways
+      _extraHallways.forEach(idx => {
+        const el = document.getElementById('f-xhall-item-' + idx);
+        if (!el) return;
+        const area = dimAreaFromXHall(idx);
+        const res = document.getElementById('f-xhall-' + idx + '-m2');
+        if (res) { res.textContent = area != null ? area + ' m²' : '—'; res.classList.toggle('has-val', area != null); }
+      });
       const livingZone = (dimAreaFromInputs('living')      ?? 0)
                        + (dimAreaFromInputs('dining')      ?? 0)
                        + (dimAreaFromInputs('extraliving') ?? 0);
       const kitchen = dimAreaFromInputs('kitchen')   ?? 0;
-      const hallway = dimAreaFromInputs('hallway')   ?? 0;
+      const extraHallAreas = _extraHallways
+        .filter(idx => document.getElementById('f-xhall-item-' + idx))
+        .map(idx => dimAreaFromXHall(idx) ?? 0);
+      const hallway = (dimAreaFromInputs('hallway') ?? 0) + extraHallAreas.reduce((s, v) => s + v, 0);
       const fixedBeds = ['bed1','bed2'].map(k => dimAreaFromInputs(k) ?? 0);
       const extraBedAreas = _extraBeds
         .filter(idx => document.getElementById('f-xbed-item-' + idx))
@@ -4077,6 +4168,8 @@
       const interior = r1(livingZone + kitchen + hallway + bedTotal + svc);
       const livingTotalEl = document.getElementById('f-living-total');
       if (livingTotalEl) livingTotalEl.textContent = r1(livingZone) + ' m²';
+      const hallwayTotalEl = document.getElementById('f-hallway-total');
+      if (hallwayTotalEl) hallwayTotalEl.textContent = r1(hallway) + ' m²';
       const balcony = dimAreaFromInputs('balcony') ?? 0;
       // Auto-fill room count: 1 living + fixed beds (2) + extra beds
       const totalBedCount = 2 + extraBedAreas.length;
@@ -4117,8 +4210,11 @@
 
     function openAptModal(key = null) {
       _editKey = key;
-      _extraBeds = []; _extraBedSeq = 0; _formImages = [];
+      _extraBeds = []; _extraBedSeq = 0;
+      _extraHallways = []; _extraHallwaySeq = 0;
+      _formImages = [];
       document.getElementById('f-extra-beds').innerHTML = '';
+      document.getElementById('f-extra-hallways').innerHTML = '';
       document.getElementById('f-images-list').innerHTML = '';
       mfpUpdateLaunchBtn();
       document.getElementById('aptForm').reset();
@@ -4145,6 +4241,10 @@
         setDimInputs('extraliving', aptDimStr(key, 'extraliving'));
         setDimInputs('kitchen',   aptDimStr(key, 'kitchen'));
         setDimInputs('hallway',   aptDimStr(key, 'hallway'));
+        // Extra hallways from hallwayList[1+]
+        const extraHallDimKeys = ['hall2','hall3','hall4','hall5'];
+        const extraHallCount = Math.max(0, (a.hallwayList || []).length - 1);
+        for (let i = 0; i < extraHallCount; i++) addExtraHallway(aptDimStr(key, extraHallDimKeys[i]));
         setDimInputs('mainbath',  aptDimStr(key, 'mainbath'));
         setDimInputs('masterbath',aptDimStr(key, 'masterbath'));
         setDimInputs('closet',    aptDimStr(key, 'closet'));
@@ -4187,6 +4287,10 @@
       const totalBedCount = 2 + liveExtra.length;
       const extraDims = {};
       liveExtra.forEach((idx, pos) => { const d = dimStrFromXBed(idx); if (d) extraDims['bed' + (pos + 3)] = d; });
+      const liveExtraHall = _extraHallways.filter(idx => document.getElementById('f-xhall-item-' + idx));
+      const hallwayList = [dimAreaFromInputs('hallway'), ...liveExtraHall.map(idx => dimAreaFromXHall(idx))];
+      const extraHallDims = {};
+      liveExtraHall.forEach((idx, pos) => { const d = dimStrFromXHall(idx); if (d) extraHallDims['hall' + (pos + 2)] = d; });
       const apt = {
         key, label,
         num: _editKey ? DATA[_editKey].num : ORDER.length,
@@ -4197,8 +4301,9 @@
         rooms: 1 + totalBedCount,
         beds: totalBedCount,
         balcony: dimAreaFromInputs('balcony') ?? 0,
-        cat: { living: r1(ga('living') + ga('dining') + ga('extraliving')), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: ga('hallway') },
+        cat: { living: r1(ga('living') + ga('dining') + ga('extraliving')), kitchen: ga('kitchen'), bedrooms: 0, service: 0, hallway: r1(hallwayList.reduce((s, v) => s + (v ?? 0), 0)) },
         bedList: beds,
+        hallwayList,
         service: { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath'), laundry: dimAreaFromInputs('laundry') },
         hasShower: document.getElementById('f-hasshower').checked,
         interior: 0,
@@ -4208,7 +4313,7 @@
           master: gd('bed1'), bed2: gd('bed2'),
           mainbath: gd('mainbath'), masterbath: gd('masterbath'), closet: gd('closet'),
           thirdbath: gd('thirdbath'), laundry: gd('laundry'), balcony: gd('balcony'),
-          ...extraDims
+          ...extraDims, ...extraHallDims
         },
         images: _formImages
       };
@@ -4324,7 +4429,9 @@
       const svc = { mainBath: ga('mainbath'), masterBath: ga('masterbath'), closet: ga('closet'), thirdBath: dimAreaFromInputs('thirdbath') };
       const bedTotal = beds.reduce((s, v) => s + (v ?? 0), 0);
       const svcTotal = svc.mainBath + svc.masterBath + svc.closet + (svc.thirdBath ?? 0);
-      const living = ga('living'), kitchen = ga('kitchen'), hallway = ga('hallway');
+      const living = ga('living'), kitchen = ga('kitchen');
+      const liveExtraHallForGen = _extraHallways.filter(idx => document.getElementById('f-xhall-item-' + idx));
+      const hallway = ga('hallway') + liveExtraHallForGen.reduce((s, idx) => s + (dimAreaFromXHall(idx) ?? 0), 0);
       const interior = r1(living + kitchen + hallway + bedTotal + svcTotal);
       const tempApt = {
         key: _editKey || '_new_', label: document.getElementById('f-label').value || 'New apartment',
