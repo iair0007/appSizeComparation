@@ -2214,12 +2214,18 @@
       return res.json();
     }
 
+    const DIRTY_KEY = 'apt_data_dirty';
+    function markDirty() { localStorage.setItem(DIRTY_KEY, '1'); }
+    function clearDirty() { localStorage.removeItem(DIRTY_KEY); }
+    function isDirty() { return localStorage.getItem(DIRTY_KEY) === '1'; }
+
     async function pushToGist() {
       const cfg = getGistCfg(); if (!cfg) return;
       const content = JSON.stringify({ DATA, VERDICTS, ORDER });
       try {
         setSyncStatus('Syncing…', 'busy');
         await gistFetch(cfg.token, cfg.gistId, { files: { [GIST_FILE]: { content } } });
+        clearDirty();
         setSyncStatus('✓ Synced', 'ok');
       } catch (e) {
         setSyncStatus('Sync error — check settings', 'err');
@@ -2237,11 +2243,12 @@
     function saveStore() {
       const payload = { DATA, VERDICTS, ORDER };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      markDirty();
       const cfg = getGistCfg();
       if (cfg) pushToGist();
     }
 
-    function loadStore() {
+    async function loadStore() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         try { const s = JSON.parse(raw); DATA = s.DATA; VERDICTS = s.VERDICTS; ORDER = s.ORDER; }
@@ -2254,20 +2261,27 @@
       }
       active = {};
       ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
-      // If Gist configured, pull latest in background and refresh UI
+      // If Gist configured, sync with it. If local data has unsynced changes
+      // (e.g. a save that hasn't reached the Gist yet), push those first
+      // instead of pulling and overwriting them.
       const cfg = getGistCfg();
       if (cfg) {
         setSyncStatus('Syncing…', 'busy');
-        pullFromGist(cfg.token, cfg.gistId).then(s => {
-          DATA = s.DATA; VERDICTS = s.VERDICTS; ORDER = s.ORDER;
-          active = {}; ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
-          buildHero(); buildAptChips(); redrawAll();
-          setSyncStatus('✓ Synced', 'ok');
-        }).catch(e => {
+        try {
+          if (isDirty()) {
+            await pushToGist();
+          } else {
+            const s = await pullFromGist(cfg.token, cfg.gistId);
+            DATA = s.DATA; VERDICTS = s.VERDICTS; ORDER = s.ORDER;
+            active = {}; ORDER.forEach(k => { if (DATA[k]) active[k] = true; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ DATA, VERDICTS, ORDER }));
+            buildHero(); buildAptChips(); redrawAll();
+            setSyncStatus('✓ Synced', 'ok');
+          }
+        } catch (e) {
           setSyncStatus('Sync error — check settings', 'err');
-          console.error('Gist pull error', e);
-        });
+          console.error('Gist sync error', e);
+        }
       }
     }
 
