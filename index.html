@@ -1587,6 +1587,7 @@
     .mfp-roomchip-done:hover { color: var(--pos); border-color: var(--pos); background: rgba(155,207,79,.16); }
     .mfp-chip-size { color: var(--txt3); font-size: .72rem; margin-left: .25rem; }
     .mfp-donebar { width: 100%; font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; color: var(--txt3); margin: .3rem 0 0; }
+    .mfp-parts-note { color: var(--txt3); font-weight: 400; font-size: .78rem; }
   </style>
 </head>
 
@@ -3126,7 +3127,7 @@
         step: 'calibrating', active: 'cal',
         tool: 'draw', shape: 'rect', ortho: false, spaceDown: false,
         pxPerCm: null, knownCm: null, knownVal: '', knownUnit: 'm',
-        calLine: null, wLine: null, hLine: null, rect: null, rectSwap: false, justSaved: null,
+        calLine: null, wLine: null, hLine: null, rect: null, rectSwap: false, parts: [], justSaved: null,
         hintHidden: false, _hintStep: null, _calBoxShown: false,
         pointers: new Map(), pinch: null, dragPoint: null, panStart: null,
         warn: ''
@@ -3183,7 +3184,7 @@
       }
       mfp.imgIdx = idx;
       mfp.pxPerCm = null; mfp.knownCm = null; mfp.knownVal = '';
-      mfp.calLine = mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.justSaved = null;
+      mfp.calLine = mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.parts = []; mfp.justSaved = null;
       mfp.view = { zoom: 1, panX: 0, panY: 0 };
       mfp.warn = ''; mfp.tool = 'draw'; mfp._calBoxShown = false;
       mfpApplySavedCal(idx);
@@ -3276,6 +3277,15 @@
       if (mfp.calLine && mfp.step === 'calibrating')
         mfpDrawLine(ctx, mfp.calLine, MFP_COLORS.cal, mfp.knownCm ? 'ref ' + mfpFmt(mfp.knownCm) : 'reference');
       if (mfp.step === 'measure') {
+        // already-banked parts of a composite room, dimmed
+        if (mfp.parts.length) {
+          ctx.save(); ctx.globalAlpha = 0.4;
+          mfp.parts.forEach(p => {
+            if (p.rect) mfpDrawRect(ctx, p.rect, true);
+            else { if (p.wLine) mfpDrawLine(ctx, p.wLine, MFP_COLORS.w, ''); if (p.hLine) mfpDrawLine(ctx, p.hLine, MFP_COLORS.h, ''); }
+          });
+          ctx.restore();
+        }
         if (mfp.shape === 'rect') { if (mfp.rect) mfpDrawRect(ctx, mfp.rect); }
         else {
           if (mfp.wLine) mfpDrawLine(ctx, mfp.wLine, MFP_COLORS.w, mfpMeasLabel(mfp.wLine, 'W'));
@@ -3284,7 +3294,7 @@
       }
     }
     function mfpMeasLabel(line, tag) { const cm = mfpLineCm(line); return cm != null ? tag + ' ' + mfpFmt(cm) : tag; }
-    function mfpDrawRect(ctx, rect) {
+    function mfpDrawRect(ctx, rect, noLabel) {
       const a = mfpImgToCss(rect.a), b = mfpImgToCss(rect.b);
       const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y), w = Math.abs(b.x - a.x), h = Math.abs(b.y - a.y);
       ctx.fillStyle = 'rgba(90,169,255,0.14)'; ctx.fillRect(x, y, w, h);
@@ -3296,7 +3306,7 @@
         ctx.lineWidth = 2; ctx.strokeStyle = '#11100c'; ctx.stroke();
       });
       const { W, H } = mfpGetWH();
-      if (W != null && H != null) {
+      if (!noLabel && W != null && H != null) {
         const label = mfpFmt(W) + ' × ' + mfpFmt(H);
         const mx = x + w / 2, my = y + h / 2;
         ctx.font = '600 12px Outfit, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -3375,6 +3385,26 @@
     }
     function mfpHasMeasure() {
       return mfp.shape === 'rect' ? mfpShapeValid('rect') : (mfpShapeValid('w') && mfpShapeValid('h'));
+    }
+    // Composite-room (L-shape) support: bank parts and sum their area.
+    function mfpCurAreaCm2() { const { W, H } = mfpGetWH(); return (W != null && H != null) ? W * H : 0; }
+    function mfpPartsAreaCm2() { return mfp.parts.reduce((s, p) => s + p.areaCm2, 0); }
+    function mfpTotalAreaCm2() { return mfpPartsAreaCm2() + mfpCurAreaCm2(); }
+    function mfpTotalMaxSide() {
+      let m = 0;
+      mfp.parts.forEach(p => { if (p.maxSide > m) m = p.maxSide; });
+      const { W, H } = mfpGetWH();
+      if (W != null && H != null) m = Math.max(m, W, H);
+      return m;
+    }
+    function mfpHasAny() { return mfp.parts.length > 0 || mfpHasMeasure(); }
+    // The W×H actually written to a room. Single shape keeps its real W×H;
+    // a composite room becomes an area-equivalent box (longest side × effective depth).
+    function mfpInsertWH() {
+      if (mfp.parts.length === 0) return mfpGetWH();
+      const totalCm2 = mfpTotalAreaCm2(), maxSide = mfpTotalMaxSide();
+      if (totalCm2 <= 0 || maxSide <= 0) return { W: null, H: null };
+      return { W: maxSide, H: totalCm2 / maxSide };
     }
 
     function mfpBindCanvas() {
@@ -3577,11 +3607,13 @@
     function mfpLiveReadout() {
       if (!mfp || mfp.step !== 'measure') return;
       const { W, H } = mfpGetWH();
-      const area = (W != null && H != null) ? (W * H / 10000) : null;
       const ew = document.getElementById('mfp-wval'), eh = document.getElementById('mfp-hval'), ea = document.getElementById('mfp-areaval');
       if (ew) ew.textContent = W != null ? mfpFmt(W) : '—';
       if (eh) eh.textContent = H != null ? mfpFmt(H) : '—';
-      if (ea) ea.textContent = area != null ? (Math.round(area * 10) / 10) + ' m²' : '—';
+      if (ea) {
+        if (mfp.parts.length > 0) ea.textContent = (Math.round(mfpTotalAreaCm2() / 10000 * 10) / 10) + ' m²';
+        else { const a = (W != null && H != null) ? (W * H / 10000) : null; ea.textContent = a != null ? (Math.round(a * 10) / 10) + ' m²' : '—'; }
+      }
     }
 
     // ── Step machine & UI sync ──────────────────────────────────────────────
@@ -3608,10 +3640,26 @@
       if (px < 0.05 * big) mfp.warn = 'Tip: a longer reference line gives more accurate results.';
       return true;
     }
+    // Bank the current shape as one part of an L-shaped room, then clear it.
+    function mfpAddPart() {
+      if (!mfp || !mfpHasMeasure()) return;
+      const { W, H } = mfpGetWH();
+      const part = { areaCm2: W * H, maxSide: Math.max(W, H), shape: mfp.shape };
+      if (mfp.shape === 'rect') part.rect = mfp.rect;
+      else { part.wLine = mfp.wLine; part.hLine = mfp.hLine; }
+      mfp.parts.push(part);
+      mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.warn = '';
+      mfpSyncControls(); mfpRender();
+    }
+    function mfpUndoPart() {
+      if (!mfp || !mfp.parts.length) return;
+      mfp.parts.pop();
+      mfpSyncControls(); mfpRender();
+    }
     // Footer "Re-calibrate": forget this plan's scale and redraw the reference.
     function mfpClearAll() {
       if (!mfp) return;
-      mfp.calLine = mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.justSaved = null;
+      mfp.calLine = mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.parts = []; mfp.justSaved = null;
       mfp.pxPerCm = null; mfp.knownCm = null; mfp.knownVal = ''; mfp._calBoxShown = false;
       const img = mfp.images[mfp.imgIdx];
       if (img && img._mfpCal) delete img._mfpCal;
@@ -3627,14 +3675,14 @@
     // Clear the current room's shape(s) and measure the next room (keeps calibration).
     function mfpRedoRoom() {
       if (!mfp) return;
-      mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.justSaved = null; mfp.warn = ''; mfp.tool = 'draw';
+      mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.parts = []; mfp.justSaved = null; mfp.warn = ''; mfp.tool = 'draw';
       mfpSyncControls(); mfpRender();
     }
 
     function mfpHint() {
       if (mfp.step === 'calibrating') return 'Draw a line over a KNOWN distance (a labelled wall or scale bar), then type its real length.  ·  Two fingers move.';
-      if (mfp.shape === 'rect') return 'Drag a box over a room, then tap the room to save it.  ·  Two fingers move.';
-      return 'Draw the two sides of a room, then tap the room to save.  ·  Two fingers move · Shift = straight.';
+      if (mfp.shape === 'rect') return 'Drag a box over a room, then tap the room to save it.  ·  L-shaped? Use “Add part”.  ·  Two fingers move.';
+      return 'Draw the two sides of a room, then tap the room to save.  ·  L-shaped? Use “Add part”.  ·  Shift = straight.';
     }
     function mfpSyncUI() {
       mfpDrawSteps();
@@ -3705,29 +3753,45 @@
     }
     function mfpMeasureControlsHtml() {
       const { W, H } = mfpGetWH();
-      const area = (W != null && H != null) ? (W * H / 10000) : null;
-      const sizeLine = `<div class="mfp-sizeline">
-          <span class="mfp-dim">W <strong id="mfp-wval">${W != null ? mfpFmt(W) : '—'}</strong></span>
-          <span class="mfp-dim">H <strong id="mfp-hval">${H != null ? mfpFmt(H) : '—'}</strong></span>
-          <span class="mfp-dim mfp-area">= <strong id="mfp-areaval">${area != null ? (Math.round(area * 10) / 10) + ' m²' : '—'}</strong></span>
-        </div>`;
-      // measurement complete → show the room picker
-      if (mfpHasMeasure()) {
+      const partsN = mfp.parts.length;
+      let sizeLine;
+      if (partsN > 0) {
+        const totalM2 = mfpTotalAreaCm2() / 10000;
+        sizeLine = `<div class="mfp-sizeline">
+            <span class="mfp-dim">Part <strong id="mfp-wval">${W != null ? mfpFmt(W) : '—'}</strong> × <strong id="mfp-hval">${H != null ? mfpFmt(H) : '—'}</strong></span>
+            <span class="mfp-dim mfp-area">Room total <strong id="mfp-areaval">${(Math.round(totalM2 * 10) / 10)} m²</strong> <span class="mfp-parts-note">(${partsN} part${partsN > 1 ? 's' : ''}${mfpHasMeasure() ? ' + this' : ''})</span></span>
+            <button class="btn-additem" onclick="mfpUndoPart()">↩ Undo part</button>
+          </div>`;
+      } else {
+        const area = (W != null && H != null) ? (W * H / 10000) : null;
+        sizeLine = `<div class="mfp-sizeline">
+            <span class="mfp-dim">W <strong id="mfp-wval">${W != null ? mfpFmt(W) : '—'}</strong></span>
+            <span class="mfp-dim">H <strong id="mfp-hval">${H != null ? mfpFmt(H) : '—'}</strong></span>
+            <span class="mfp-dim mfp-area">= <strong id="mfp-areaval">${area != null ? (Math.round(area * 10) / 10) + ' m²' : '—'}</strong></span>
+          </div>`;
+      }
+      // a part is drawn, or parts already banked → show the room picker
+      if (mfpHasAny()) {
         const targets = mfpRoomTargets();
         const todo = targets.filter(r => !mfpRoomDone(r.key));
         const done = targets.filter(r => mfpRoomDone(r.key));
         const chip = r => `<button type="button" class="mfp-roomchip${mfpRoomDone(r.key) ? ' mfp-roomchip-done' : ''}" onclick="mfpPick('${r.key}')">${mfpRoomDone(r.key) ? '✓ ' : ''}${r.label}${mfpRoomDone(r.key) ? ` <span class="mfp-chip-size">${mfpRoomSizeLabel(r.key)}</span>` : ''}</button>`;
         const newChip = `<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNew()">＋ New bedroom</button>`;
         const doneBar = done.length ? `<div class="mfp-donebar">Already set — tap to overwrite</div>` : '';
+        const addPart = mfpHasMeasure() ? `<button class="btn-additem" onclick="mfpAddPart()" title="L-shaped room — bank this part, then draw the next">➕ Add part</button>` : '';
+        const swap = partsN === 0 ? `<button class="btn-additem" onclick="mfpSwapWH()">⇄ Swap W/H</button>` : '';
+        const partHint = (partsN > 0 && !mfpHasMeasure())
+          ? `<div class="mfp-pick-hint">Draw the next part on the plan, or pick a room to save the total.</div>` : '';
         return sizeLine + `
           <div class="mfp-pickbar">
-            <span>Save to which room?</span>
-            <button class="btn-additem" onclick="mfpSwapWH()">⇄ Swap W/H</button>
+            <span>${partsN > 0 ? 'Save whole room to:' : 'Save to room:'}</span>
+            ${addPart}${swap}
             <button class="btn-additem" onclick="mfpRedoRoom()">↶ Redo</button>
           </div>
+          ${partHint}
           <div class="mfp-roomchips">${todo.map(chip).join('')}${newChip}${doneBar}${done.map(chip).join('')}</div>`;
       }
-      // still drawing
+      // still drawing the first part
       let msg;
       if (mfp.shape === 'lines' && mfp.wLine) {
         msg = 'Now draw the other side. <button class="btn-additem" onclick="mfpCancelLine()">✕ Clear</button>';
@@ -3756,7 +3820,7 @@
     // Tap a room chip → write W×H into that room and loop for the next one.
     function mfpPick(key) {
       if (!mfp) return;
-      const { W, H } = mfpGetWH();
+      const { W, H } = mfpInsertWH();
       if (W == null || H == null) return;
       if (!document.getElementById('f-' + key + '-w')) return;
       setDimInputs(key, Math.round(W) + '×' + Math.round(H));
@@ -3768,13 +3832,13 @@
     // "+ New bedroom" → create a bedroom field and drop the size into it.
     function mfpPickNew() {
       if (!mfp) return;
-      const { W, H } = mfpGetWH();
+      const { W, H } = mfpInsertWH();
       if (W == null || H == null) return;
       addExtraBed(Math.round(W) + '×' + Math.round(H));
       mfpAfterInsert('Bedroom ' + (_extraBeds.length + 2));
     }
     function mfpAfterInsert(label) {
-      mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.justSaved = label; mfp.warn = ''; mfp.tool = 'draw';
+      mfp.wLine = mfp.hLine = mfp.rect = null; mfp.rectSwap = false; mfp.parts = []; mfp.justSaved = label; mfp.warn = ''; mfp.tool = 'draw';
       mfpSyncControls(); mfpSyncFooter(); mfpRender();
     }
 
