@@ -1583,6 +1583,10 @@
     .mfp-roomchip:hover { border-color: var(--gold); color: var(--gold); background: rgba(224,161,58,.1); }
     .mfp-roomchip:active { transform: scale(.96); }
     .mfp-roomchip-new { border-style: dashed; color: var(--txt2); }
+    .mfp-roomchip-done { color: var(--pos); border-color: rgba(155,207,79,.35); background: rgba(155,207,79,.08); }
+    .mfp-roomchip-done:hover { color: var(--pos); border-color: var(--pos); background: rgba(155,207,79,.16); }
+    .mfp-chip-size { color: var(--txt3); font-size: .72rem; margin-left: .25rem; }
+    .mfp-donebar { width: 100%; font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; color: var(--txt3); margin: .3rem 0 0; }
   </style>
 </head>
 
@@ -3709,14 +3713,19 @@
         </div>`;
       // measurement complete → show the room picker
       if (mfpHasMeasure()) {
-        const chips = mfpRoomTargets().map(r => `<button type="button" class="mfp-roomchip" onclick="mfpPick('${r.key}')">${r.label}</button>`).join('');
+        const targets = mfpRoomTargets();
+        const todo = targets.filter(r => !mfpRoomDone(r.key));
+        const done = targets.filter(r => mfpRoomDone(r.key));
+        const chip = r => `<button type="button" class="mfp-roomchip${mfpRoomDone(r.key) ? ' mfp-roomchip-done' : ''}" onclick="mfpPick('${r.key}')">${mfpRoomDone(r.key) ? '✓ ' : ''}${r.label}${mfpRoomDone(r.key) ? ` <span class="mfp-chip-size">${mfpRoomSizeLabel(r.key)}</span>` : ''}</button>`;
+        const newChip = `<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNew()">＋ New bedroom</button>`;
+        const doneBar = done.length ? `<div class="mfp-donebar">Already set — tap to overwrite</div>` : '';
         return sizeLine + `
           <div class="mfp-pickbar">
             <span>Save to which room?</span>
             <button class="btn-additem" onclick="mfpSwapWH()">⇄ Swap W/H</button>
             <button class="btn-additem" onclick="mfpRedoRoom()">↶ Redo</button>
           </div>
-          <div class="mfp-roomchips">${chips}<button type="button" class="mfp-roomchip mfp-roomchip-new" onclick="mfpPickNew()">＋ New bedroom</button></div>`;
+          <div class="mfp-roomchips">${todo.map(chip).join('')}${newChip}${doneBar}${done.map(chip).join('')}</div>`;
       }
       // still drawing
       let msg;
@@ -3734,6 +3743,15 @@
       _extraBeds.filter(idx => document.getElementById('f-xbed-item-' + idx))
         .forEach((idx, pos) => list.push({ key: 'xbed-' + idx, label: 'Bedroom ' + (pos + 3) }));
       return list;
+    }
+    // A room is "done" once both its W and H inputs are filled.
+    function mfpRoomDone(key) {
+      const w = document.getElementById('f-' + key + '-w'), h = document.getElementById('f-' + key + '-h');
+      return !!(w && h && w.value !== '' && h.value !== '');
+    }
+    function mfpRoomSizeLabel(key) {
+      const a = dimAreaFromInputs(key);
+      return a != null ? a + ' m²' : '';
     }
     // Tap a room chip → write W×H into that room and loop for the next one.
     function mfpPick(key) {
