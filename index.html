@@ -2668,10 +2668,16 @@
       chBreak.update();
     }
 
-    const BEDLABELS = ['Master', 'Bed 2 (ממ"ד)', 'Bed 3', 'Bed 4', 'Main bath', 'Master bath', 'Closet', '3rd bath'];
+    const BED_SLOT_LABELS = ['Master', 'Bed 2 (ממ"ד)', 'Bed 3', 'Bed 4'];
+    const SERVICE_LABELS = ['Main bath', 'Master bath', 'Closet', '3rd bath'];
+    function bedChartLabels(maxBeds) {
+      const labels = BED_SLOT_LABELS.slice();
+      for (let i = BED_SLOT_LABELS.length + 1; i <= maxBeds; i++) labels.push('Bed ' + i);
+      return [...labels, ...SERVICE_LABELS];
+    }
     let chBeds = new Chart(document.getElementById('cBeds'), {
       type: 'bar',
-      data: { labels: BEDLABELS, datasets: [] },
+      data: { labels: bedChartLabels(BED_SLOT_LABELS.length), datasets: [] },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
@@ -2686,9 +2692,13 @@
     });
     function drawBeds() {
       const ks = activeList();
+      const maxBeds = Math.max(BED_SLOT_LABELS.length, ...ks.map(k => (DATA[k].bedList || []).length));
+      chBeds.data.labels = bedChartLabels(maxBeds);
       chBeds.data.datasets = ks.map(k => {
         const d = DATA[k];
-        return { label: d.label, data: [...d.bedList, d.service.mainBath, d.service.masterBath, d.service.closet, d.service.thirdBath], backgroundColor: d.color, borderRadius: 4, maxBarThickness: 20 };
+        const beds = d.bedList.slice();
+        while (beds.length < maxBeds) beds.push(null);
+        return { label: d.label, data: [...beds, d.service.mainBath, d.service.masterBath, d.service.closet, d.service.thirdBath], backgroundColor: d.color, borderRadius: 4, maxBarThickness: 20 };
       });
       chBeds.update();
     }
@@ -2776,7 +2786,7 @@
         ]
       },
       {
-        group: 'Bedrooms', rows: [
+        group: 'Bedrooms', dynamicBedrooms: true, rows: [
           { name: 'Master bedroom', hertzog: [7.3, '350×210'], Liors_apartment: [8.3, '255×325'], Katzir_10: [12.0, '320×375'], Golda_floor_9: [10.2, '320×320'], Golda_floor_12: [10.2, '320×320'], Anesiim_42: [12.2, '380×320'], katzir_22: [15.8, '450×350'] },
           { name: 'Bedroom 2', mamad: true, hertzog: [8.2, '298×275'], Liors_apartment: [9.6, '320×300'], Katzir_10: [11.0, '368×299'], Golda_floor_9: [10.3, '355×290'], Golda_floor_12: [10.3, '355×290'], Anesiim_42: [11.1, '390×285'], katzir_22: [9.7, '351×275'] },
           { name: 'Bedroom 3', hertzog: [9.0, '321×280'], Liors_apartment: [10.0, '345×290'], Katzir_10: [9.4, '325×290'], Golda_floor_9: [10.7, '373×286'], Golda_floor_12: [9.7, '340×286'], Anesiim_42: [10.9, '330×330'], katzir_22: [9.7, '280×345'] },
@@ -2815,10 +2825,16 @@
       'Third bathroom': 'thirdbath', 'Laundry room': 'laundry', 'Balcony': 'balcony'
     };
 
+    function rowDimKey(name) {
+      if (ROW_TO_DIM_TABLE[name]) return ROW_TO_DIM_TABLE[name];
+      const m = /^Bedroom (\d+)$/.exec(name);
+      return m ? 'bed' + m[1] : undefined;
+    }
+
     function resolveCell(row, k) {
       if (row[k] !== undefined) return row[k];
       if (DATA[k] && DATA[k].dims) {
-        const dk = ROW_TO_DIM_TABLE[row.name];
+        const dk = rowDimKey(row.name);
         if (dk) {
           const dimStr = DATA[k].dims[dk];
           if (dimStr) {
@@ -2832,6 +2848,15 @@
         }
       }
       return undefined;
+    }
+
+    // Extend the static bedroom rows with "Bedroom N" rows for any apartment
+    // that has more bedrooms than the rows already cover.
+    function bedroomRows(staticRows, cols) {
+      const maxBeds = Math.max(staticRows.length, ...cols.map(k => (DATA[k]?.bedList || []).length));
+      const rows = staticRows.slice();
+      for (let i = staticRows.length + 1; i <= maxBeds; i++) rows.push({ name: 'Bedroom ' + i });
+      return rows;
     }
 
     function winnerOf(row, cols) {
@@ -2867,7 +2892,8 @@
 
       TABLE.forEach(g => {
         html += `<div class="rt-group">${g.group}</div>`;
-        g.rows.forEach(row => {
+        const rows = g.dynamicBedrooms ? bedroomRows(g.rows, cols) : g.rows;
+        rows.forEach(row => {
           if (row.subtotal) {
             const catKey = row.catKey || 'living';
             html += `<div class="rt-subtotal" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span></div>`;
