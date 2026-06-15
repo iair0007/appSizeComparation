@@ -2061,7 +2061,6 @@
     <div class="modal-box mfp-box">
       <div class="modal-header">
         <h2>Measure from floor plan</h2>
-        <button class="modal-close" onclick="closeMeasureTool()" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">
         <div class="mfp-topbar">
@@ -2095,6 +2094,7 @@
       </div>
       <div class="modal-footer" id="mfp-footer">
         <button class="btn-ghost" id="mfp-clear" onclick="mfpClearAll()">↻ Re-calibrate</button>
+        <button class="btn-primary" id="mfp-done" onclick="mfpDone()">✓ Done</button>
       </div>
     </div>
   </div>
@@ -2390,16 +2390,22 @@
       closeLightbox();
       // If viewing from an apartment's gallery, open its editor first so the
       // measured sizes have room fields to land in.
-      if (aptKey != null && !document.getElementById('aptModal').classList.contains('open')) {
+      const aptModalAlreadyOpen = document.getElementById('aptModal').classList.contains('open');
+      if (aptKey != null && !aptModalAlreadyOpen) {
         openAptModal(aptKey);
       }
       const target = _formImages[idx];
       if (target) { target.isFloorPlan = true; renderImagePreviews(); }
       openMeasureTool();
-      // preselect the image the user was looking at
-      if (mfp && target) {
-        const pos = mfp.images.indexOf(target);
-        if (pos > 0) mfpSelectImage(pos);
+      if (mfp) {
+        // Remember if we opened the editor just for this, so "Done" can
+        // close it again and return to the floor map.
+        mfp.openedAptModal = aptKey != null && !aptModalAlreadyOpen;
+        // preselect the image the user was looking at
+        if (target) {
+          const pos = mfp.images.indexOf(target);
+          if (pos > 0) mfpSelectImage(pos);
+        }
       }
     }
 
@@ -3192,7 +3198,7 @@
         calLine: null, wLine: null, hLine: null, rect: null, rectSwap: false, parts: [], justSaved: null,
         hintHidden: true, showRooms: false, _calBoxShown: false,
         pointers: new Map(), pinch: null, dragPoint: null, panStart: null,
-        warn: ''
+        warn: '', openedAptModal: false
       };
       const sel = document.getElementById('mfp-image-select');
       sel.innerHTML = fps.map((im, i) => `<option>${String(im.label || ('Floor plan ' + (i + 1))).replace(/</g, '&lt;')}</option>`).join('');
@@ -3221,11 +3227,19 @@
       return false;
     }
 
-    function closeMeasureTool() {
+    // Closing the measure tool always autosaves (there's no "cancel"):
+    // commit any measured dims to the apartment, then return to wherever
+    // the user came from. If the apartment editor was only opened as a
+    // side effect of jumping in from the floor map, close it too.
+    function mfpDone() {
+      if (!mfp) return;
+      const openedAptModal = mfp.openedAptModal;
       document.getElementById('mfpModal').classList.remove('open');
-      document.body.style.overflow = 'auto';
       mfpUnbindCanvas();
       mfp = null;
+      if (_editKey) autosaveAptForm();
+      if (openedAptModal) closeAptModal();
+      else document.body.style.overflow = 'hidden';
     }
 
     function mfpLoadBitmap() {
@@ -3873,9 +3887,9 @@
         `<div class="mfp-step ${i === cur ? 'active' : (i < cur ? 'done' : '')}">${s.label}</div>`).join('');
     }
     function mfpSyncFooter() {
-      // Footer only holds "Re-calibrate", shown while measuring.
-      const footer = document.getElementById('mfp-footer');
-      if (footer) footer.style.display = (mfp.step === 'measure') ? '' : 'none';
+      // "Done" is always available; "Re-calibrate" only while measuring.
+      const clearBtn = document.getElementById('mfp-clear');
+      if (clearBtn) clearBtn.style.display = (mfp.step === 'measure') ? '' : 'none';
     }
     function mfpSyncControls(focusKnown) {
       const el = document.getElementById('mfp-controls');
@@ -4188,11 +4202,7 @@
       _editKey = null;
     }
 
-    function saveAptForm() {
-      const label = document.getElementById('f-label').value.trim();
-      if (!label) { alert('Please enter a display name.'); return; }
-      const key = _editKey || label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-      if (!_editKey && DATA[key]) { alert('An apartment with this key already exists. Please use a different name.'); return; }
+    function buildAptFromForm(key, label) {
       const ga = k => dimAreaFromInputs(k) ?? 0;
       const gd = k => dimStrFromInputs(k);
       const liveExtra = _extraBeds.filter(idx => document.getElementById('f-xbed-item-' + idx));
@@ -4234,9 +4244,27 @@
         pros: getProsList(),
         cons: getConsList()
       };
+      return { apt, verdict };
+    }
+
+    function saveAptForm() {
+      const label = document.getElementById('f-label').value.trim();
+      if (!label) { alert('Please enter a display name.'); return; }
+      const key = _editKey || label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+      if (!_editKey && DATA[key]) { alert('An apartment with this key already exists. Please use a different name.'); return; }
+      const { apt, verdict } = buildAptFromForm(key, label);
       if (_editKey) updateApt(_editKey, apt, verdict);
       else createApt(key, apt, verdict);
       closeAptModal();
+    }
+
+    // Persist the apartment being edited without closing its editor —
+    // used when "Done" in the measure tool autosaves measured room sizes.
+    function autosaveAptForm() {
+      if (!_editKey) return;
+      const label = document.getElementById('f-label').value.trim() || DATA[_editKey].label;
+      const { apt, verdict } = buildAptFromForm(_editKey, label);
+      updateApt(_editKey, apt, verdict);
     }
 
     function createApt(key, apt, verdict) {
