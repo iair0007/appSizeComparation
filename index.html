@@ -2832,10 +2832,7 @@
     }
 
     function resolveCell(row, k) {
-      const staticCell = row[k];
-      // Static table data with a real area is authoritative for pre-defined apartments
-      if (staticCell !== undefined && staticCell[0] != null) return staticCell;
-      // Dynamic DATA.dims: used for user-added apartments and when static has no area
+      // Live measured dims always win — static TABLE is only a fallback
       if (DATA[k] && DATA[k].dims) {
         const dk = rowDimKey(row.name);
         if (dk) {
@@ -2850,8 +2847,8 @@
           }
         }
       }
-      // Return static cell even with null area (preserves notes like 'in living')
-      if (staticCell !== undefined) return staticCell;
+      // Fall back to static TABLE (handles notes like 'in living', unmeasured rooms)
+      if (row[k] !== undefined) return row[k];
       return undefined;
     }
 
