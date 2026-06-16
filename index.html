@@ -2832,7 +2832,10 @@
     }
 
     function resolveCell(row, k) {
-      if (row[k] !== undefined) return row[k];
+      const staticCell = row[k];
+      // Static table data with a real area is authoritative for pre-defined apartments
+      if (staticCell !== undefined && staticCell[0] != null) return staticCell;
+      // Dynamic DATA.dims: used for user-added apartments and when static has no area
       if (DATA[k] && DATA[k].dims) {
         const dk = rowDimKey(row.name);
         if (dk) {
@@ -2847,6 +2850,8 @@
           }
         }
       }
+      // Return static cell even with null area (preserves notes like 'in living')
+      if (staticCell !== undefined) return staticCell;
       return undefined;
     }
 
@@ -2899,13 +2904,13 @@
             html += `<div class="rt-subtotal" style="grid-template-columns:${gridCols}"><div class="rt-room"><span class="rn">${row.name}</span></div>`;
             cols.forEach(k => {
               const isCurr = DATA[k].current;
-              // Fall back to the computed category total for new apartments
-              const rawVal = row[k]?.[0] ?? DATA[k]?.cat?.[catKey];
+              // Always prefer live cat total; fall back to static table value
+              const rawVal = DATA[k]?.cat?.[catKey] ?? row[k]?.[0];
               let dh = '';
               if (showVs && bk && cols.includes(bk)) {
                 if (isCurr) dh = '<span class="vsh eq">baseline</span>';
                 else {
-                  const hv = row[bk]?.[0] ?? DATA[bk]?.cat?.[catKey];
+                  const hv = DATA[bk]?.cat?.[catKey] ?? row[bk]?.[0];
                   if (hv != null && rawVal != null) {
                     const d = r1(rawVal - hv);
                     const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'eq');
