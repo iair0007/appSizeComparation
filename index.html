@@ -2240,8 +2240,11 @@
         clearDirty();
         setSyncStatus('✓ Synced', 'ok');
       } catch (e) {
-        setSyncStatus('Sync error — check settings', 'err');
+        setSyncStatus('Sync error — changes NOT backed up to Gist', 'err');
         console.error('Gist push error', e);
+        alert('⚠️ Could not sync your changes to the Gist backup (' + e.message + '). ' +
+              'Your changes are still saved on this device/browser, but won\'t show up elsewhere until sync succeeds. ' +
+              'Check your connection/Gist settings.');
       }
     }
 
@@ -2249,12 +2252,28 @@
       const data = await gistFetch(token, gistId);
       const file = data.files[GIST_FILE];
       if (!file) throw new Error('File not found in Gist');
-      return JSON.parse(file.content);
+      let content = file.content;
+      if (file.truncated) {
+        // GitHub's gist API truncates files over ~1MB in the normal response —
+        // fall back to the raw URL to get the full, untruncated content.
+        const res = await fetch(file.raw_url, { headers: { Authorization: `token ${token}` } });
+        if (!res.ok) throw new Error(`GitHub raw fetch ${res.status}: ${res.statusText}`);
+        content = await res.text();
+      }
+      return JSON.parse(content);
     }
 
     function saveStore() {
       const payload = { DATA, VERDICTS, ORDER };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      const json = JSON.stringify(payload);
+      try {
+        localStorage.setItem(STORAGE_KEY, json);
+      } catch (e) {
+        console.error('localStorage save failed', e);
+        alert('⚠️ Could not save your changes — the browser storage is full (likely too many/too large photos or floor plans). ' +
+              'Nothing was saved. Please remove some images and try again, or use smaller images.');
+        throw e; // stop callers (e.g. closeAptModal) from treating this as a successful save
+      }
       markDirty();
       const cfg = getGistCfg();
       if (cfg) pushToGist();
@@ -3322,7 +3341,7 @@
       document.getElementById('mfpModal').classList.remove('open');
       mfpUnbindCanvas();
       mfp = null;
-      if (_editKey) autosaveAptForm();
+      if (_editKey) { try { autosaveAptForm(); } catch (e) { /* save failure already alerted in saveStore() */ } }
       if (openedAptModal) closeAptModal();
       else document.body.style.overflow = 'hidden';
     }
