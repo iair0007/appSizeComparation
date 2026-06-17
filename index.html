@@ -2256,7 +2256,10 @@
       if (file.truncated) {
         // GitHub's gist API truncates files over ~1MB in the normal response —
         // fall back to the raw URL to get the full, untruncated content.
-        const res = await fetch(file.raw_url, { headers: { Authorization: `token ${token}` } });
+        // No Authorization header here: raw_url is a signed/capability URL that
+        // works without auth, and adding a custom header would trigger a CORS
+        // preflight that gist.githubusercontent.com doesn't support.
+        const res = await fetch(file.raw_url);
         if (!res.ok) throw new Error(`GitHub raw fetch ${res.status}: ${res.statusText}`);
         content = await res.text();
       }
